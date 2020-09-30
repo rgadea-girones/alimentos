@@ -1,0 +1,29 @@
+{
+    "f_inicial": 10,
+    "f_final": 10000000,
+    "n_puntos": 10,
+    "ancho_banda": 2,
+    "vosc": 0.5,
+    "tipo_barrido": 0,
+    "DC_bias": 0,
+    "nivel_DC": 0,
+    "avg": 0,
+    "n_medidas_punto": 0,
+    "load_mfile_name": "./medida.csv",
+    "save_mfile_name": "./medida.csv",
+    "cal_file_name": "./calibracion.cal",
+    "def_path": "./",
+    "conf_cal": 0,
+    "c_load": 500,
+    "g_load": 0.1,
+    "pto_cal": 0,
+    "combox": [
+        "|Z|",
+        "F.Z",
+        "E'r",
+        "E''r",
+        "|Er|",
+        "F.Er"
+    ],
+    "VI_ADDRESS": "USB0::1510::8752::9030149::0::INSTR"
+}
