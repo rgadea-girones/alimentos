@@ -4,7 +4,7 @@ import sys
 import json
 import numpy as np
 import pandas as pd
-import miopatia_visa as mv
+import MIOPATIA_visa as mv
 from PyQt5 import QtCore, QtWidgets, uic
 from threading import Thread, Event, RLock
 
@@ -119,9 +119,9 @@ class DATA(object):
         self.Swe_type        = 'LIN'
 
         # Inicializacion de vectores de datos
+        self.freq            = np.array([])
         self.Z_mod_data      = np.array([])
         self.Z_fase_data     = np.array([])
-        self.freq            = np.array([])
         self.Err_data        = np.array([])
         self.Eri_data        = np.array([])
         self.Er_mod_data     = np.array([])
@@ -226,19 +226,49 @@ class BACK_END(object):
                             names=['Freq','Z_mod','Z_Fase', 'Err',
                                     'Eri','E_mod','E_fase','R','X'],
                             delim_whitespace=True)
-            self.pw.textBrowser.append(file)
-
         except:
             self.pw.textBrowser.append("Fichero no encontrado\n")
-
-        self.vi.show_data(self.pw.comboBox_trazaA.currentIndex(),
-                          self.pw.comboBox_trazaB.currentIndex(),
-                          data)
-        self.pw.canvas2.draw()
+        else:
+            self.pw.textBrowser.append(file)
+            self.vi.show_data(self.pw.comboBox_trazaA.currentIndex(),
+                              self.pw.comboBox_trazaB.currentIndex(),
+                              data)
+            self.pw.canvas2.draw()
 
 
     def save_m(self):
+        def justify(input_str,n_char):
+            string = input_str+''.join([' ']*(n_char-len(input_str)))
+            return string.strip('"')
+
         self.pw.textBrowser.append("SALVA MEDIDA")
+        file_save = self.sd.def_cfg['save_mfile_name']
+        try:
+            data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
+                                         np.reshape(self.sd.Z_mod_data,(-1,1)),
+                                         np.reshape(self.sd.Z_fase_data,(-1,1)),
+                                         np.reshape(self.sd.Err_data,(-1,1)),
+                                         np.reshape(self.sd.Eri_data,(-1,1)),
+                                         np.reshape(self.sd.Er_mod_data,(-1,1)),
+                                         np.reshape(self.sd.Er_fase_data,(-1,1)),
+                                         np.reshape(self.sd.R_data,(-1,1)),
+                                         np.reshape(self.sd.X_data,(-1,1))],
+                                         axis=1)
+            data_frame = pd.DataFrame(data_array,
+                                      columns=['Freq','Z_mod','Z_Fase','Err','Eri',
+                                               'E_mod','E_fase','R','X'])
+            data_frame.to_csv(file_save, sep=' ', index=False, float_format='%+13.6e',
+                              # header=[justify('Freq',15).strip('"'), justify('Z_mod',15),
+                              #         justify('Z_Fase',15), justify('Err',15),
+                              #         justify('Eri',15), justify('E_mod',15),
+                              #         justify('E_fase',15), justify('R',15),
+                              #         justify('X',15)]
+                              header=True)
+        except:
+            self.pw.textBrowser.append("El fichero de datos no se ha podido salvar\n")
+        else:
+            self.pw.textBrowser.append(file_save)
+
 
     def go_cal(self):
         self.pw.textBrowser.append("CALIBRAR")
