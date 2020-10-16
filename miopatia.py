@@ -12,6 +12,7 @@ from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
+from PyQt5.QtWidgets import QMessageBox
 
 qtCreatorFile = "MIOPATIA.ui"
 
@@ -463,6 +464,15 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_pto_cal.buttonClicked[int].connect(self.backend.bt_pto_cal)
 
 
+    def closeEvent(self, event):
+        quit_msg = "¿Seguro que quiere salir del programa?"
+        reply = QMessageBox.question(self, 'Cuidado!',
+                         quit_msg, QMessageBox.Yes, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
     # MatplotLib Widgets
     def addmpl_1(self, fig):
@@ -496,6 +506,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.data.axes['ax2'].tick_params(axis="y", labelsize=8)
         self.data.axes['ax3'].tick_params(axis="x", labelsize=8)
         self.data.axes['ax3'].tick_params(axis="y", labelsize=8)
+
 
 
 
