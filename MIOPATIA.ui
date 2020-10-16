@@ -101,7 +101,7 @@
            <property name="geometry">
             <rect>
              <x>240</x>
-             <y>430</y>
+             <y>424</y>
              <width>171</width>
              <height>31</height>
             </rect>
@@ -178,7 +178,7 @@
            <property name="font">
             <font>
              <family>Courier 10 Pitch</family>
-             <pointsize>20</pointsize>
+             <pointsize>18</pointsize>
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -655,20 +655,21 @@
              <rect>
               <x>10</x>
               <y>380</y>
-              <width>201</width>
+              <width>151</width>
               <height>41</height>
              </rect>
             </property>
             <property name="text">
-             <string>CONTINUAR</string>
+             <string>REDIBUJAR
+MEDIDA</string>
             </property>
            </widget>
            <widget class="QPushButton" name="MEDIR">
             <property name="geometry">
              <rect>
-              <x>230</x>
+              <x>170</x>
               <y>380</y>
-              <width>201</width>
+              <width>151</width>
               <height>41</height>
              </rect>
             </property>
@@ -717,9 +718,9 @@
             <widget class="QLabel" name="label_16">
              <property name="geometry">
               <rect>
-               <x>10</x>
+               <x>20</x>
                <y>24</y>
-               <width>141</width>
+               <width>101</width>
                <height>20</height>
               </rect>
              </property>
@@ -730,15 +731,15 @@
               </font>
              </property>
              <property name="text">
-              <string>EJE Y - Traza A</string>
+              <string>EJE Y - (ROJO)</string>
              </property>
             </widget>
             <widget class="QLabel" name="label_17">
              <property name="geometry">
               <rect>
-               <x>10</x>
+               <x>20</x>
                <y>74</y>
-               <width>141</width>
+               <width>101</width>
                <height>20</height>
               </rect>
              </property>
@@ -749,7 +750,7 @@
               </font>
              </property>
              <property name="text">
-              <string>EJE Y - Traza B</string>
+              <string>EJE Y - (AZUL)</string>
              </property>
             </widget>
            </widget>
@@ -789,7 +790,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>CARGAR MEDIDA</string>
+             <string>CARGAR/REDIBUJAR DATOS</string>
             </property>
            </widget>
            <widget class="QLineEdit" name="save_path">
@@ -839,6 +840,20 @@
               <width>421</width>
               <height>131</height>
              </rect>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="SAVE_cfg">
+            <property name="geometry">
+             <rect>
+              <x>330</x>
+              <y>380</y>
+              <width>101</width>
+              <height>41</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>SALVAR 
+CONFIG.</string>
             </property>
            </widget>
           </widget>

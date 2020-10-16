@@ -4,7 +4,7 @@ import sys
 import json
 import numpy as np
 import pandas as pd
-import MIOPATIA_visa as MP_visa
+import miopatia_visa as mv
 from PyQt5 import QtCore, QtWidgets, uic
 from threading import Thread, Event, RLock
 
@@ -33,7 +33,7 @@ class DATA(object):
         self.fig1 = Figure()
         self.fig2 = Figure()
         # Axes for plotting
-        self.axes={'ax1':0,'ax2':0}
+        self.axes={'ax0':0,'ax1':0,'ax2':0,'ax3':0}
 
         if (read==True):
             self.config_read()
@@ -58,9 +58,79 @@ class DATA(object):
                             'g_load':0.1,
                             'pto_cal':0,
                             'combox':['|Z|','F.Z','E\'r','E\'\'r','|Er|','F.Er'],
-                            'VI_ADDRESS': 'USB0::1510::8752::9030149::0::INSTR'
+                            'VI_ADDRESS': 'GPIB0::17::INSTR'
                             }
         self.config_write()
+
+        # FLAGS
+        self.measuring = False
+
+        # CONSTANTS
+        self.E0              = 8.854e-12 # Vacuum permitivity
+        self.Adj_center      = 100000    # Central Freq. for certain calibrations
+        self.Adj_up_limit_a  = 1E-9      # Limite superior C (Faradios) del ajuste
+                                         # de electrodos paralelos para electrodo TIPO A
+        self.Adj_low_limit_a = 7E-10     # Limite inferior C (Faradios) del ajuste
+                                         # de electrodos paralelos para electrodo TIPO A
+        self.Adj_up_limit_b  = 2E-11     # Limite superior C (Faradios) del ajuste
+                                         # de electrodos paralelos para electrodo TIPO B
+        self.Adj_low_limit_b = 1.2E-11   # Limite inferior C (Faradios) del ajuste
+                                         # de electrodos paralelos para electrodo TIPO B
+
+        # Constantes para la calibración por carga
+        self.Load_center     = 100000    # Frecuencia central 100KHz donde se realiza
+                                         # la primera medida por carga.
+        self.Load_ave        = 4         # Media de 4 medidas para el ajuste por carga
+        self.Load_bw         = 5         # Bandwidth 5 (Mejor reolución - más lento) para el ajuste por carga.
+        self.Load_up_limit_a = 5.05E-11  # 50.5 pF Limite superior del valor de la capacidad para la carga en el electrodo A
+        self.Load_lo_limit_a = 4.95E-11  # 49.5 pF Limite inferior del valor de la capacidad para la carga en el electrodo A
+        self.Load_up_limit_b = 5.05E-12  # 5.05 pF Limite superior del valor de la capacidad para la carga en el electrodo B
+        self.Load_lo_limit_b = 4.95E-12  # 4.95 pF Limite inferior del valor de la capacidad para la carga en el electrodo B
+        self.Load_up_limit_c = 1.55E-12  # 1.55 pF Limite superior del valor de la capacidad para la carga en el electrodo C
+        self.Load_lo_limit_c = 1.45E-12  # 1.45 pF Limite inferior del valor de la capacidad para la carga en el electrodo C
+        self.Load_up_limit_d = 1.55E-12  # 1.55 pF Limite superior del valor de la capacidad para la carga en el electrodo D
+        self.Load_lo_limit_d = 1.45E-12  # 1.45 pF Limite inferior del valor de la capacidad para la carga en el electrodo D
+        self.Load_g          = 0         # Valor de la admitancia de la carga
+
+        # Constantes de calibración de abiertos - Caso calibración Carga-Open-Short
+        self.Open_r          = 1E11      # Resistencia de 100GOhm. Valor esperado de resistencia en el abierto.
+        self.Open_l          = 0         # Valor de la inductancia esperada en el abierto
+        # Constantes de calibración de cortos - Caso calibración Carga-Open-Short
+        self.Short_r         = 0         # Valor de la resitencia espreada del corto
+        self.Short_l         = 0         # Valor de la inductancia esperada del corto.
+
+        # Constantes de calibración de abiertos - Caso calibración Open-Short
+        self.Open_c2         = 0         # Capacidad esperada para en el abierto.
+        self.Open_g2         = 0         # Valor de la admitancia esperada en el abierto.
+        # Constantes de calibración de cortos  - Caso calibración Open-Short
+        self.Short_r2        = 0         # Valor de la resitencia espreada del corto
+        self.Short_l2        = 0         # Valor de la inductancia esperada del corto.
+        # Constantes de calibración de carga - Caso calibración Open-Short
+        self.Load_r2         = 0         # Valor de la resitencia espreada del corto
+        self.Load_l2         = 0         # Valor de la inductancia esperada del corto.
+
+        self.Bw              = 3         # Valor del Bandwidth
+
+        # Constantes para calibracion con platos
+        self.D_elec_a        = 0.038     # Diametro del electrodo A - 38mm
+        self.D_elec_b        = 0.005     # Diametro del electrodo B - 5 mm
+
+        self.Nop             = 1         # ???
+        self.Swe_type        = 'LIN'
+
+        # Inicializacion de vectores de datos
+        self.Z_mod_data      = np.array([])
+        self.Z_fase_data     = np.array([])
+        self.freq            = np.array([])
+        self.Err_data        = np.array([])
+        self.Eri_data        = np.array([])
+        self.Er_mod_data     = np.array([])
+        self.Er_fase_data    = np.array([])
+        self.R_data          = np.array([])
+        self.X_data          = np.array([])
+
+        self.Co              = 1E-12   # Valor capacidad en abierto sensor de puntas
+
 
     def config_write(self):
         writeName = self.filename
@@ -81,65 +151,117 @@ class DATA(object):
 class BACK_END(object):
     """ Code associatted to controls, buttons, text boxes etc.
     """
-    def __init__(self,parent_wdg,shared_data):
+    def __init__(self,parent_wdg,shared_data,visa):
         self.sd = shared_data
         self.pw = parent_wdg
+        self.vi = visa
+        self.flag = True
 
      # Controlled casting to avoid data intro errors
-    def float_v(self,number):
+    def float_v(self,objeto,limits=[0,1E12]):
         try:
-            return float(number)
+            aux = float(objeto.text())
+            print(aux)
+            if ((aux >= limits[0]) and (aux <= limits[1])):
+                return float(aux)
+            else:
+                if (aux > limits[1]):
+                    objeto.setText(str(limits[1]))
+                    return float(limits[1])
+                else:
+                    if (aux < limits[0]):
+                        objeto.setText(str(limits[0]))
+                        return float(limits[0])
         except ValueError:
-            return 0.0
+            self.pw.textBrowser.append("ERROR EN VALOR")
+            objeto.setText(str(limits[0]))
+            return limits[0]
 
-    def int_v(self,number):
+    def int_v(self,objeto,limits=[0,1E12]):
         try:
-            return int(number)
+            aux = int(objeto.text())
+            if ((aux >= limits[0]) and (aux <= limits[1])):
+                return int(aux)
+            else:
+                if (aux > limits[1]):
+                    objeto.setText(str(limits[1]))
+                    return int(limits[1])
+                else:
+                    if (aux < limits[0]):
+                        objeto.setText(str(limits[0]))
+                        return int(limits[0])
         except ValueError:
-            return 0
+            self.pw.textBrowser.append("ERROR EN VALOR")
+            objeto.setText(str(limits[0]))
+            return limits[0]
+
+    def save_config(self):
+        self.sd.config_write()
 
     def continuar(self):
-        print("CONTINUAR")
+        # self.pw.textBrowser.append("CONTINUAR")
+        if (len(self.sd.freq))>0:
+            self.vi.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
+                                     self.pw.comboBox_trazaB.currentIndex())
+        else:
+            self.pw.textBrowser.append("NO HAY DATOS QUE MOSTRAR")
+        self.pw.canvas1.draw()
 
     def medir(self):
-        print("MEDIR")
+        self.pw.MEDIR.setEnabled(False)
+        app.processEvents()
+        self.pw.textBrowser.append("MEDIR")
+        self.vi.config_measurement()
+        self.vi.measure()
+        self.vi.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
+                                 self.pw.comboBox_trazaB.currentIndex())
+        self.pw.canvas1.draw()
+        self.pw.MEDIR.setEnabled(True)
 
     def load_m(self):
-        print("CARGA MEDIDA")
-        data = pd.read_csv("pechuga_con_piel.csv",header=0,
-                           names=['Freq','Z_mod','Z_Fase', 'Err','Eri','E_mod','E_fase','R','X'],
-                           delim_whitespace=True)
-        x_axis = np.array(data['Freq'])
-        self.sd.axes['ax1'].semilogx(x_axis,data['Z_mod'])
-        self.sd.axes['ax1'].grid(True)
-        self.pw.canvas1.draw()
+        self.pw.textBrowser.append("CARGA MEDIDA")
+        file = self.sd.def_cfg['load_mfile_name']
+        try:
+            data = pd.read_csv(file,header=0,
+                            names=['Freq','Z_mod','Z_Fase', 'Err',
+                                    'Eri','E_mod','E_fase','R','X'],
+                            delim_whitespace=True)
+            self.pw.textBrowser.append(file)
+
+        except:
+            self.pw.textBrowser.append("Fichero no encontrado\n")
+
+        self.vi.show_data(self.pw.comboBox_trazaA.currentIndex(),
+                          self.pw.comboBox_trazaB.currentIndex(),
+                          data)
+        self.pw.canvas2.draw()
 
 
     def save_m(self):
-        print("SALVA MEDIDA")
+        self.pw.textBrowser.append("SALVA MEDIDA")
 
     def go_cal(self):
-        print("CALIBRAR")
+        self.pw.textBrowser.append("CALIBRAR")
 
     def load_cal(self):
-        print("CARGAR CALIBRACIÓN")
+        self.pw.textBrowser.append("CARGAR CALIBRACIÓN")
 
     def save_cal(self):
-        print("SALVAR CALIBRACIÓN")
+        self.pw.textBrowser.append("SALVAR CALIBRACIÓN")
 
     def store_data(self):
-        self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial.text())
-        self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final.text())
-        self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos.text())
-        self.sd.def_cfg['ancho_banda']=self.float_v(self.pw.ancho_banda.text())
-        self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc.text())
-        self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC.text())
-        self.sd.def_cfg['n_medidas_punto']=self.float_v(self.pw.n_medidas_punto.text())
+        self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial,[40,110E6])
+        self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final,[40,110E6])
+        self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos,[1,801])
+        self.sd.def_cfg['ancho_banda']=self.int_v(self.pw.ancho_banda,[1,5])
+        self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc,[0.0,1.0])
+        self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC,[-40.0,40.0])
+        self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto,[1,256])
         self.sd.def_cfg['load_mfile_name']=self.pw.load_path.text()
         self.sd.def_cfg['save_mfile_name']=self.pw.save_path.text()
         self.sd.def_cfg['save_mfile_name']=self.pw.save_path.text()
-        self.sd.def_cfg['c_load']=self.float_v(self.pw.c_load.text())
-        self.sd.def_cfg['g_load']=self.float_v(self.pw.g_load.text())
+        self.sd.def_cfg['c_load']=self.float_v(self.pw.c_load)
+        self.sd.def_cfg['g_load']=self.float_v(self.pw.g_load)
         self.sd.def_cfg['cal_file_name']=self.pw.load_path_2.text()
 
         print(self.sd.def_cfg)
@@ -147,19 +269,14 @@ class BACK_END(object):
     # Button groups send id when clicked, then a function per button group is created
     def bt_xaxis(self,id):
         self.sd.def_cfg['tipo_barrido']=id
-        print(id)
     def bt_DC(self,id):
         self.sd.def_cfg['DC_bias']=id
-        print(id)
     def bt_avg(self,id):
         self.sd.def_cfg['avg']=id
-        print(id)
     def bt_config_cal(self,id):
         self.sd.def_cfg['conf_cal']=id
-        print(id)
     def bt_pto_cal(self,id):
         self.sd.def_cfg['pto_cal']=id
-        print(id)
 
 
 class BROWSERS(object):
@@ -171,9 +288,9 @@ class BROWSERS(object):
 
     def load_mfile_browser(self):
         file_aux = QtWidgets.QFileDialog.getOpenFileName(self.parent_wdg,
-                                        'Open measurement file',
+                                        'Abrir fichero medida',
                                         self.sd.def_cfg['def_path'],
-                                        "Measurement files (*.csv)")
+                                        "Ficheros de medida (*.csv)")
         fname_aux = ([str(x) for x in file_aux])
         self.sd.def_cfg['load_mfile_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
@@ -181,10 +298,10 @@ class BROWSERS(object):
 
 
     def save_mfile_browser(self):
-        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.parent_wdg,
-                                        'Save measurement file',
+        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.parent_wdg,
+                                        'Salvar fichero medida',
                                         self.sd.def_cfg['def_path'],
-                                        "Measurement files (*.csv)")
+                                        "Ficheros de medida (*.csv)")
         fname_aux = ([str(x) for x in file_aux])
         self.sd.def_cfg['save_mfile_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
@@ -192,10 +309,10 @@ class BROWSERS(object):
 
 
     def calibration_file_browser(self):
-        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.parent_wdg,
-                                        'Calibration file',
+        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.parent_wdg,
+                                        'Fichero de calibración',
                                         self.sd.def_cfg['def_path'],
-                                        "Calibration files (*.cal)")
+                                        "Ficheros de calibración (*.cal)")
         fname_aux = ([str(x) for x in file_aux])
         self.sd.def_cfg['cal_file_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
@@ -214,7 +331,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Classes Instantiation
         self.browsers = BROWSERS(self,data)
-        self.backend  = BACK_END(self,data)
+        # VISA start
+        self.v_s = mv.VISA(self.data,self.textBrowser)
+        self.backend  = BACK_END(self,data,self.v_s)
+
+
 
         # Controls Defaults
         self.f_inicial.setText(str(self.data.def_cfg['f_inicial']))
@@ -279,7 +400,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.radioButton_config_cal[self.data.def_cfg['conf_cal']].setChecked(True)
         self.radioButton_pto_cal[self.data.def_cfg['pto_cal']].setChecked(True)
 
-        # Controls Calls
+        # Clicked Calls
         self.toolButton_load.clicked.connect(self.browsers.load_mfile_browser)
         self.toolButton_save.clicked.connect(self.browsers.save_mfile_browser)
         self.toolButton_load_2.clicked.connect(self.browsers.calibration_file_browser)
@@ -290,6 +411,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.GO_CAL.clicked.connect(self.backend.go_cal)
         self.LOAD_CAL.clicked.connect(self.backend.load_cal)
         self.SAVE_CAL.clicked.connect(self.backend.save_cal)
+        self.SAVE_cfg.clicked.connect(self.backend.save_config)
 
         # Controls Signals
         self.f_inicial.editingFinished.connect(self.backend.store_data)
@@ -311,6 +433,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_pto_cal.buttonClicked[int].connect(self.backend.bt_pto_cal)
 
 
+
     # MatplotLib Widgets
     def addmpl_1(self, fig):
         # Matplotlib constructor
@@ -320,7 +443,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolbar = NavigationToolbar(self.canvas1, self.frame_2,
                                          coordinates=True)
         self.mpl_1.addWidget(self.toolbar)
-        self.data.axes['ax1'] = fig.add_subplot(111)
+        self.data.axes['ax0'] = fig.add_subplot(111)
+        self.data.axes['ax1'] = self.data.axes['ax0'].twinx()
+        self.data.axes['ax0'].tick_params(axis="x", labelsize=8)
+        self.data.axes['ax0'].tick_params(axis="y", labelsize=8)
+        self.data.axes['ax1'].tick_params(axis="x", labelsize=8)
+        self.data.axes['ax1'].tick_params(axis="y", labelsize=8)
         # self.data.axes['ax2'] = self.data.axes['ax1'].twinx()
 
 
@@ -333,12 +461,18 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                                          coordinates=True)
         self.mpl_2.addWidget(self.toolbar)
         self.data.axes['ax2'] = fig.add_subplot(111)
+        self.data.axes['ax3'] = self.data.axes['ax2'].twinx()
+        self.data.axes['ax2'].tick_params(axis="x", labelsize=8)
+        self.data.axes['ax2'].tick_params(axis="y", labelsize=8)
+        self.data.axes['ax3'].tick_params(axis="x", labelsize=8)
+        self.data.axes['ax3'].tick_params(axis="y", labelsize=8)
+
 
 
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
-    data = DATA(read=False)
+    data = DATA(read=True)
     window = MyApp(data)
     window.addmpl_1(data.fig1)
     window.addmpl_2(data.fig2)
