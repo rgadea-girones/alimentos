@@ -490,7 +490,7 @@
               <rect>
                <x>20</x>
                <y>220</y>
-               <width>161</width>
+               <width>171</width>
                <height>131</height>
               </rect>
              </property>
@@ -562,60 +562,15 @@
             <widget class="QGroupBox" name="groupBox_4">
              <property name="geometry">
               <rect>
-               <x>210</x>
-               <y>230</y>
-               <width>191</width>
-               <height>121</height>
+               <x>220</x>
+               <y>227</y>
+               <width>181</width>
+               <height>120</height>
               </rect>
              </property>
              <property name="title">
-              <string>Varias Medidas por Punto</string>
+              <string>Promediado</string>
              </property>
-             <widget class="QRadioButton" name="radioButton_avg_SI">
-              <property name="geometry">
-               <rect>
-                <x>40</x>
-                <y>40</y>
-                <width>51</width>
-                <height>23</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Si</string>
-              </property>
-             </widget>
-             <widget class="QRadioButton" name="radioButton_avg_NO">
-              <property name="geometry">
-               <rect>
-                <x>100</x>
-                <y>40</y>
-                <width>51</width>
-                <height>23</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>No</string>
-              </property>
-             </widget>
-             <widget class="QLabel" name="label_13">
-              <property name="geometry">
-               <rect>
-                <x>9</x>
-                <y>20</y>
-                <width>180</width>
-                <height>20</height>
-               </rect>
-              </property>
-              <property name="font">
-               <font>
-                <family>Courier 10 Pitch</family>
-                <pointsize>9</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>¿Útil en la calibración?</string>
-              </property>
-             </widget>
              <widget class="QLabel" name="label_14">
               <property name="geometry">
                <rect>
@@ -632,13 +587,13 @@
                </font>
               </property>
               <property name="text">
-               <string>No. medidas/pto [1-256]</string>
+               <string>Medidas/pto [1-256]</string>
               </property>
              </widget>
              <widget class="QLineEdit" name="n_medidas_punto">
               <property name="geometry">
                <rect>
-                <x>60</x>
+                <x>54</x>
                 <y>93</y>
                 <width>71</width>
                 <height>20</height>
@@ -646,6 +601,19 @@
               </property>
               <property name="readOnly">
                <bool>false</bool>
+              </property>
+             </widget>
+             <widget class="QCheckBox" name="avg">
+              <property name="geometry">
+               <rect>
+                <x>12</x>
+                <y>35</y>
+                <width>92</width>
+                <height>23</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Activar</string>
               </property>
              </widget>
             </widget>
@@ -868,9 +836,9 @@ CONFIG.</string>
           <widget class="QPushButton" name="GO_CAL">
            <property name="geometry">
             <rect>
-             <x>60</x>
-             <y>280</y>
-             <width>241</width>
+             <x>340</x>
+             <y>360</y>
+             <width>221</width>
              <height>51</height>
             </rect>
            </property>
@@ -889,9 +857,9 @@ CONFIG.</string>
           <widget class="QPushButton" name="SAVE_CAL">
            <property name="geometry">
             <rect>
-             <x>340</x>
-             <y>190</y>
-             <width>181</width>
+             <x>60</x>
+             <y>270</y>
+             <width>171</width>
              <height>31</height>
             </rect>
            </property>
@@ -911,7 +879,7 @@ CONFIG.</string>
              <x>60</x>
              <y>60</y>
              <width>241</width>
-             <height>201</height>
+             <height>181</height>
             </rect>
            </property>
            <property name="title">
@@ -1013,8 +981,8 @@ CONFIG.</string>
             <rect>
              <x>340</x>
              <y>60</y>
-             <width>181</width>
-             <height>121</height>
+             <width>221</width>
+             <height>251</height>
             </rect>
            </property>
            <property name="title">
@@ -1024,7 +992,7 @@ CONFIG.</string>
             <property name="geometry">
              <rect>
               <x>20</x>
-              <y>80</y>
+              <y>70</y>
               <width>161</width>
               <height>23</height>
              </rect>
@@ -1038,7 +1006,7 @@ CONFIG.</string>
              <rect>
               <x>20</x>
               <y>40</y>
-              <width>201</width>
+              <width>131</width>
               <height>23</height>
              </rect>
             </property>
@@ -1046,13 +1014,71 @@ CONFIG.</string>
              <string>Medidor</string>
             </property>
            </widget>
+           <widget class="QGroupBox" name="groupBox_7">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>120</y>
+              <width>181</width>
+              <height>111</height>
+             </rect>
+            </property>
+            <property name="title">
+             <string>Promediado</string>
+            </property>
+            <widget class="QCheckBox" name="avg_2">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>92</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Activar</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_20">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>60</y>
+               <width>141</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <family>Courier 10 Pitch</family>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Medidas/pto [1-256]</string>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="n_medidas_punto_2">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>80</y>
+               <width>71</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="readOnly">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </widget>
           </widget>
           <widget class="QPushButton" name="LOAD_CAL">
            <property name="geometry">
             <rect>
-             <x>340</x>
-             <y>230</y>
-             <width>181</width>
+             <x>60</x>
+             <y>350</y>
+             <width>171</width>
              <height>31</height>
             </rect>
            </property>
@@ -1069,7 +1095,7 @@ CONFIG.</string>
           <widget class="QToolButton" name="toolButton_load_2">
            <property name="geometry">
             <rect>
-             <x>340</x>
+             <x>270</x>
              <y>310</y>
              <width>31</width>
              <height>21</height>
@@ -1082,14 +1108,47 @@ CONFIG.</string>
           <widget class="QLineEdit" name="load_path_2">
            <property name="geometry">
             <rect>
-             <x>340</x>
-             <y>280</y>
-             <width>191</width>
+             <x>60</x>
+             <y>390</y>
+             <width>201</width>
              <height>20</height>
             </rect>
            </property>
            <property name="readOnly">
             <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="save_path_2">
+           <property name="geometry">
+            <rect>
+             <x>60</x>
+             <y>310</y>
+             <width>201</width>
+             <height>21</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QToolButton" name="toolButton_save_2">
+           <property name="geometry">
+            <rect>
+             <x>270</x>
+             <y>390</y>
+             <width>31</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+          <widget class="QTextBrowser" name="textBrowser_2">
+           <property name="geometry">
+            <rect>
+             <x>60</x>
+             <y>440</y>
+             <width>501</width>
+             <height>361</height>
+            </rect>
            </property>
           </widget>
          </widget>

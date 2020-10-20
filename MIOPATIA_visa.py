@@ -17,15 +17,15 @@ class VISA():
         # Visa initializationg
         self.rm = visa.ResourceManager()
         self.lor = self.rm.list_resources()
-        self.tb.append("Lista de dispositivos encontrados:")
-        self.tb.append(str(self.lor))
+        self.append_plus("Lista de dispositivos encontrados:")
+        self.append_plus(str(self.lor))
         try:
             self.inst = self.rm.open_resource(self.uc.def_cfg['VI_ADDRESS'])
-            self.tb.append("Conectados al equipo:")
-            self.tb.append(str(self.inst.query("*IDN?")))
+            self.append_plus("Conectados al equipo:")
+            self.append_plus(str(self.inst.query("*IDN?")))
 
         except:
-            self.tb.append("No encuentro el medidor 4294A")
+            self.append_plus("No encuentro el medidor 4294A")
 
         else:
             # Basic parameters
@@ -36,6 +36,10 @@ class VISA():
             # Avoids reading/sending carriage return inside messages
 
             self.inst.write('HOLD')
+
+    def append_plus(self,message):
+        for text_browser in self.tb:
+            text_browser.append(message)
 
     def switch(self,switcher,input):
         #Switch case function
@@ -60,7 +64,7 @@ class VISA():
         # Average of measurement points
         self.inst.write('PAVERFACT %s' % str(self.uc.def_cfg['n_medidas_punto']))
         # Activate average or not
-        self.inst.write('PAVER %s' % self.switch({0:'ON', 1:'OFF'},self.uc.def_cfg['avg']))
+        self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.uc.def_cfg['avg']))
         # Frequency sweep starting at ...
         self.inst.write('STAR %s' % str(self.uc.def_cfg['f_inicial']))
         # Frequency sweep stopping at ...
@@ -110,17 +114,17 @@ class VISA():
                         flag_dcrange = 100
                     elif (error_code==137):
                         # ERROR: BIAS Voltage too high
-                        self.tb.append("Módulo de BIAS demasiado elevado. Redúzcala o Desactívela")
-                        self.tb.append("ERROR %s" % str(error_code))
+                        self.append_plus("Módulo de BIAS demasiado elevado. Redúzcala o Desactívela")
+                        self.append_plus("ERROR %s" % str(error_code))
                     else:
-                        self.tb.append("Reconsidere usar la tensión de BIAS")
-                        self.tb.append("ERROR %s" % str(error_code))
+                        self.append_plus("Reconsidere usar la tensión de BIAS")
+                        self.append_plus("ERROR %s" % str(error_code))
                 else:
-                    self.tb.append("Reconsidere usar la tensión de BIAS")
-                    self.tb.append("ERROR %s" % str(error_code))
+                    self.append_plus("Reconsidere usar la tensión de BIAS")
+                    self.append_plus("ERROR %s" % str(error_code))
             else:
-                self.tb.append("Reconsidere usar la tensión de BIAS")
-                self.tb.append("ERROR %s" % str(error_code))
+                self.append_plus("Reconsidere usar la tensión de BIAS")
+                self.append_plus("ERROR %s" % str(error_code))
 
         # No BIAS voltage
         else:
@@ -129,7 +133,7 @@ class VISA():
 
 
     def measure(self):
-        self.tb.append("Midiendo Z=R+iX")
+        self.append_plus("Midiendo Z=R+iX")
 
         # Service Request instead of using pulling
         event_type = visa.constants.EventType.service_request
@@ -146,11 +150,11 @@ class VISA():
         self.inst.write('HIDI OFF')          # Muestras la traza inactiva
         self.inst.write('SING')              # Iniciar un barrido único.
 
-        self.tb.append(self.inst.query('*OPC?'))
+        self.append_plus("ACK Instrumento = %s" % self.inst.query('*OPC?'))
 
         # self.inst.enable_event(event_type, event_mech)
         #
-        # #self.tb.append(self.inst.query('*OPC?'))
+        # #self.append_plus(self.inst.query('*OPC?'))
         # # Wait for the event to occur
         # response = self.inst.wait_on_event(event_type, 10000)
         #
