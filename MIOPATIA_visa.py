@@ -5,6 +5,8 @@ import time
 #from threading import Thread, Event
 import os
 import numpy as np
+from PyQt5.QtWidgets import QMessageBox
+
 
 BYE_MSG={'command':"BYE",'arg1':"",'arg2':""}
 
@@ -55,10 +57,7 @@ class VISA():
 
 
     def config_measurement(self):
-        # Calibración MEDIDOR/USUARIO
-        # COMMON PARAMETERS
-        # Configure calibration/measurement process
-        self.inst.write('CALP %s' % self.switch({0:'FIXED', 1:'USER'},self.uc.def_cfg['conf_cal']))
+
         #fprintf(handles.GPIBobj,'PAVER OFF'); % Desactivo el promediado. Añadido por mi.
 
         # Average of measurement points
@@ -279,3 +278,163 @@ class VISA():
             self.uc.axes['ax3'].tick_params(axis='y', colors='blue')
 
         self.uc.fig2.tight_layout()
+
+
+    def config_calibration(self):
+        # Configuración de los valores para la calibración en abierto, corto y carga
+        # Calibración MEDIDOR/USUARIO
+        # COMMON PARAMETERS
+        # Configure calibration/measurement process
+        self.inst.write('CALP %s' % self.switch({0:'FIXED', 1:'USER'},self.uc.def_cfg['conf_cal']))
+        # Average of measurement points
+        self.inst.write('PAVERFACT %s' % str(self.uc.def_cfg['n_medidas_punto']))
+        # Activate average or not
+        self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.uc.def_cfg['avg']))
+        # Frequency sweep starting at ...
+        self.inst.write('STAR %s' % str(self.uc.def_cfg['f_inicial']))
+        # Frequency sweep stopping at ...
+        self.inst.write('STOP %s' % str(self.uc.def_cfg['f_final']))
+        # Tipo de barrido
+        self.inst.write('SWPT %s' % self.switch({0:'LIN', 1:'LOG'},self.uc.def_cfg['tipo_barrido']))
+        # Number of points
+        self.inst.write('POIN %s' % str(self.uc.def_cfg['n_puntos']))
+        # Bandwidth - resolución de la medida.
+        self.inst.write('BWFACT %s' % str(self.uc.def_cfg['ancho_banda']))
+        # Configura la tensión de salida del oscilador
+        self.inst.write('POWMOD VOLT;POWE %s' % str(self.uc.def_cfg['vosc']))
+
+        # Desativo bias
+        self.inst.write('DCO OFF')
+        # Fijo rango de tensión de bias
+        self.inst.write('DCRNG M1')
+
+        # % ************** IMPORTANTE ***********************************
+        # % * Los valores de la calibración en abierto serán usados para la
+        # % * calibración en carga y los valores de la caligración en carga serán
+        # % * usados para la calibración en abierto.
+        # % ***************************************************************
+
+        # Conductancia esparada en la calibración en abierto
+        self.inst.write('DCOMOPENG %s' % str(self.uc.def_cfg['g_load']))
+        # Capacidad esparada en la calibración en abierto (fF)
+        self.inst.write('DCOMOPENC %s' % str(self.uc.def_cfg['c_load']))
+
+        # Resistencia esperada calibración corto
+        self.inst.write('DCOMSHORR %s' % str(self.uc.Short_r))
+        # Inductancia esperada calibración corto
+        self.inst.write('DCOMSHORL %s' % str(self.uc.Short_l))
+        # Resistencia esperada calibración en carga
+        self.inst.write('DCOMLOADR %s' % str(self.uc.Open_r))
+        # Inductancia esperada calibración en carga
+        self.inst.write('DCOMLOADL %s' % str(self.uc.Open_l))
+
+
+    def cal_load_open_short(self):
+        # Proceos de la calibración en carga, para ello como se indica se
+        # realiza una calibración en abierto con la configuración realizada con
+        # los comandos anteriores.
+
+        ############## CARGA
+        self.message_box("Calibración con CARGA",
+                         "Introduzca la carga indicada y pulsa ACEPTAR")
+        self.append_plus("Realizando calibración por carga")
+
+        error_code = self.AdapterCorrection('Compen_Open')
+        if error_code==0:
+            self.append_plus("Calibración por CARGA realizada correctamente")
+        else:
+            self.append_plus("Error %s en calibración por carga" % error_code)
+
+        ############## ABIERTO
+        self.message_box("Calibración en ABIERTO",
+                         "Configure el sensor para calibración en ABIERTO y pulsa ACEPTAR")
+        self.append_plus("Realizando calibración en ABIERTO")
+
+        error_code = self.AdapterCorrection('Compen_Load')
+        if error_code==0:
+            self.append_plus("Calibración en ABIERTO realizada correctamente")
+        else:
+            self.append_plus("Error %s en calibración en ABIERTO" % error_code)
+
+        ############## CORTO
+        self.message_box("Calibración en CORTO",
+                         "Configure el sensor para calibración en CORTO y pulsa ACEPTAR")
+        self.append_plus("Realizando calibración en CORTO")
+
+        error_code = self.AdapterCorrection('Compen_Short')
+        if error_code==0:
+            self.append_plus("Calibración en CORTO realizada correctamente")
+        else:
+            self.append_plus("Error %s en calibración en CORTO" % error_code)
+
+    def cal_open_short(self):
+        # Proceos de la calibración en carga, para ello como se indica se
+        # realiza una calibración en abierto con la configuración realizada con
+        # los comandos anteriores.
+
+        ############## ABIERTO
+        self.message_box("Calibración en ABIERTO",
+                         "Configure el sensor para calibración en ABIERTO y pulsa ACEPTAR")
+        self.append_plus("Realizando calibración en ABIERTO")
+
+        error_code = self.AdapterCorrection('Compen_Open')
+        if error_code==0:
+            self.append_plus("Calibración en ABIERTO realizada correctamente")
+        else:
+            self.append_plus("Error %s en calibración en ABIERTO" % error_code)
+
+        ############## CORTO
+        self.message_box("Calibración en CORTO",
+                         "Configure el sensor para calibración en CORTO y pulsa ACEPTAR")
+        self.append_plus("Realizando calibración en CORTO")
+
+        error_code = self.AdapterCorrection('Compen_Short')
+        if error_code==0:
+            self.append_plus("Calibración en CORTO realizada correctamente")
+        else:
+            self.append_plus("Error %s en calibración en CORTO" % error_code)
+
+
+
+    def message_box(self,title,text):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText(text)
+        # msg.setInformativeText(text)
+        msg.setWindowTitle(title)
+        #msg.setDetailedText("")
+        retval = msg.exec_()
+
+
+    def AdapterCorrection(self, type):
+        # Activo el bit 8 del instrument event status register
+        # Que se activará cuando se finalice una calibración o compensación
+        self.inst.write('ESNB 256')
+        # Activo el bit 2 del Status Byte Register, el denomindo bit Instrument
+        # Event Status Register Summary. Este indica que se active la linea SRQ
+        # del bus GPIB cuando se produzca el evento programando en el Instrument
+        # Event Status Register
+        self.inst.write('*SRE 4')
+        # Clear de los registros
+        self.inst.write('*CLS')
+        # Se aplica la compensación según el tipo de calibración
+        self.inst.write(self.switch({'Adapter_Phase':'ECALP',
+                                   'Compen_Open':'COMA',
+                                   'Compen_Short':'COMB',
+                                   'Compen_Load':'COMC'}
+                                   ,type))
+        # Espera hasta que se produce un SRQ en el instrumento indicado con GPIBobj
+        # En este caso la linea SRQ se activa cuando se ha finalizado la
+        # compensación (timeout 120seg)
+        self.inst.wait_for_srq(120000)
+
+        # Pregunto poe el último error
+        error = self.inst.query('OUTPERRO?')
+        error_code = int(error[0:error.find(',')])
+
+        if error_code == 0:
+            self.append_plus("Calibración %s correcta" % type)
+        else:
+            self.append_plus("Error en Calibración %s" % type)
+
+        return error_code

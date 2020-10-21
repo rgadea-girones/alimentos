@@ -132,6 +132,7 @@ class DATA(object):
         self.X_data          = np.array([])
 
         self.Co              = 1E-12   # Valor capacidad en abierto sensor de puntas
+        self.stop_continue   = 0
 
 
     def config_write(self):
@@ -200,7 +201,7 @@ class BACK_END(object):
     def save_config(self):
         self.sd.config_write()
 
-    def continuar(self):
+    def redraw_measure(self):
         # self.vi.append_plus("CONTINUAR")
         if (len(self.sd.freq))>0:
             self.vi.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
@@ -274,6 +275,17 @@ class BACK_END(object):
 
     def go_cal(self):
         self.vi.append_plus("CALIBRAR")
+        self.vi.config_calibration()
+        if (self.sd.def_cfg['conf_cal'] == 0):
+            # Calibración CARGA - ABIERTO - CORTO
+            self.vi.cal_load_open_short()
+        elif (self.sd.def_cfg['conf_cal'] == 1):
+            # Calibración ABIERTO - CORTO
+            self.vi.cal_open_short()
+
+    # def continuar(self):
+    #     self.vi.append_plus("CONTINUAR")
+    #     self.sd.stop_continue = 1
 
     def load_cal(self):
         self.vi.append_plus("CARGAR CALIBRACIÓN")
@@ -281,47 +293,112 @@ class BACK_END(object):
     def save_cal(self):
         self.vi.append_plus("SALVAR CALIBRACIÓN")
 
-    def store_data(self):
-        self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial,[40,110E6])
-        self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final,[40,110E6])
-        self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos,[1,801])
-        self.sd.def_cfg['ancho_banda']=self.int_v(self.pw.ancho_banda,[1,5])
-        self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc,[0.0,1.0])
-        self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC,[-40.0,40.0])
-        #self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto,[1,256])
-        self.sd.def_cfg['load_mfile_name']=self.pw.load_path.text()
-        self.sd.def_cfg['save_mfile_name']=self.pw.save_path.text()
-        self.sd.def_cfg['save_cal_file_name']=self.pw.save_path_2.text()
-        self.sd.def_cfg['load_cal_file_name']=self.pw.load_path_2.text()
-        self.sd.def_cfg['c_load']=self.float_v(self.pw.c_load)
-        self.sd.def_cfg['g_load']=self.float_v(self.pw.g_load)
-
-
-        print(self.sd.def_cfg)
-
-    def store_avg_1(self):
-        self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto,[1,256])
-        self.pw.n_medidas_punto_2.setText(str(self.sd.def_cfg['n_medidas_punto']))
-
-    def store_avg_2(self):
-        self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto_2,[1,256])
+    def default_data(self):
+        self.pw.f_inicial.setText(str(self.sd.def_cfg['f_inicial']))
+        self.pw.f_final.setText(str(self.sd.def_cfg['f_final']))
+        self.pw.n_puntos.setText(str(self.sd.def_cfg['n_puntos']))
+        self.pw.vosc.setText(str(self.sd.def_cfg['vosc']))
+        self.pw.ancho_banda.setText(str(self.sd.def_cfg['ancho_banda']))
+        self.pw.nivel_DC.setText(str(self.sd.def_cfg['nivel_DC']))
         self.pw.n_medidas_punto.setText(str(self.sd.def_cfg['n_medidas_punto']))
-
-    def avg_store(self):
-        self.sd.def_cfg['avg']=int(self.pw.avg.isChecked())
-        self.pw.avg_2.setChecked(self.sd.def_cfg['avg'])
-
-    def avg_store_2(self):
-        self.sd.def_cfg['avg']=int(self.pw.avg_2.isChecked())
+        self.pw.load_path.setText(str(self.sd.def_cfg['load_mfile_name']))
+        self.pw.save_path.setText(str(self.sd.def_cfg['save_mfile_name']))
+        self.pw.load_path_2.setText(str(self.sd.def_cfg['load_cal_file_name']))
+        self.pw.save_path_2.setText(str(self.sd.def_cfg['save_cal_file_name']))
+        self.pw.c_load.setText(str(self.sd.def_cfg['c_load']))
+        self.pw.g_load.setText(str(self.sd.def_cfg['g_load']))
         self.pw.avg.setChecked(self.sd.def_cfg['avg'])
 
+        self.pw.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
+        self.pw.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
+
+        # Radio Buttons Defaults
+        self.pw.radioButton_xaxis[self.sd.def_cfg['tipo_barrido']].setChecked(True)
+        self.pw.radioButton_xaxis_2[self.sd.def_cfg['tipo_barrido']].setChecked(True)
+        self.pw.radioButton_DC[self.sd.def_cfg['DC_bias']].setChecked(True)
+        self.pw.radioButton_DC_2[self.sd.def_cfg['DC_bias']].setChecked(True)
+        self.pw.radioButton_config_cal[self.sd.def_cfg['conf_cal']].setChecked(True)
+        self.pw.radioButton_pto_cal[self.sd.def_cfg['pto_cal']].setChecked(True)
+
+        self.store_data(id='meas')
+
+
+    def store_data(self,id):
+
+        if (id == 'meas'):
+            # Store Measurement configuration data
+            self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial,[40,110E6])
+            self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final,[40,110E6])
+            self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos,[1,801])
+            self.sd.def_cfg['ancho_banda']=self.int_v(self.pw.ancho_banda,[1,5])
+            self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc,[0.0,1.0])
+            self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC,[-40.0,40.0])
+            self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto,[1,256])
+            self.sd.def_cfg['avg']=int(self.pw.avg.isChecked())
+            # Copy configuration dato to calibration sheet
+            self.pw.n_medidas_punto_2.setText(str(self.sd.def_cfg['n_medidas_punto']))
+            self.pw.avg_2.setChecked(self.sd.def_cfg['avg'])
+            self.pw.nivel_DC_2.setText(str(self.sd.def_cfg['nivel_DC']))
+            self.pw.vosc_2.setText(str(self.sd.def_cfg['vosc']))
+            self.pw.ancho_banda_2.setText(str(self.sd.def_cfg['ancho_banda']))
+            self.pw.n_puntos_2.setText(str(self.sd.def_cfg['n_puntos']))
+            self.pw.f_final_2.setText(str(self.sd.def_cfg['f_final']))
+            self.pw.f_inicial_2.setText(str(self.sd.def_cfg['f_inicial']))
+
+            print(self.sd.def_cfg)
+
+        elif (id == 'cal' ):
+            # Store Measurement configuration data
+            self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial_2,[40,110E6])
+            self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final_2,[40,110E6])
+            self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos_2,[1,801])
+            self.sd.def_cfg['ancho_banda']=self.int_v(self.pw.ancho_banda_2,[1,5])
+            self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc_2,[0.0,1.0])
+            self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC_2,[-40.0,40.0])
+            self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto_2,[1,256])
+            self.sd.def_cfg['avg']=int(self.pw.avg_2.isChecked())
+            # Copy configuration dato to calibration sheet
+            self.pw.n_medidas_punto.setText(str(self.sd.def_cfg['n_medidas_punto']))
+            self.pw.avg.setChecked(self.sd.def_cfg['avg'])
+            self.pw.nivel_DC.setText(str(self.sd.def_cfg['nivel_DC']))
+            self.pw.vosc.setText(str(self.sd.def_cfg['vosc']))
+            self.pw.ancho_banda.setText(str(self.sd.def_cfg['ancho_banda']))
+            self.pw.n_puntos.setText(str(self.sd.def_cfg['n_puntos']))
+            self.pw.f_final.setText(str(self.sd.def_cfg['f_final']))
+            self.pw.f_inicial.setText(str(self.sd.def_cfg['f_inicial']))
+
+        elif (id == 'none'):
+            self.sd.def_cfg['load_mfile_name']=self.pw.load_path.text()
+            self.sd.def_cfg['save_mfile_name']=self.pw.save_path.text()
+            self.sd.def_cfg['save_cal_file_name']=self.pw.save_path_2.text()
+            self.sd.def_cfg['load_cal_file_name']=self.pw.load_path_2.text()
+            self.sd.def_cfg['c_load']=self.float_v(self.pw.c_load)
+            self.sd.def_cfg['g_load']=self.float_v(self.pw.g_load)
+        else:
+            pass
+
+        # print(self.sd.def_cfg)
+
+
     # Button groups send id when clicked, then a function per button group is created
-    def bt_xaxis(self,id):
+    def bt_xaxis(self,id,mode):
         self.sd.def_cfg['tipo_barrido']=id
-    def bt_DC(self,id):
+        if mode=='meas':
+            self.pw.radioButton_xaxis_2[id].setChecked(True)
+        elif mode=='cal':
+            self.pw.radioButton_xaxis[id].setChecked(True)
+        else:
+            pass
+    def bt_DC(self,id,mode):
         self.sd.def_cfg['DC_bias']=id
-    def bt_avg(self,id):
-        self.sd.def_cfg['avg']=id
+        if mode=='meas':
+            self.pw.radioButton_DC_2[id].setChecked(True)
+        elif mode=='cal':
+            self.pw.radioButton_DC[id].setChecked(True)
+        else:
+            pass
+    # def bt_avg(self,id):
+    #     self.sd.def_cfg['avg']=id
     def bt_config_cal(self,id):
         self.sd.def_cfg['conf_cal']=id
     def bt_pto_cal(self,id):
@@ -395,52 +472,31 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.backend  = BACK_END(self,data,self.v_s)
 
 
-
-        # Controls Defaults
-        self.f_inicial.setText(str(self.data.def_cfg['f_inicial']))
-        self.f_final.setText(str(self.data.def_cfg['f_final']))
-        self.n_puntos.setText(str(self.data.def_cfg['n_puntos']))
-        self.vosc.setText(str(self.data.def_cfg['vosc']))
-        self.ancho_banda.setText(str(self.data.def_cfg['ancho_banda']))
-        self.nivel_DC.setText(str(self.data.def_cfg['nivel_DC']))
-        self.n_medidas_punto.setText(str(self.data.def_cfg['n_medidas_punto']))
-        self.n_medidas_punto_2.setText(str(self.data.def_cfg['n_medidas_punto']))
-        self.load_path.setText(str(self.data.def_cfg['load_mfile_name']))
-        self.save_path.setText(str(self.data.def_cfg['save_mfile_name']))
-        self.load_path_2.setText(str(self.data.def_cfg['load_cal_file_name']))
-        self.save_path_2.setText(str(self.data.def_cfg['save_cal_file_name']))
-        self.c_load.setText(str(self.data.def_cfg['c_load']))
-        self.g_load.setText(str(self.data.def_cfg['g_load']))
-
-        self.avg.setChecked(self.data.def_cfg['avg'])
-        self.avg_2.setChecked(self.data.def_cfg['avg'])
-
-        self.comboBox_trazaA.addItems(self.data.def_cfg['combox'])
-        self.comboBox_trazaB.addItems(self.data.def_cfg['combox'])
-
-
         # Radio Buttons groups creation
         self.bg_xaxis,self.radioButton_xaxis = self.Rbutton_group([self.radioButton_lineal,
                                                                    self.radioButton_log])
+        self.bg_xaxis_2,self.radioButton_xaxis_2 = self.Rbutton_group([self.radioButton_lineal_2,
+                                                                           self.radioButton_log_2])
         self.bg_DC,self.radioButton_DC       = self.Rbutton_group([self.radioButton_DC_ON,
                                                                    self.radioButton_DC_OFF])
+        self.bg_DC_2,self.radioButton_DC_2       = self.Rbutton_group([self.radioButton_DC_ON_2,
+                                                                   self.radioButton_DC_OFF_2])
+
         self.bg_config_cal,self.radioButton_config_cal = self.Rbutton_group([self.radioButton_config_cal_1,
                                                                              self.radioButton_config_cal_2])
         self.bg_pto_cal,self.radioButton_pto_cal = self.Rbutton_group([self.radioButton_pto_cal_medidor,
                                                                        self.radioButton_pto_cal_usuario])
 
-        # Radio Buttons
-        self.radioButton_xaxis[self.data.def_cfg['tipo_barrido']].setChecked(True)
-        self.radioButton_DC[self.data.def_cfg['DC_bias']].setChecked(True)
-        self.radioButton_config_cal[self.data.def_cfg['conf_cal']].setChecked(True)
-        self.radioButton_pto_cal[self.data.def_cfg['pto_cal']].setChecked(True)
+        # Controls Defaults
+        self.backend.default_data()
+
 
         # Clicked Calls
         self.toolButton_load.clicked.connect(self.browsers.load_mfile_browser)
         self.toolButton_save.clicked.connect(self.browsers.save_mfile_browser)
         self.toolButton_load_2.clicked.connect(self.browsers.load_calibration_file_browser)
         self.toolButton_save_2.clicked.connect(self.browsers.save_calibration_file_browser)
-        self.CONTINUAR.clicked.connect(self.backend.continuar)
+        self.REDRAW_MEASURE.clicked.connect(self.backend.redraw_measure)
         self.MEDIR.clicked.connect(self.backend.medir)
         self.LOAD_M.clicked.connect(self.backend.load_m)
         self.SAVE_M.clicked.connect(self.backend.save_m)
@@ -448,27 +504,44 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.LOAD_CAL.clicked.connect(self.backend.load_cal)
         self.SAVE_CAL.clicked.connect(self.backend.save_cal)
         self.SAVE_cfg.clicked.connect(self.backend.save_config)
-        self.avg.clicked.connect(self.backend.avg_store)
-        self.avg_2.clicked.connect(self.backend.avg_store_2)
+        # self.CONTINUAR.clicked.connect(self.backend.continuar)
 
-        # Controls Signals
-        self.f_inicial.editingFinished.connect(self.backend.store_data)
-        self.f_final.editingFinished.connect(self.backend.store_data)
-        self.n_puntos.editingFinished.connect(self.backend.store_data)
-        self.ancho_banda.editingFinished.connect(self.backend.store_data)
-        self.vosc.editingFinished.connect(self.backend.store_data)
-        self.nivel_DC.editingFinished.connect(self.backend.store_data)
-        self.n_medidas_punto.editingFinished.connect(self.backend.store_avg_1)
-        self.n_medidas_punto_2.editingFinished.connect(self.backend.store_avg_2)
-        self.load_path.textChanged.connect(self.backend.store_data)
-        self.save_path.textChanged.connect(self.backend.store_data)
-        self.load_path_2.textChanged.connect(self.backend.store_data)
-        self.save_path_2.textChanged.connect(self.backend.store_data)
-        self.c_load.editingFinished.connect(self.backend.store_data)
-        self.g_load.editingFinished.connect(self.backend.store_data)
-        self.bg_xaxis.buttonClicked[int].connect(self.backend.bt_xaxis)
-        self.bg_DC.buttonClicked[int].connect(self.backend.bt_DC)
-        #self.bg_avg.buttonClicked[int].connect(self.backend.bt_avg)
+
+        # Duplicated control
+        # Measurement
+        self.f_inicial.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
+        self.f_final.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
+        self.n_puntos.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
+        self.ancho_banda.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
+        self.vosc.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
+        self.nivel_DC.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
+        self.n_medidas_punto.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
+        self.avg.stateChanged.connect(lambda ch,id='meas': self.backend.store_data(id))
+        # Calibration
+        self.f_inicial_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
+        self.f_final_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
+        self.n_puntos_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
+        self.ancho_banda_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
+        self.vosc_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
+        self.nivel_DC_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
+        self.n_medidas_punto_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
+        # This one sends an argument to the function so ch (void) is needed to bypass it
+        self.avg_2.stateChanged.connect(lambda none,id='cal': self.backend.store_data(id))
+
+        # Other parameters
+        self.load_path.textChanged.connect(lambda id='none': self.backend.store_data(id))
+        self.save_path.textChanged.connect(lambda id='none': self.backend.store_data(id))
+        self.load_path_2.textChanged.connect(lambda id='none': self.backend.store_data(id))
+        self.save_path_2.textChanged.connect(lambda id='none': self.backend.store_data(id))
+        self.c_load.editingFinished.connect(lambda id='none': self.backend.store_data(id))
+        self.g_load.editingFinished.connect(lambda id='none': self.backend.store_data(id))
+
+        # Magic button groups
+        self.bg_xaxis.buttonClicked[int].connect(lambda id,mode='meas': self.backend.bt_xaxis(id=id,mode=mode))
+        self.bg_DC.buttonClicked[int].connect(lambda id,mode='meas': self.backend.bt_DC(id=id,mode=mode))
+        self.bg_xaxis_2.buttonClicked[int].connect(lambda id,mode='cal': self.backend.bt_xaxis(id=id,mode=mode))
+        self.bg_DC_2.buttonClicked[int].connect(lambda id,mode='cal': self.backend.bt_DC(id=id,mode=mode))
+
         self.bg_config_cal.buttonClicked[int].connect(self.backend.bt_config_cal)
         self.bg_pto_cal.buttonClicked[int].connect(self.backend.bt_pto_cal)
 
