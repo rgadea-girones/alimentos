@@ -60,12 +60,11 @@ class DATA(object):
                             'g_load':0.1,
                             'pto_cal':0,
                             'combox':['|Z|','F.Z','E\'r','E\'\'r','|Er|','F.Er'],
-                            'VI_ADDRESS': 'GPIB0::17::INSTR'
+                            'VI_ADDRESS': 'GPIB0::17::INSTR',
+                            'GPIB_timeout':10000
                             }
-        self.config_write()
+            self.config_write()
 
-        # FLAGS
-        self.measuring = False
 
         # CONSTANTS
         self.E0              = 8.854e-12 # Vacuum permitivity
@@ -410,50 +409,50 @@ class BROWSERS(object):
     """
     def __init__(self,parent_wdg,shared_data):
         self.sd = shared_data
-        self.parent_wdg = parent_wdg
+        self.pw = parent_wdg
 
     def load_mfile_browser(self):
-        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.parent_wdg,
+        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
                                         'Abrir fichero medida',
                                         self.sd.def_cfg['def_path'],
                                         "Ficheros de medida (*.csv)")
         fname_aux = ([str(x) for x in file_aux])
         self.sd.def_cfg['load_mfile_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
-        self.parent_wdg.load_path.setText(self.sd.def_cfg['load_mfile_name'])
+        self.pw.load_path.setText(self.sd.def_cfg['load_mfile_name'])
 
 
     def save_mfile_browser(self):
-        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.parent_wdg,
+        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.pw,
                                         'Salvar fichero medida',
                                         self.sd.def_cfg['def_path'],
                                         "Ficheros de medida (*.csv)")
         fname_aux = ([str(x) for x in file_aux])
         self.sd.def_cfg['save_mfile_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
-        self.parent_wdg.save_path.setText(self.sd.def_cfg['save_mfile_name'])
+        self.pw.save_path.setText(self.sd.def_cfg['save_mfile_name'])
 
 
     def load_calibration_file_browser(self):
-        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.parent_wdg,
+        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.pw,
                                         'Fichero de calibración',
                                         self.sd.def_cfg['def_path'],
                                         "Ficheros de calibración (*.cal)")
         fname_aux = ([str(x) for x in file_aux])
         self.sd.def_cfg['load_cal_file_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
-        self.parent_wdg.load_path_2.setText(self.sd.def_cfg['load_cal_file_name'])
+        self.pw.load_path_2.setText(self.sd.def_cfg['load_cal_file_name'])
 
 
     def save_calibration_file_browser(self):
-        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.parent_wdg,
+        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.pw,
                                         'Fichero de calibración',
                                         self.sd.def_cfg['def_path'],
                                         "Ficheros de calibración (*.cal)")
         fname_aux = ([str(x) for x in file_aux])
         self.sd.def_cfg['save_cal_file_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
-        self.parent_wdg.save_path_2.setText(self.sd.def_cfg['save_cal_file_name'])
+        self.pw.save_path_2.setText(self.sd.def_cfg['save_cal_file_name'])
 
 
 
@@ -464,12 +463,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         # Shared data
-        self.data = data
+        self.sd = data
         # Classes Instantiation
-        self.browsers = BROWSERS(self,data)
+        self.brw = BROWSERS(self,data)
         # VISA start
-        self.v_s = mv.VISA(self.data,[self.textBrowser,self.textBrowser_2])
-        self.backend  = BACK_END(self,data,self.v_s)
+        self.vi = mv.VISA(self.sd,[self.textBrowser,self.textBrowser_2])
+        self.be  = BACK_END(self,data,self.vi)
 
 
         # Radio Buttons groups creation
@@ -488,62 +487,62 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                                                                        self.radioButton_pto_cal_usuario])
 
         # Controls Defaults
-        self.backend.default_data()
+        self.be.default_data()
 
 
         # Clicked Calls
-        self.toolButton_load.clicked.connect(self.browsers.load_mfile_browser)
-        self.toolButton_save.clicked.connect(self.browsers.save_mfile_browser)
-        self.toolButton_load_2.clicked.connect(self.browsers.load_calibration_file_browser)
-        self.toolButton_save_2.clicked.connect(self.browsers.save_calibration_file_browser)
-        self.REDRAW_MEASURE.clicked.connect(self.backend.redraw_measure)
-        self.MEDIR.clicked.connect(self.backend.medir)
-        self.LOAD_M.clicked.connect(self.backend.load_m)
-        self.SAVE_M.clicked.connect(self.backend.save_m)
-        self.GO_CAL.clicked.connect(self.backend.go_cal)
-        self.LOAD_CAL.clicked.connect(self.backend.load_cal)
-        self.SAVE_CAL.clicked.connect(self.backend.save_cal)
-        self.SAVE_cfg.clicked.connect(self.backend.save_config)
-        # self.CONTINUAR.clicked.connect(self.backend.continuar)
+        self.toolButton_load.clicked.connect(self.brw.load_mfile_browser)
+        self.toolButton_save.clicked.connect(self.brw.save_mfile_browser)
+        self.toolButton_load_2.clicked.connect(self.brw.load_calibration_file_browser)
+        self.toolButton_save_2.clicked.connect(self.brw.save_calibration_file_browser)
+        self.REDRAW_MEASURE.clicked.connect(self.be.redraw_measure)
+        self.MEDIR.clicked.connect(self.be.medir)
+        self.LOAD_M.clicked.connect(self.be.load_m)
+        self.SAVE_M.clicked.connect(self.be.save_m)
+        self.GO_CAL.clicked.connect(self.be.go_cal)
+        self.LOAD_CAL.clicked.connect(self.be.load_cal)
+        self.SAVE_CAL.clicked.connect(self.be.save_cal)
+        self.SAVE_cfg.clicked.connect(self.be.save_config)
+        # self.CONTINUAR.clicked.connect(self.be.continuar)
 
 
         # Duplicated control
         # Measurement
-        self.f_inicial.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
-        self.f_final.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
-        self.n_puntos.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
-        self.ancho_banda.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
-        self.vosc.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
-        self.nivel_DC.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
-        self.n_medidas_punto.editingFinished.connect(lambda id='meas': self.backend.store_data(id))
-        self.avg.stateChanged.connect(lambda ch,id='meas': self.backend.store_data(id))
+        self.f_inicial.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        self.f_final.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        self.n_puntos.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        self.ancho_banda.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        self.vosc.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        self.nivel_DC.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        self.n_medidas_punto.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        self.avg.stateChanged.connect(lambda ch,id='meas': self.be.store_data(id))
         # Calibration
-        self.f_inicial_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
-        self.f_final_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
-        self.n_puntos_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
-        self.ancho_banda_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
-        self.vosc_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
-        self.nivel_DC_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
-        self.n_medidas_punto_2.editingFinished.connect(lambda id='cal': self.backend.store_data(id))
+        self.f_inicial_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        self.f_final_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        self.n_puntos_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        self.ancho_banda_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        self.vosc_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        self.nivel_DC_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        self.n_medidas_punto_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
         # This one sends an argument to the function so ch (void) is needed to bypass it
-        self.avg_2.stateChanged.connect(lambda none,id='cal': self.backend.store_data(id))
+        self.avg_2.stateChanged.connect(lambda none,id='cal': self.be.store_data(id))
 
         # Other parameters
-        self.load_path.textChanged.connect(lambda id='none': self.backend.store_data(id))
-        self.save_path.textChanged.connect(lambda id='none': self.backend.store_data(id))
-        self.load_path_2.textChanged.connect(lambda id='none': self.backend.store_data(id))
-        self.save_path_2.textChanged.connect(lambda id='none': self.backend.store_data(id))
-        self.c_load.editingFinished.connect(lambda id='none': self.backend.store_data(id))
-        self.g_load.editingFinished.connect(lambda id='none': self.backend.store_data(id))
+        self.load_path.textChanged.connect(lambda id='none': self.be.store_data(id))
+        self.save_path.textChanged.connect(lambda id='none': self.be.store_data(id))
+        self.load_path_2.textChanged.connect(lambda id='none': self.be.store_data(id))
+        self.save_path_2.textChanged.connect(lambda id='none': self.be.store_data(id))
+        self.c_load.editingFinished.connect(lambda id='none': self.be.store_data(id))
+        self.g_load.editingFinished.connect(lambda id='none': self.be.store_data(id))
 
         # Magic button groups
-        self.bg_xaxis.buttonClicked[int].connect(lambda id,mode='meas': self.backend.bt_xaxis(id=id,mode=mode))
-        self.bg_DC.buttonClicked[int].connect(lambda id,mode='meas': self.backend.bt_DC(id=id,mode=mode))
-        self.bg_xaxis_2.buttonClicked[int].connect(lambda id,mode='cal': self.backend.bt_xaxis(id=id,mode=mode))
-        self.bg_DC_2.buttonClicked[int].connect(lambda id,mode='cal': self.backend.bt_DC(id=id,mode=mode))
+        self.bg_xaxis.buttonClicked[int].connect(lambda id,mode='meas': self.be.bt_xaxis(id=id,mode=mode))
+        self.bg_DC.buttonClicked[int].connect(lambda id,mode='meas': self.be.bt_DC(id=id,mode=mode))
+        self.bg_xaxis_2.buttonClicked[int].connect(lambda id,mode='cal': self.be.bt_xaxis(id=id,mode=mode))
+        self.bg_DC_2.buttonClicked[int].connect(lambda id,mode='cal': self.be.bt_DC(id=id,mode=mode))
 
-        self.bg_config_cal.buttonClicked[int].connect(self.backend.bt_config_cal)
-        self.bg_pto_cal.buttonClicked[int].connect(self.backend.bt_pto_cal)
+        self.bg_config_cal.buttonClicked[int].connect(self.be.bt_config_cal)
+        self.bg_pto_cal.buttonClicked[int].connect(self.be.bt_pto_cal)
 
 
     def Rbutton_group(self, button_array):
@@ -575,13 +574,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolbar = NavigationToolbar(self.canvas1, self.frame_2,
                                          coordinates=True)
         self.mpl_1.addWidget(self.toolbar)
-        self.data.axes['ax0'] = fig.add_subplot(111)
-        self.data.axes['ax1'] = self.data.axes['ax0'].twinx()
-        self.data.axes['ax0'].tick_params(axis="x", labelsize=8)
-        self.data.axes['ax0'].tick_params(axis="y", labelsize=8)
-        self.data.axes['ax1'].tick_params(axis="x", labelsize=8)
-        self.data.axes['ax1'].tick_params(axis="y", labelsize=8)
-        # self.data.axes['ax2'] = self.data.axes['ax1'].twinx()
+        self.sd.axes['ax0'] = fig.add_subplot(111)
+        self.sd.axes['ax1'] = self.sd.axes['ax0'].twinx()
+        self.sd.axes['ax0'].tick_params(axis="x", labelsize=8)
+        self.sd.axes['ax0'].tick_params(axis="y", labelsize=8)
+        self.sd.axes['ax1'].tick_params(axis="x", labelsize=8)
+        self.sd.axes['ax1'].tick_params(axis="y", labelsize=8)
+        # self.sd.axes['ax2'] = self.sd.axes['ax1'].twinx()
 
 
     def addmpl_2(self, fig):
@@ -592,12 +591,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.toolbar = NavigationToolbar(self.canvas2, self.frame_3,
                                          coordinates=True)
         self.mpl_2.addWidget(self.toolbar)
-        self.data.axes['ax2'] = fig.add_subplot(111)
-        self.data.axes['ax3'] = self.data.axes['ax2'].twinx()
-        self.data.axes['ax2'].tick_params(axis="x", labelsize=8)
-        self.data.axes['ax2'].tick_params(axis="y", labelsize=8)
-        self.data.axes['ax3'].tick_params(axis="x", labelsize=8)
-        self.data.axes['ax3'].tick_params(axis="y", labelsize=8)
+        self.sd.axes['ax2'] = fig.add_subplot(111)
+        self.sd.axes['ax3'] = self.sd.axes['ax2'].twinx()
+        self.sd.axes['ax2'].tick_params(axis="x", labelsize=8)
+        self.sd.axes['ax2'].tick_params(axis="y", labelsize=8)
+        self.sd.axes['ax3'].tick_params(axis="x", labelsize=8)
+        self.sd.axes['ax3'].tick_params(axis="y", labelsize=8)
 
 
 
