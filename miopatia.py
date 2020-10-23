@@ -1,3 +1,4 @@
+
 import pyvisa
 import time
 import sys
@@ -5,7 +6,7 @@ import json
 import numpy as np
 import pandas as pd
 import MIOPATIA_visa as mv
-from PyQt5 import QtCore, QtWidgets, uic
+from PyQt5 import QtCore, QtWidgets, uic, QtGui
 from threading import Thread, Event, RLock
 
 from matplotlib.backends.backend_qt5agg import (
@@ -13,6 +14,9 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import QMessageBox
+
+import ctypes
+
 
 qtCreatorFile = "MIOPATIA.ui"
 
@@ -461,7 +465,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
-
+        self.setWindowIcon(QtGui.QIcon('./pollo.jpeg'))
+        self.show()
         # Shared data
         self.sd = data
         # Classes Instantiation
@@ -604,6 +609,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
+    myappid = 'UPV.instrumentation.4294A.1' # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     data = DATA(read=True)
     window = MyApp(data)
     window.addmpl_1(data.fig1)
