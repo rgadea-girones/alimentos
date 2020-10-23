@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 import ctypes
 
+# PYINSTALLER : pyinstaller -D --specpath .\EXE miopatia.py
 
 qtCreatorFile = "MIOPATIA.ui"
 
