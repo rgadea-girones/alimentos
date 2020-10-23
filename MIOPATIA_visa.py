@@ -204,7 +204,6 @@ class VISA():
 
         self.inst.wait_for_srq(self.sd.def_cfg['GPIB_timeout'])
 
-        print("MEDIDA REALIZADA")
 
 
     def show_measurement(self,comboBox_trazaA,comboBox_trazaB):
@@ -284,9 +283,8 @@ class VISA():
         # Configuración de los valores para la calibración en abierto, corto y carga
         # Calibración MEDIDOR/USUARIO
         # COMMON PARAMETERS
-        # Configure calibration/measurement process
-        self.inst.write('CALP %s' % self.switch({0:'FIXED', 1:'USER'},self.sd.def_cfg['conf_cal']))
         # Average of measurement points
+
         self.inst.write('PAVERFACT %s' % str(self.sd.def_cfg['n_medidas_punto']))
         # Activate average or not
         self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.sd.def_cfg['avg']))
@@ -307,6 +305,9 @@ class VISA():
         self.inst.write('DCO OFF')
         # Fijo rango de tensión de bias
         self.inst.write('DCRNG M1')
+
+        # Configure calibration/measurement process
+        self.inst.write('CALP %s' % self.switch({0:'FIXED', 1:'USER'},self.sd.def_cfg['pto_cal']))
 
         # % ************** IMPORTANTE ***********************************
         # % * Los valores de la calibración en abierto serán usados para la
@@ -333,6 +334,12 @@ class VISA():
         # Proceos de la calibración en carga, para ello como se indica se
         # realiza una calibración en abierto con la configuración realizada con
         # los comandos anteriores.
+
+        # % ************** IMPORTANTE ***********************************
+        # % * Los valores de la calibración en abierto serán usados para la
+        # % * calibración en carga y los valores de la caligración en carga serán
+        # % * usados para la calibración en abierto.
+        # % ***************************************************************
 
         ############## CARGA
         self.message_box("Calibración con CARGA",
@@ -395,6 +402,34 @@ class VISA():
             self.append_plus("Error %s en calibración en CORTO" % error_code)
 
 
+    def get_calibration(self):
+        # Loads OPEN - SHORT - LOAD calibration results
+        OPEN_cal  = np.fromstring(self.inst.query('OUTPCOMC1?'), dtype=float, sep=',')
+        SHORT_cal = np.fromstring(self.inst.query('OUTPCOMC2?'), dtype=float, sep=',')
+        LOAD_cal  = np.fromstring(self.inst.query('OUTPCOMC3?'), dtype=float, sep=',')
+
+        self.sd.COM_OPEN_data_R = OPEN_cal[0::2]
+        self.sd.COM_OPEN_data_X = OPEN_cal[1::2]
+        self.sd.COM_SHORT_data_R = SHORT_cal[0::2]
+        self.sd.COM_SHORT_data_X = SHORT_cal[1::2]
+        self.sd.COM_LOAD_data_R = LOAD_cal[0::2]
+        self.sd.COM_LOAD_data_X = LOAD_cal[1::2]
+
+        # Frequency array creation
+        if (self.sd.def_cfg['tipo_barrido']==0):
+            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial'],
+                                       self.sd.def_cfg['f_final'],
+                                       self.sd.def_cfg['n_puntos'])
+        elif(self.sd.def_cfg['tipo_barrido']==1):
+            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']),
+                                       np.log10(self.sd.def_cfg['f_final']),
+                                       self.sd.def_cfg['n_puntos'])
+
+    def send_calibration(self):
+        # Create arrays to send CALIBRATION information
+        # Think about what to do with load calibration information when open-short calibration is used
+        pass
+
 
     def message_box(self,title,text):
         msg = QMessageBox()
@@ -417,6 +452,8 @@ class VISA():
         self.inst.write('*SRE 4')
         # Clear de los registros
         self.inst.write('*CLS')
+
+
         # Se aplica la compensación según el tipo de calibración
         self.inst.write(self.switch({'Adapter_Phase':'ECALP',
                                    'Compen_Open':'COMA',
@@ -428,9 +465,10 @@ class VISA():
         # compensación (timeout 120seg)
         self.inst.wait_for_srq(self.sd.def_cfg['GPIB_timeout'])
 
-        # Pregunto poe el último error
+        # Pregunto por el último error
         error = self.inst.query('OUTPERRO?')
         error_code = int(error[0:error.find(',')])
+
 
         if error_code == 0:
             self.append_plus("Calibración %s correcta" % type)

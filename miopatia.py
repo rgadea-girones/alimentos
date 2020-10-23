@@ -134,9 +134,17 @@ class DATA(object):
         self.Er_fase_data    = np.array([])
         self.R_data          = np.array([])
         self.X_data          = np.array([])
+        self.COM_OPEN_data_R = np.array([])
+        self.COM_OPEN_data_X = np.array([])
+        self.COM_SHORT_data_R = np.array([])
+        self.COM_SHORT_data_X = np.array([])
+        self.COM_LOAD_data_R = np.array([])
+        self.COM_LOAD_data_X = np.array([])
 
         self.Co              = 1E-12   # Valor capacidad en abierto sensor de puntas
         self.stop_continue   = 0
+
+        self.cal_points      = 100
 
 
     def config_write(self):
@@ -168,7 +176,6 @@ class BACK_END(object):
     def float_v(self,objeto,limits=[0,1E12]):
         try:
             aux = float(objeto.text())
-            print(aux)
             if ((aux >= limits[0]) and (aux <= limits[1])):
                 return float(aux)
             else:
@@ -283,19 +290,58 @@ class BACK_END(object):
         if (self.sd.def_cfg['conf_cal'] == 0):
             # Calibración CARGA - ABIERTO - CORTO
             self.vi.cal_load_open_short()
+
         elif (self.sd.def_cfg['conf_cal'] == 1):
             # Calibración ABIERTO - CORTO
             self.vi.cal_open_short()
 
-    # def continuar(self):
-    #     self.vi.append_plus("CONTINUAR")
-    #     self.sd.stop_continue = 1
-
     def load_cal(self):
         self.vi.append_plus("CARGAR CALIBRACIÓN")
+        file = self.sd.def_cfg['load_cal_file_name']
+        try:
+            data = pd.read_csv(file,header=0,
+                            names=['Freq','OPEN_R','OPEN_X','SHORT_R','SHORT_X',
+                                     'LOAD_R','LOAD_X'],
+                            delim_whitespace=True)
+        except:
+            self.vi.append_plus("Fichero no encontrado\n")
+        else:
+            self.vi.append_plus(file)
+            self.sd.COM_OPEN_data_R = data['OPEN_R']
+            self.sd.COM_OPEN_data_X = data['OPEN_X']
+            self.sd.COM_SHORT_data_R = data['SHORT_R']
+            self.sd.COM_SHORT_data_X = data['SHORT_X']
+            self.sd.COM_LOAD_data_R = data['LOAD_R']
+            self.sd.COM_LOAD_data_X = data['LOAD_X']
+
+            self.vi.send_calibration()
+
 
     def save_cal(self):
         self.vi.append_plus("SALVAR CALIBRACIÓN")
+        self.vi.get_calibration()
+
+        file_save = self.sd.def_cfg['save_cal_file_name']
+        try:
+            print(len(self.sd.COM_OPEN_data_R))
+
+            data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
+                                         np.reshape(self.sd.COM_OPEN_data_R,(-1,1)),
+                                         np.reshape(self.sd.COM_OPEN_data_X,(-1,1)),
+                                         np.reshape(self.sd.COM_SHORT_data_R,(-1,1)),
+                                         np.reshape(self.sd.COM_SHORT_data_X,(-1,1)),
+                                         np.reshape(self.sd.COM_LOAD_data_R,(-1,1)),
+                                         np.reshape(self.sd.COM_LOAD_data_X,(-1,1))]
+                                         ,axis=1)
+            data_frame = pd.DataFrame(data_array,
+                                      columns=['Freq','OPEN_R','OPEN_X','SHORT_R','SHORT_X',
+                                               'LOAD_R','LOAD_X'])
+            data_frame.to_csv(file_save, sep=' ', index=False, float_format='%+13.6e',header=True)
+        except:
+            self.vi.append_plus("El fichero de calibración no se ha podido salvar\n")
+        else:
+            self.vi.append_plus(file_save)
+
 
     def default_data(self):
         self.pw.f_inicial.setText(str(self.sd.def_cfg['f_inicial']))

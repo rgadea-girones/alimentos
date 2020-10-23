@@ -73,7 +73,7 @@
           <bool>false</bool>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="datos">
           <attribute name="title">
@@ -1048,7 +1048,7 @@ CONFIG.</string>
            <property name="geometry">
             <rect>
              <x>270</x>
-             <y>260</y>
+             <y>340</y>
              <width>31</width>
              <height>21</height>
             </rect>
@@ -1084,7 +1084,7 @@ CONFIG.</string>
            <property name="geometry">
             <rect>
              <x>270</x>
-             <y>340</y>
+             <y>260</y>
              <width>31</width>
              <height>21</height>
             </rect>
