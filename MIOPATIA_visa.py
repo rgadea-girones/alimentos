@@ -8,8 +8,6 @@ import numpy as np
 from PyQt5.QtWidgets import QMessageBox
 
 
-BYE_MSG={'command':"BYE",'arg1':"",'arg2':""}
-
 
 class VISA():
     def __init__(self,shared_data,txt_browser):
