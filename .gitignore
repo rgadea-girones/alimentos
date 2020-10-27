@@ -4,3 +4,5 @@ EXE/
 dist/
 
 build/
+
+*.cal
