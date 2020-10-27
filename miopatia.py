@@ -45,25 +45,25 @@ class DATA(object):
             self.config_read()
         else:
             # These are the default values.
-            self.def_cfg= {'f_inicial':10,
-                            'f_final':1000000,
-                            'n_puntos':25,
-                            'ancho_banda':3,
-                            'vosc':0.5,
-                            'tipo_barrido':0,
-                            'DC_bias':1,
-                            'nivel_DC':10.0,
-                            'avg':0,
-                            'n_medidas_punto':1,
+            self.def_cfg= {'f_inicial':{'value':10, 'limits':[10.0,100.0E6],'type':'float'},
+                            'f_final' :{'value':10000000, 'limits':[10.0,100.0E6],'type':'float'},
+                            'n_puntos':{'value':25, 'limits':[1,801],'type':'int'},
+                            'ancho_banda':{'value':3, 'limits':[1,5],'type':'int'},
+                            'vosc':{'value':0.5, 'limits':[0.0,1.0],'type':'float'},
+                            'tipo_barrido':{'value':0, 'limits':[0,1],'type':'int'},
+                            'DC_bias':{'value':0, 'limits':[0,1],'type':'int'},
+                            'nivel_DC':{'value':0, 'limits':[-40.0,40.0],'type':'float'},
+                            'avg':{'value':0, 'limits':[0,1],'type':'int'},
+                            'n_medidas_punto':{'value':1, 'limits':[1,256],'type':'int'},
                             'load_mfile_name':"./medida.csv",
                             'save_mfile_name':"./medida.csv",
                             'load_cal_file_name':"./calibracion.cal",
                             'save_cal_file_name':"./calibracion_new.cal",
                             'def_path':"./",
-                            'conf_cal':0,
-                            'c_load':500,
-                            'g_load':0.1,
-                            'pto_cal':1,
+                            'conf_cal':{'value':0, 'limits':[0,1],'type':'int'},
+                            'c_load':{'value':500, 'limits':[0,1E6],'type':'float'},
+                            'g_load':{'value':0.1, 'limits':[0,1E6],'type':'float'},
+                            'pto_cal':{'value':1, 'limits':[0,1],'type':'int'},
                             'combox':['|Z|','F.Z','E\'r','E\'\'r','|Er|','F.Er'],
                             'VI_ADDRESS': 'GPIB0::17::INSTR',
                             'GPIB_timeout':12000
@@ -173,41 +173,41 @@ class BACK_END(object):
         self.flag = True
 
      # Controlled casting to avoid data intro errors
-    def float_v(self,objeto,limits=[0,1E12]):
+    def value_control(self,objeto,limits=[0,1E12],type='int'):
         try:
-            aux = float(objeto.text())
+            aux = eval(type)(objeto.text())
             if ((aux >= limits[0]) and (aux <= limits[1])):
-                return float(aux)
+                return eval(type)(aux)
             else:
                 if (aux > limits[1]):
                     objeto.setText(str(limits[1]))
-                    return float(limits[1])
+                    return eval(type)(limits[1])
                 else:
                     if (aux < limits[0]):
                         objeto.setText(str(limits[0]))
-                        return float(limits[0])
+                        return eval(type)(limits[0])
         except ValueError:
             self.vi.append_plus("ERROR EN VALOR")
             objeto.setText(str(limits[0]))
             return limits[0]
-
-    def int_v(self,objeto,limits=[0,1E12]):
-        try:
-            aux = int(objeto.text())
-            if ((aux >= limits[0]) and (aux <= limits[1])):
-                return int(aux)
-            else:
-                if (aux > limits[1]):
-                    objeto.setText(str(limits[1]))
-                    return int(limits[1])
-                else:
-                    if (aux < limits[0]):
-                        objeto.setText(str(limits[0]))
-                        return int(limits[0])
-        except ValueError:
-            self.vi.append_plus("ERROR EN VALOR")
-            objeto.setText(str(limits[0]))
-            return limits[0]
+    #
+    # def int_v(self,objeto,limits=[0,1E12]):
+    #     try:
+    #         aux = int(objeto.text())
+    #         if ((aux >= limits[0]) and (aux <= limits[1])):
+    #             return int(aux)
+    #         else:
+    #             if (aux > limits[1]):
+    #                 objeto.setText(str(limits[1]))
+    #                 return int(limits[1])
+    #             else:
+    #                 if (aux < limits[0]):
+    #                     objeto.setText(str(limits[0]))
+    #                     return int(limits[0])
+    #     except ValueError:
+    #         self.vi.append_plus("ERROR EN VALOR")
+    #         objeto.setText(str(limits[0]))
+    #         return limits[0]
 
     def save_config(self):
         self.sd.config_write()
@@ -344,29 +344,29 @@ class BACK_END(object):
 
 
     def default_data(self):
-        self.pw.f_inicial.setText(str(self.sd.def_cfg['f_inicial']))
-        self.pw.f_final.setText(str(self.sd.def_cfg['f_final']))
-        self.pw.n_puntos.setText(str(self.sd.def_cfg['n_puntos']))
-        self.pw.vosc.setText(str(self.sd.def_cfg['vosc']))
-        self.pw.ancho_banda.setText(str(self.sd.def_cfg['ancho_banda']))
-        self.pw.nivel_DC.setText(str(self.sd.def_cfg['nivel_DC']))
-        self.pw.n_medidas_punto.setText(str(self.sd.def_cfg['n_medidas_punto']))
+        self.pw.f_inicial.setText(str(self.sd.def_cfg['f_inicial']['value']))
+        self.pw.f_final.setText(str(self.sd.def_cfg['f_final']['value']))
+        self.pw.n_puntos.setText(str(self.sd.def_cfg['n_puntos']['value']))
+        self.pw.vosc.setText(str(self.sd.def_cfg['vosc']['value']))
+        self.pw.ancho_banda.setText(str(self.sd.def_cfg['ancho_banda']['value']))
+        self.pw.nivel_DC.setText(str(self.sd.def_cfg['nivel_DC']['value']))
+        self.pw.n_medidas_punto.setText(str(self.sd.def_cfg['n_medidas_punto']['value']))
         self.pw.load_path.setText(str(self.sd.def_cfg['load_mfile_name']))
         self.pw.save_path.setText(str(self.sd.def_cfg['save_mfile_name']))
         self.pw.load_path_2.setText(str(self.sd.def_cfg['load_cal_file_name']))
         self.pw.save_path_2.setText(str(self.sd.def_cfg['save_cal_file_name']))
         self.pw.c_load.setText(str(self.sd.def_cfg['c_load']))
         self.pw.g_load.setText(str(self.sd.def_cfg['g_load']))
-        self.pw.avg.setChecked(self.sd.def_cfg['avg'])
+        self.pw.avg.setChecked(self.sd.def_cfg['avg']['value'])
 
         self.pw.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
         self.pw.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
 
         # Radio Buttons Defaults
-        self.pw.radioButton_xaxis[self.sd.def_cfg['tipo_barrido']].setChecked(True)
-        self.pw.radioButton_xaxis_2[self.sd.def_cfg['tipo_barrido']].setChecked(True)
-        self.pw.radioButton_DC[self.sd.def_cfg['DC_bias']].setChecked(True)
-        self.pw.radioButton_DC_2[self.sd.def_cfg['DC_bias']].setChecked(True)
+        self.pw.radioButton_xaxis[self.sd.def_cfg['tipo_barrido']['value']].setChecked(True)
+        self.pw.radioButton_xaxis_2[self.sd.def_cfg['tipo_barrido']['value']].setChecked(True)
+        self.pw.radioButton_DC[self.sd.def_cfg['DC_bias']['value']].setChecked(True)
+        self.pw.radioButton_DC_2[self.sd.def_cfg['DC_bias']['value']].setChecked(True)
         self.pw.radioButton_config_cal[self.sd.def_cfg['conf_cal']].setChecked(True)
         self.pw.radioButton_pto_cal[self.sd.def_cfg['pto_cal']].setChecked(True)
 
@@ -377,6 +377,15 @@ class BACK_END(object):
     #
 
     def store_data(self,id):
+
+        for i in self.pw.mirror.keys():
+            for j in self.pw.mirror[i]:
+                new_data = self.value_control(self.pw.eval(j), self.sd.def_cfg[i]['limits'],type=self.sd.def_cfg[i]['type'])
+                def_data = self.sd.def_cfg[i]['value']
+                if def_data != data:
+                    self.sd.def_cfg[i]['value'] = new_data
+                    break
+
 
         if (id == 'meas'):
             # Store Measurement configuration data
@@ -421,10 +430,10 @@ class BACK_END(object):
             self.pw.f_inicial.setText(str(self.sd.def_cfg['f_inicial']))
 
         elif (id == 'none'):
-            self.sd.def_cfg['load_mfile_name']=self.pw.load_path.text()
-            self.sd.def_cfg['save_mfile_name']=self.pw.save_path.text()
-            self.sd.def_cfg['save_cal_file_name']=self.pw.save_path_2.text()
-            self.sd.def_cfg['load_cal_file_name']=self.pw.load_path_2.text()
+            self.sd.def_cfg['load_mfile_name']=self.pw.load_path
+            self.sd.def_cfg['save_mfile_name']=self.pw.save_path
+            self.sd.def_cfg['save_cal_file_name']=self.pw.save_path_2
+            self.sd.def_cfg['load_cal_file_name']=self.pw.load_path_2
             self.sd.def_cfg['c_load']=self.float_v(self.pw.c_load)
             self.sd.def_cfg['g_load']=self.float_v(self.pw.g_load)
         else:
@@ -542,18 +551,28 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         # Data Mirroring through GUI
-        self.mirror =  {'f_inicial':   [self.f_inicial, self.f_inicial_2],
-                        'f_final':     [self.f_final,   self.f_final_2],
-                        'n_puntos':    [self.n_puntos,  self.n_puntos_2],
-                        'ancho_banda': [self.ancho_banda, self.ancho_banda_2],
-                        'vosc':        [self.vosc,        self.vosc_2],
-                        'tipo_barrido':[self.bg_xaxis, self.bg_xaxis_2],
-                        'DC_bias':     [self.bg_DC,    self.bg_DC_2],
-                        'nivel_DC':    [self.nivel_DC, self.nivel_DC_2],
-                        'avg':         [self.avg,      self.avg_2],
-                        'n_medidas_punto':[self.n_medidas_punto, self.n_medidas_punto_2]}
+        self.mirror =  {'f_inicial':   ['f_inicial', 'f_inicial_2'],
+                        'f_final':     ['f_final',   'f_final_2'],
+                        'n_puntos':    ['n_puntos',  'n_puntos_2'],
+                        'ancho_banda': ['ancho_banda', 'ancho_banda_2'],
+                        'vosc':        ['vosc',        'vosc_2'],
+                        'tipo_barrido':['bg_xaxis', 'bg_xaxis_2'],
+                        'DC_bias':     ['bg_DC',    'bg_DC_2'],
+                        'nivel_DC':    ['nivel_DC', 'nivel_DC_2'],
+                        'avg':         ['avg',      'avg_2'],
+                        'n_medidas_punto':['n_medidas_punto', 'n_medidas_punto_2']}
 
-        
+        self.paths = {'load_mfile_name':['load_path'],
+                      'save_mfile_name':['save_path'],
+                      'load_cal_file_name':['load_path_2'],
+                      'save_cal_file_name':['save_path_2']}
+
+        self.other = {'conf_cal':['bg_config_cal'],
+                      'c_load':['c_load'],
+                      'g_load':['g_load'],
+                      'pto_cal':['bg_pto_cal']}
+
+
         # Controls Defaults
         self.be.default_data()
 

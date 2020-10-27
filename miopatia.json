@@ -1,23 +1,121 @@
 {
-    "f_inicial": 100,
-    "f_final": 1000000,
-    "n_puntos": 25,
-    "ancho_banda": 3,
-    "vosc": 0.5,
-    "tipo_barrido": 1,
-    "DC_bias": 1,
-    "nivel_DC": 10.0,
-    "avg": 0,
-    "n_medidas_punto": 1,
-    "load_mfile_name": "G:/MIOPATIA/pechuga_con_piel.csv",
-    "save_mfile_name": "G:/MIOPATIA/prueba.csv",
-    "load_cal_file_name": "G:/MIOPATIA/cal_old.cal",
-    "save_cal_file_name": "G:/MIOPATIA/cal_new.cal",
+    "f_inicial": {
+        "value": 10,
+        "limits": [
+            10.0,
+            100000000.0
+        ],
+        "type": "float"
+    },
+    "f_final": {
+        "value": 10000000,
+        "limits": [
+            10.0,
+            100000000.0
+        ],
+        "type": "float"
+    },
+    "n_puntos": {
+        "value": 25,
+        "limits": [
+            1,
+            801
+        ],
+        "type": "int"
+    },
+    "ancho_banda": {
+        "value": 3,
+        "limits": [
+            1,
+            5
+        ],
+        "type": "int"
+    },
+    "vosc": {
+        "value": 0.5,
+        "limits": [
+            0.0,
+            1.0
+        ],
+        "type": "float"
+    },
+    "tipo_barrido": {
+        "value": 0,
+        "limits": [
+            0,
+            1
+        ],
+        "type": "int"
+    },
+    "DC_bias": {
+        "value": 0,
+        "limits": [
+            0,
+            1
+        ],
+        "type": "int"
+    },
+    "nivel_DC": {
+        "value": 0,
+        "limits": [
+            -40.0,
+            40.0
+        ],
+        "type": "float"
+    },
+    "avg": {
+        "value": 0,
+        "limits": [
+            0,
+            1
+        ],
+        "type": "int"
+    },
+    "n_medidas_punto": {
+        "value": 1,
+        "limits": [
+            1,
+            256
+        ],
+        "type": "int"
+    },
+    "load_mfile_name": "./medida.csv",
+    "save_mfile_name": "./medida.csv",
+    "load_cal_file_name": "./calibracion.cal",
+    "save_cal_file_name": "./calibracion_new.cal",
     "def_path": "./",
-    "conf_cal": 0,
-    "c_load": 500.0,
-    "g_load": 0.1,
-    "pto_cal": 1,
+    "conf_cal": {
+        "value": 0,
+        "limits": [
+            0,
+            1
+        ],
+        "type": "int"
+    },
+    "c_load": {
+        "value": 500,
+        "limits": [
+            0,
+            1000000.0
+        ],
+        "type": "float"
+    },
+    "g_load": {
+        "value": 0.1,
+        "limits": [
+            0,
+            1000000.0
+        ],
+        "type": "float"
+    },
+    "pto_cal": {
+        "value": 1,
+        "limits": [
+            0,
+            1
+        ],
+        "type": "int"
+    },
     "combox": [
         "|Z|",
         "F.Z",
@@ -27,5 +125,5 @@
         "F.Er"
     ],
     "VI_ADDRESS": "GPIB0::17::INSTR",
-    "GPIB_timeout": 120000
+    "GPIB_timeout": 12000
 }
