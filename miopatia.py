@@ -372,16 +372,19 @@ class BACK_END(object):
 
         self.store_data(id='meas')
 
+    # def store_data(self):
+    #     for i in self.meas_data.keys():
+    #
 
     def store_data(self,id):
 
         if (id == 'meas'):
             # Store Measurement configuration data
             self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial,[40,110E6])
-            self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final,[40,110E6])
-            self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos,[1,801])
+            self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final,    [40,110E6])
+            self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos,  [1,801])
             self.sd.def_cfg['ancho_banda']=self.int_v(self.pw.ancho_banda,[1,5])
-            self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc,[0.0,1.0])
+            self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc,        [0.0,1.0])
             self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC,[-40.0,40.0])
             self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto,[1,256])
             self.sd.def_cfg['avg']=int(self.pw.avg.isChecked())
@@ -400,10 +403,10 @@ class BACK_END(object):
         elif (id == 'cal' ):
             # Store Measurement configuration data
             self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial_2,[40,110E6])
-            self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final_2,[40,110E6])
-            self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos_2,[1,801])
+            self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final_2,    [40,110E6])
+            self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos_2,  [1,801])
             self.sd.def_cfg['ancho_banda']=self.int_v(self.pw.ancho_banda_2,[1,5])
-            self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc_2,[0.0,1.0])
+            self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc_2,        [0.0,1.0])
             self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC_2,[-40.0,40.0])
             self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto_2,[1,256])
             self.sd.def_cfg['avg']=int(self.pw.avg_2.isChecked())
@@ -519,9 +522,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Classes Instantiation
         self.brw = BROWSERS(self,data)
         # VISA start
-        self.vi = mv.VISA(self.sd,[self.textBrowser,self.textBrowser_2])
+        self.vi  = mv.VISA(self.sd,[self.textBrowser,self.textBrowser_2])
         self.be  = BACK_END(self,data,self.vi)
-
 
         # Radio Buttons groups creation
         self.bg_xaxis,self.radioButton_xaxis     = self.Rbutton_group([self.radioButton_lineal,
@@ -538,11 +540,25 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_pto_cal,self.radioButton_pto_cal       = self.Rbutton_group([self.radioButton_pto_cal_medidor,
                                                                              self.radioButton_pto_cal_usuario])
 
+
+        # Data Mirroring through GUI
+        self.mirror =  {'f_inicial':   [self.f_inicial, self.f_inicial_2],
+                        'f_final':     [self.f_final,   self.f_final_2],
+                        'n_puntos':    [self.n_puntos,  self.n_puntos_2],
+                        'ancho_banda': [self.ancho_banda, self.ancho_banda_2],
+                        'vosc':        [self.vosc,        self.vosc_2],
+                        'tipo_barrido':[self.bg_xaxis, self.bg_xaxis_2],
+                        'DC_bias':     [self.bg_DC,    self.bg_DC_2],
+                        'nivel_DC':    [self.nivel_DC, self.nivel_DC_2],
+                        'avg':         [self.avg,      self.avg_2],
+                        'n_medidas_punto':[self.n_medidas_punto, self.n_medidas_punto_2]}
+
+        
         # Controls Defaults
         self.be.default_data()
 
         # Clicked Calls
-        click    = [{'wdg':self.toolButton_load,   'func':self.brw.load_mfile_browser},
+        clicked  = [{'wdg':self.toolButton_load,   'func':self.brw.load_mfile_browser},
                     {'wdg':self.toolButton_save,   'func':self.brw.save_mfile_browser},
                     {'wdg':self.toolButton_load_2, 'func':self.brw.load_calibration_file_browser},
                     {'wdg':self.toolButton_save_2, 'func':self.brw.save_calibration_file_browser},
@@ -554,43 +570,49 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.LOAD_CAL,          'func':self.be.load_cal},
                     {'wdg':self.SAVE_CAL,          'func':self.be.save_cal},
                     {'wdg':self.SAVE_cfg,          'func':self.be.save_config}]
-                                        
-        for i in click:
+
+        for i in clicked:
             i['wdg'].clicked.connect(i['func'])
 
-        # self.toolButton_load.clicked.connect(self.brw.load_mfile_browser)
-        # self.toolButton_save.clicked.connect(self.brw.save_mfile_browser)
-        # self.toolButton_load_2.clicked.connect(self.brw.load_calibration_file_browser)
-        # self.toolButton_save_2.clicked.connect(self.brw.save_calibration_file_browser)
-        # self.REDRAW_MEASURE.clicked.connect(self.be.redraw_measure)
-        # self.MEDIR.clicked.connect(self.be.medir)
-        # self.LOAD_M.clicked.connect(self.be.load_m)
-        # self.SAVE_M.clicked.connect(self.be.save_m)
-        # self.GO_CAL.clicked.connect(self.be.go_cal)
-        # self.LOAD_CAL.clicked.connect(self.be.load_cal)
-        # self.SAVE_CAL.clicked.connect(self.be.save_cal)
-        # self.SAVE_cfg.clicked.connect(self.be.save_config)
-        # self.CONTINUAR.clicked.connect(self.be.continuar)
+        # editingFinished Calls
+        editingFinished = [{'wdg':self.f_inicial,        'mode':'meas'},
+                           {'wdg':self.f_final,          'mode':'meas'},
+                           {'wdg':self.n_puntos,         'mode':'meas'},
+                           {'wdg':self.ancho_banda,      'mode':'meas'},
+                           {'wdg':self.vosc,             'mode':'meas'},
+                           {'wdg':self.nivel_DC,         'mode':'meas'},
+                           {'wdg':self.n_medidas_punto,  'mode':'meas'},
+                           {'wdg':self.f_inicial_2,      'mode':'cal'},
+                           {'wdg':self.f_final_2,        'mode':'cal'},
+                           {'wdg':self.n_puntos_2,       'mode':'cal'},
+                           {'wdg':self.ancho_banda_2,    'mode':'cal'},
+                           {'wdg':self.vosc_2,           'mode':'cal'},
+                           {'wdg':self.nivel_DC_2,       'mode':'cal'},
+                           {'wdg':self.n_medidas_punto_2,'mode':'cal'},
+                           {'wdg':self.c_load,           'mode':'none'},
+                           {'wdg':self.g_load,           'mode':'none'}]
 
+        for i in editingFinished:
+            i['wdg'].editingFinished.connect(lambda id=i['mode']: self.be.store_data(id))
 
         # Duplicated control
         # Measurement
-        self.f_inicial.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.f_final.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.n_puntos.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.ancho_banda.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.vosc.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.nivel_DC.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.n_medidas_punto.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        # self.f_inicial.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        # self.f_final.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        # self.n_puntos.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        # self.ancho_banda.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        # self.vosc.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        # self.nivel_DC.editingFinished.connect(lambda id='meas': self.be.store_data(id))
+        # self.n_medidas_punto.editingFinished.connect(lambda id='meas': self.be.store_data(id))
         self.avg.stateChanged.connect(lambda ch,id='meas': self.be.store_data(id))
         # Calibration
-        self.f_inicial_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.f_final_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.n_puntos_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.ancho_banda_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.vosc_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.nivel_DC_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.n_medidas_punto_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        # self.f_inicial_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        # self.f_final_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        # self.n_puntos_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        # self.ancho_banda_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        # self.vosc_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        # self.nivel_DC_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
+        # self.n_medidas_punto_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
         # This one sends an argument to the function so ch (void) is needed to bypass it
         self.avg_2.stateChanged.connect(lambda none,id='cal': self.be.store_data(id))
 
@@ -599,8 +621,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.save_path.textChanged.connect(lambda id='none': self.be.store_data(id))
         self.load_path_2.textChanged.connect(lambda id='none': self.be.store_data(id))
         self.save_path_2.textChanged.connect(lambda id='none': self.be.store_data(id))
-        self.c_load.editingFinished.connect(lambda id='none': self.be.store_data(id))
-        self.g_load.editingFinished.connect(lambda id='none': self.be.store_data(id))
+        # self.c_load.editingFinished.connect(lambda id='none': self.be.store_data(id))
+        # self.g_load.editingFinished.connect(lambda id='none': self.be.store_data(id))
 
         # Magic button groups
         self.bg_xaxis.buttonClicked[int].connect(lambda id,mode='meas': self.be.bt_xaxis(id=id,mode=mode))
