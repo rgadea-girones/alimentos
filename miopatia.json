@@ -4,7 +4,7 @@
     "n_puntos": 25,
     "ancho_banda": 3,
     "vosc": 0.5,
-    "tipo_barrido": 0,
+    "tipo_barrido": 1,
     "DC_bias": 1,
     "nivel_DC": 10.0,
     "avg": 0,

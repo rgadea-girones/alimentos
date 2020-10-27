@@ -404,7 +404,8 @@ class VISA():
 
     def get_calibration(self):
         # Loads OPEN - SHORT - LOAD calibration results
-        OPEN_cal  = np.fromstring(self.inst.query('OUTPCOMC1?'), dtype=float, sep=',')
+        test=self.inst.query('OUTPCOMC1?')
+        OPEN_cal  = np.fromstring(test, dtype=float, sep=',')
         SHORT_cal = np.fromstring(self.inst.query('OUTPCOMC2?'), dtype=float, sep=',')
         LOAD_cal  = np.fromstring(self.inst.query('OUTPCOMC3?'), dtype=float, sep=',')
 
@@ -414,6 +415,8 @@ class VISA():
         self.sd.COM_SHORT_data_X = SHORT_cal[1::2]
         self.sd.COM_LOAD_data_R = LOAD_cal[0::2]
         self.sd.COM_LOAD_data_X = LOAD_cal[1::2]
+
+        print(test)
 
         # Frequency array creation
         if (self.sd.def_cfg['tipo_barrido']==0):
@@ -428,7 +431,28 @@ class VISA():
     def send_calibration(self):
         # Create arrays to send CALIBRATION information
         # Think about what to do with load calibration information when open-short calibration is used
-        pass
+        open_data = np.zeros(len(self.sd.COM_OPEN_data_R)*2)
+        open_data[0::2] = self.sd.COM_OPEN_data_R
+        open_data[1::2] = self.sd.COM_OPEN_data_X
+        short_data = np.zeros(len(self.sd.COM_SHORT_data_R)*2)
+        short_data[0::2] = self.sd.COM_SHORT_data_R
+        short_data[1::2] = self.sd.COM_SHORT_data_X
+        load_data = np.zeros(len(self.sd.COM_LOAD_data_R)*2)
+        load_data[0::2] = self.sd.COM_LOAD_data_R
+        load_data[1::2] = self.sd.COM_LOAD_data_X
+
+        open_data_string = ''.join(str("{:-8.6e}".format(i))+","  for i in open_data)
+        open_data_string = open_data_string[:-1]
+        short_data_string = ''.join(str("{:-8.6e}".format(i))+","  for i in short_data)
+        short_data_string = short_data_string[:-1]
+        load_data_string = ''.join(str("{:-8.6e}".format(i))+","  for i in load_data)
+        load_data_string = load_data_string[:-1]
+
+        print(open_data_string)
+
+        self.inst.write('INPUCOMC1 ' + open_data_string)
+        self.inst.write('INPUCOMC2 ' + short_data_string)
+        self.inst.write('INPUCOMC3 ' + load_data_string)
 
 
     def message_box(self,title,text):

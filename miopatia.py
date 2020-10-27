@@ -46,15 +46,15 @@ class DATA(object):
         else:
             # These are the default values.
             self.def_cfg= {'f_inicial':10,
-                            'f_final':10000000,
-                            'n_puntos':10,
-                            'ancho_banda':2,
+                            'f_final':1000000,
+                            'n_puntos':25,
+                            'ancho_banda':3,
                             'vosc':0.5,
                             'tipo_barrido':0,
-                            'DC_bias':0,
-                            'nivel_DC':0,
+                            'DC_bias':1,
+                            'nivel_DC':10.0,
                             'avg':0,
-                            'n_medidas_punto':0,
+                            'n_medidas_punto':1,
                             'load_mfile_name':"./medida.csv",
                             'save_mfile_name':"./medida.csv",
                             'load_cal_file_name':"./calibracion.cal",
@@ -63,10 +63,10 @@ class DATA(object):
                             'conf_cal':0,
                             'c_load':500,
                             'g_load':0.1,
-                            'pto_cal':0,
+                            'pto_cal':1,
                             'combox':['|Z|','F.Z','E\'r','E\'\'r','|Er|','F.Er'],
                             'VI_ADDRESS': 'GPIB0::17::INSTR',
-                            'GPIB_timeout':10000
+                            'GPIB_timeout':12000
                             }
             self.config_write()
 
@@ -485,7 +485,7 @@ class BROWSERS(object):
 
 
     def load_calibration_file_browser(self):
-        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.pw,
+        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
                                         'Fichero de calibración',
                                         self.sd.def_cfg['def_path'],
                                         "Ficheros de calibración (*.cal)")
@@ -524,37 +524,52 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         # Radio Buttons groups creation
-        self.bg_xaxis,self.radioButton_xaxis = self.Rbutton_group([self.radioButton_lineal,
-                                                                   self.radioButton_log])
+        self.bg_xaxis,self.radioButton_xaxis     = self.Rbutton_group([self.radioButton_lineal,
+                                                                       self.radioButton_log])
         self.bg_xaxis_2,self.radioButton_xaxis_2 = self.Rbutton_group([self.radioButton_lineal_2,
                                                                            self.radioButton_log_2])
-        self.bg_DC,self.radioButton_DC       = self.Rbutton_group([self.radioButton_DC_ON,
-                                                                   self.radioButton_DC_OFF])
+        self.bg_DC,self.radioButton_DC           = self.Rbutton_group([self.radioButton_DC_ON,
+                                                                       self.radioButton_DC_OFF])
         self.bg_DC_2,self.radioButton_DC_2       = self.Rbutton_group([self.radioButton_DC_ON_2,
-                                                                   self.radioButton_DC_OFF_2])
+                                                                       self.radioButton_DC_OFF_2])
 
         self.bg_config_cal,self.radioButton_config_cal = self.Rbutton_group([self.radioButton_config_cal_1,
                                                                              self.radioButton_config_cal_2])
-        self.bg_pto_cal,self.radioButton_pto_cal = self.Rbutton_group([self.radioButton_pto_cal_medidor,
-                                                                       self.radioButton_pto_cal_usuario])
+        self.bg_pto_cal,self.radioButton_pto_cal       = self.Rbutton_group([self.radioButton_pto_cal_medidor,
+                                                                             self.radioButton_pto_cal_usuario])
 
         # Controls Defaults
         self.be.default_data()
 
-
         # Clicked Calls
-        self.toolButton_load.clicked.connect(self.brw.load_mfile_browser)
-        self.toolButton_save.clicked.connect(self.brw.save_mfile_browser)
-        self.toolButton_load_2.clicked.connect(self.brw.load_calibration_file_browser)
-        self.toolButton_save_2.clicked.connect(self.brw.save_calibration_file_browser)
-        self.REDRAW_MEASURE.clicked.connect(self.be.redraw_measure)
-        self.MEDIR.clicked.connect(self.be.medir)
-        self.LOAD_M.clicked.connect(self.be.load_m)
-        self.SAVE_M.clicked.connect(self.be.save_m)
-        self.GO_CAL.clicked.connect(self.be.go_cal)
-        self.LOAD_CAL.clicked.connect(self.be.load_cal)
-        self.SAVE_CAL.clicked.connect(self.be.save_cal)
-        self.SAVE_cfg.clicked.connect(self.be.save_config)
+        click    = [{'wdg':self.toolButton_load,   'func':self.brw.load_mfile_browser},
+                    {'wdg':self.toolButton_save,   'func':self.brw.save_mfile_browser},
+                    {'wdg':self.toolButton_load_2, 'func':self.brw.load_calibration_file_browser},
+                    {'wdg':self.toolButton_save_2, 'func':self.brw.save_calibration_file_browser},
+                    {'wdg':self.REDRAW_MEASURE,    'func':self.be.redraw_measure},
+                    {'wdg':self.MEDIR,             'func':self.be.medir},
+                    {'wdg':self.LOAD_M,            'func':self.be.load_m},
+                    {'wdg':self.SAVE_M,            'func':self.be.save_m},
+                    {'wdg':self.GO_CAL,            'func':self.be.go_cal},
+                    {'wdg':self.LOAD_CAL,          'func':self.be.load_cal},
+                    {'wdg':self.SAVE_CAL,          'func':self.be.save_cal},
+                    {'wdg':self.SAVE_cfg,          'func':self.be.save_config}]
+                                        
+        for i in click:
+            i['wdg'].clicked.connect(i['func'])
+
+        # self.toolButton_load.clicked.connect(self.brw.load_mfile_browser)
+        # self.toolButton_save.clicked.connect(self.brw.save_mfile_browser)
+        # self.toolButton_load_2.clicked.connect(self.brw.load_calibration_file_browser)
+        # self.toolButton_save_2.clicked.connect(self.brw.save_calibration_file_browser)
+        # self.REDRAW_MEASURE.clicked.connect(self.be.redraw_measure)
+        # self.MEDIR.clicked.connect(self.be.medir)
+        # self.LOAD_M.clicked.connect(self.be.load_m)
+        # self.SAVE_M.clicked.connect(self.be.save_m)
+        # self.GO_CAL.clicked.connect(self.be.go_cal)
+        # self.LOAD_CAL.clicked.connect(self.be.load_cal)
+        # self.SAVE_CAL.clicked.connect(self.be.save_cal)
+        # self.SAVE_cfg.clicked.connect(self.be.save_config)
         # self.CONTINUAR.clicked.connect(self.be.continuar)
 
 
