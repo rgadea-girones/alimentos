@@ -45,28 +45,28 @@ class DATA(object):
             self.config_read()
         else:
             # These are the default values.
-            self.def_cfg= {'f_inicial':10,
-                            'f_final':10000000,
-                            'n_puntos':10,
-                            'ancho_banda':2,
-                            'vosc':0.5,
-                            'tipo_barrido':0,
-                            'DC_bias':0,
-                            'nivel_DC':0,
-                            'avg':0,
-                            'n_medidas_punto':0,
+            self.def_cfg= {'f_inicial':{'value':10, 'limits':[10.0,100.0E6],'type':'float'},
+                            'f_final' :{'value':10000000, 'limits':[10.0,100.0E6],'type':'float'},
+                            'n_puntos':{'value':25, 'limits':[1,801],'type':'int'},
+                            'ancho_banda':{'value':3, 'limits':[1,5],'type':'int'},
+                            'vosc':{'value':0.5, 'limits':[0.0,1.0],'type':'float'},
+                            'tipo_barrido':{'value':0, 'limits':[0,1],'type':'int'},
+                            'DC_bias':{'value':0, 'limits':[0,1],'type':'int'},
+                            'nivel_DC':{'value':0, 'limits':[-40.0,40.0],'type':'float'},
+                            'avg':{'value':0, 'limits':[0,1],'type':'int'},
+                            'n_medidas_punto':{'value':1, 'limits':[1,256],'type':'int'},
                             'load_mfile_name':"./medida.csv",
                             'save_mfile_name':"./medida.csv",
                             'load_cal_file_name':"./calibracion.cal",
                             'save_cal_file_name':"./calibracion_new.cal",
                             'def_path':"./",
-                            'conf_cal':0,
-                            'c_load':500,
-                            'g_load':0.1,
-                            'pto_cal':0,
+                            'conf_cal':{'value':0, 'limits':[0,1],'type':'int'},
+                            'c_load':{'value':500, 'limits':[0,1E6],'type':'float'},
+                            'g_load':{'value':0.1, 'limits':[0,1E6],'type':'float'},
+                            'pto_cal':{'value':1, 'limits':[0,1],'type':'int'},
                             'combox':['|Z|','F.Z','E\'r','E\'\'r','|Er|','F.Er'],
                             'VI_ADDRESS': 'GPIB0::17::INSTR',
-                            'GPIB_timeout':10000
+                            'GPIB_timeout':12000
                             }
             self.config_write()
 
@@ -172,38 +172,26 @@ class BACK_END(object):
         self.vi = visa
         self.flag = True
 
-     # Controlled casting to avoid data intro errors
-    def float_v(self,objeto,limits=[0,1E12]):
+     # Controlled casting to avoid data intro errors. Read text or button_ID
+    def value_control(self,objeto,limits=[0,1E12],type='int',qt_obj="QLineEdit"):
         try:
-            aux = float(objeto.text())
-            if ((aux >= limits[0]) and (aux <= limits[1])):
-                return float(aux)
-            else:
-                if (aux > limits[1]):
-                    objeto.setText(str(limits[1]))
-                    return float(limits[1])
-                else:
-                    if (aux < limits[0]):
-                        objeto.setText(str(limits[0]))
-                        return float(limits[0])
-        except ValueError:
-            self.vi.append_plus("ERROR EN VALOR")
-            objeto.setText(str(limits[0]))
-            return limits[0]
+            if qt_obj == "QLineEdit":
+                aux = eval(type)(objeto.text())
+            elif qt_obj == "QButtonGroup":
+                aux = eval(type)(objeto.checkedId())
+            elif qt_obj == "QCheckBox":
+                aux = eval(type)(objeto.isChecked())
 
-    def int_v(self,objeto,limits=[0,1E12]):
-        try:
-            aux = int(objeto.text())
             if ((aux >= limits[0]) and (aux <= limits[1])):
-                return int(aux)
+                return eval(type)(aux)
             else:
                 if (aux > limits[1]):
                     objeto.setText(str(limits[1]))
-                    return int(limits[1])
+                    return eval(type)(limits[1])
                 else:
                     if (aux < limits[0]):
                         objeto.setText(str(limits[0]))
-                        return int(limits[0])
+                        return eval(type)(limits[0])
         except ValueError:
             self.vi.append_plus("ERROR EN VALOR")
             objeto.setText(str(limits[0]))
@@ -287,11 +275,11 @@ class BACK_END(object):
     def go_cal(self):
         self.vi.append_plus("CALIBRAR")
         self.vi.config_calibration()
-        if (self.sd.def_cfg['conf_cal'] == 0):
+        if (self.sd.def_cfg['conf_cal']['value'] == 0):
             # Calibración CARGA - ABIERTO - CORTO
             self.vi.cal_load_open_short()
 
-        elif (self.sd.def_cfg['conf_cal'] == 1):
+        elif (self.sd.def_cfg['conf_cal']['value'] == 1):
             # Calibración ABIERTO - CORTO
             self.vi.cal_open_short()
 
@@ -344,115 +332,68 @@ class BACK_END(object):
 
 
     def default_data(self):
-        self.pw.f_inicial.setText(str(self.sd.def_cfg['f_inicial']))
-        self.pw.f_final.setText(str(self.sd.def_cfg['f_final']))
-        self.pw.n_puntos.setText(str(self.sd.def_cfg['n_puntos']))
-        self.pw.vosc.setText(str(self.sd.def_cfg['vosc']))
-        self.pw.ancho_banda.setText(str(self.sd.def_cfg['ancho_banda']))
-        self.pw.nivel_DC.setText(str(self.sd.def_cfg['nivel_DC']))
-        self.pw.n_medidas_punto.setText(str(self.sd.def_cfg['n_medidas_punto']))
-        self.pw.load_path.setText(str(self.sd.def_cfg['load_mfile_name']))
-        self.pw.save_path.setText(str(self.sd.def_cfg['save_mfile_name']))
-        self.pw.load_path_2.setText(str(self.sd.def_cfg['load_cal_file_name']))
-        self.pw.save_path_2.setText(str(self.sd.def_cfg['save_cal_file_name']))
-        self.pw.c_load.setText(str(self.sd.def_cfg['c_load']))
-        self.pw.g_load.setText(str(self.sd.def_cfg['g_load']))
-        self.pw.avg.setChecked(self.sd.def_cfg['avg'])
 
-        self.pw.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
-        self.pw.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
+        for i in self.pw.mirror.keys():
+            for j in self.pw.mirror[i]['array']:
+                if self.pw.mirror[i]['qt'] == 'QLineEdit':
+                    eval("self.pw."+j).setText(str(self.sd.def_cfg[i]['value']))
+                elif self.pw.mirror[i]['qt'] == 'QButtonGroup':
+                    eval("self.pw."+j).button(self.sd.def_cfg[i]['value']).setChecked(True)
+                elif self.pw.mirror[i]['qt'] == 'QCheckBox':
+                    eval("self.pw."+j).setChecked(self.sd.def_cfg[i]['value'])
 
-        # Radio Buttons Defaults
-        self.pw.radioButton_xaxis[self.sd.def_cfg['tipo_barrido']].setChecked(True)
-        self.pw.radioButton_xaxis_2[self.sd.def_cfg['tipo_barrido']].setChecked(True)
-        self.pw.radioButton_DC[self.sd.def_cfg['DC_bias']].setChecked(True)
-        self.pw.radioButton_DC_2[self.sd.def_cfg['DC_bias']].setChecked(True)
-        self.pw.radioButton_config_cal[self.sd.def_cfg['conf_cal']].setChecked(True)
-        self.pw.radioButton_pto_cal[self.sd.def_cfg['pto_cal']].setChecked(True)
+        for i in self.pw.paths.keys():
+            aux = self.pw.paths[i]
+            eval("self.pw." + aux).setText(str(self.sd.def_cfg[i]))
 
-        self.store_data(id='meas')
+        for i in self.pw.others.keys():
+            aux = self.pw.others[i]['array']
+            if self.pw.others[i]['qt'] == 'QLineEdit':
+                eval("self.pw." + aux).setText(str(self.sd.def_cfg[i]['value']))
+            elif self.pw.others[i]['qt'] == 'QButtonGroup':
+                pass
+                eval("self.pw." + aux).button(self.sd.def_cfg[i]['value']).setChecked(True)
+            elif self.pw.others[i]['qt'] == 'QCheckBox':
+                eval("self.pw." + aux).setChecked(self.sd.def_cfg[i]['value'])
+
+        self.store_data()
 
 
-    def store_data(self,id):
+    def store_data(self):
 
-        if (id == 'meas'):
-            # Store Measurement configuration data
-            self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial,[40,110E6])
-            self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final,[40,110E6])
-            self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos,[1,801])
-            self.sd.def_cfg['ancho_banda']=self.int_v(self.pw.ancho_banda,[1,5])
-            self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc,[0.0,1.0])
-            self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC,[-40.0,40.0])
-            self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto,[1,256])
-            self.sd.def_cfg['avg']=int(self.pw.avg.isChecked())
-            # Copy configuration dato to calibration sheet
-            self.pw.n_medidas_punto_2.setText(str(self.sd.def_cfg['n_medidas_punto']))
-            self.pw.avg_2.setChecked(self.sd.def_cfg['avg'])
-            self.pw.nivel_DC_2.setText(str(self.sd.def_cfg['nivel_DC']))
-            self.pw.vosc_2.setText(str(self.sd.def_cfg['vosc']))
-            self.pw.ancho_banda_2.setText(str(self.sd.def_cfg['ancho_banda']))
-            self.pw.n_puntos_2.setText(str(self.sd.def_cfg['n_puntos']))
-            self.pw.f_final_2.setText(str(self.sd.def_cfg['f_final']))
-            self.pw.f_inicial_2.setText(str(self.sd.def_cfg['f_inicial']))
+        for i in self.pw.mirror.keys():
+            for j in self.pw.mirror[i]['array']:
+                new_data = self.value_control(eval("self.pw."+j), self.sd.def_cfg[i]['limits'],
+                                              type = self.sd.def_cfg[i]['type'],
+                                              qt_obj = self.pw.mirror[i]['qt'])
+                def_data = self.sd.def_cfg[i]['value']
+                if def_data != new_data:
+                    self.sd.def_cfg[i]['value'] = new_data
+                    break
 
-            print(self.sd.def_cfg)
+        for i in self.pw.paths.keys():
+            new_data = eval("self.pw."+self.pw.paths[i]).text()
+            self.sd.def_cfg[i] = new_data
 
-        elif (id == 'cal' ):
-            # Store Measurement configuration data
-            self.sd.def_cfg['f_inicial']=self.int_v(self.pw.f_inicial_2,[40,110E6])
-            self.sd.def_cfg['f_final']=self.int_v(self.pw.f_final_2,[40,110E6])
-            self.sd.def_cfg['n_puntos']=self.int_v(self.pw.n_puntos_2,[1,801])
-            self.sd.def_cfg['ancho_banda']=self.int_v(self.pw.ancho_banda_2,[1,5])
-            self.sd.def_cfg['vosc']=self.float_v(self.pw.vosc_2,[0.0,1.0])
-            self.sd.def_cfg['nivel_DC']=self.float_v(self.pw.nivel_DC_2,[-40.0,40.0])
-            self.sd.def_cfg['n_medidas_punto']=self.int_v(self.pw.n_medidas_punto_2,[1,256])
-            self.sd.def_cfg['avg']=int(self.pw.avg_2.isChecked())
-            # Copy configuration dato to calibration sheet
-            self.pw.n_medidas_punto.setText(str(self.sd.def_cfg['n_medidas_punto']))
-            self.pw.avg.setChecked(self.sd.def_cfg['avg'])
-            self.pw.nivel_DC.setText(str(self.sd.def_cfg['nivel_DC']))
-            self.pw.vosc.setText(str(self.sd.def_cfg['vosc']))
-            self.pw.ancho_banda.setText(str(self.sd.def_cfg['ancho_banda']))
-            self.pw.n_puntos.setText(str(self.sd.def_cfg['n_puntos']))
-            self.pw.f_final.setText(str(self.sd.def_cfg['f_final']))
-            self.pw.f_inicial.setText(str(self.sd.def_cfg['f_inicial']))
+        for i in self.pw.others.keys():
+            aux = self.pw.others[i]['array']
+            new_data = self.value_control(eval("self.pw." + aux), self.sd.def_cfg[i]['limits'],
+                                          type = self.sd.def_cfg[i]['type'],
+                                          qt_obj = self.pw.others[i]['qt'])
+            self.sd.def_cfg[i]['value'] = new_data
 
-        elif (id == 'none'):
-            self.sd.def_cfg['load_mfile_name']=self.pw.load_path.text()
-            self.sd.def_cfg['save_mfile_name']=self.pw.save_path.text()
-            self.sd.def_cfg['save_cal_file_name']=self.pw.save_path_2.text()
-            self.sd.def_cfg['load_cal_file_name']=self.pw.load_path_2.text()
-            self.sd.def_cfg['c_load']=self.float_v(self.pw.c_load)
-            self.sd.def_cfg['g_load']=self.float_v(self.pw.g_load)
-        else:
-            pass
+        # UPDATE
+        for i in self.pw.mirror.keys():
+            for j in self.pw.mirror[i]['array']:
+                if self.pw.mirror[i]['qt'] == 'QLineEdit':
+                    eval("self.pw."+j).setText(str(self.sd.def_cfg[i]['value']))
+                elif self.pw.mirror[i]['qt'] == 'QButtonGroup':
+                    eval("self.pw."+j).button(self.sd.def_cfg[i]['value']).setChecked(True)
+                elif self.pw.mirror[i]['qt'] == 'QCheckBox':
+                    eval("self.pw."+j).setChecked(self.sd.def_cfg[i]['value'])
 
-        # print(self.sd.def_cfg)
+        print(self.sd.def_cfg)
 
-
-    # Button groups send id when clicked, then a function per button group is created
-    def bt_xaxis(self,id,mode):
-        self.sd.def_cfg['tipo_barrido']=id
-        if mode=='meas':
-            self.pw.radioButton_xaxis_2[id].setChecked(True)
-        elif mode=='cal':
-            self.pw.radioButton_xaxis[id].setChecked(True)
-        else:
-            pass
-    def bt_DC(self,id,mode):
-        self.sd.def_cfg['DC_bias']=id
-        if mode=='meas':
-            self.pw.radioButton_DC_2[id].setChecked(True)
-        elif mode=='cal':
-            self.pw.radioButton_DC[id].setChecked(True)
-        else:
-            pass
-    # def bt_avg(self,id):
-    #     self.sd.def_cfg['avg']=id
-    def bt_config_cal(self,id):
-        self.sd.def_cfg['conf_cal']=id
-    def bt_pto_cal(self,id):
-        self.sd.def_cfg['pto_cal']=id
 
 
 class BROWSERS(object):
@@ -485,7 +426,7 @@ class BROWSERS(object):
 
 
     def load_calibration_file_browser(self):
-        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.pw,
+        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
                                         'Fichero de calibración',
                                         self.sd.def_cfg['def_path'],
                                         "Ficheros de calibración (*.cal)")
@@ -519,82 +460,88 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Classes Instantiation
         self.brw = BROWSERS(self,data)
         # VISA start
-        self.vi = mv.VISA(self.sd,[self.textBrowser,self.textBrowser_2])
+        self.vi  = mv.VISA(self.sd,[self.textBrowser,self.textBrowser_2])
         self.be  = BACK_END(self,data,self.vi)
 
 
-        # Radio Buttons groups creation
-        self.bg_xaxis,self.radioButton_xaxis = self.Rbutton_group([self.radioButton_lineal,
-                                                                   self.radioButton_log])
-        self.bg_xaxis_2,self.radioButton_xaxis_2 = self.Rbutton_group([self.radioButton_lineal_2,
-                                                                           self.radioButton_log_2])
-        self.bg_DC,self.radioButton_DC       = self.Rbutton_group([self.radioButton_DC_ON,
-                                                                   self.radioButton_DC_OFF])
-        self.bg_DC_2,self.radioButton_DC_2       = self.Rbutton_group([self.radioButton_DC_ON_2,
-                                                                   self.radioButton_DC_OFF_2])
+        self.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
+        self.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
 
-        self.bg_config_cal,self.radioButton_config_cal = self.Rbutton_group([self.radioButton_config_cal_1,
-                                                                             self.radioButton_config_cal_2])
-        self.bg_pto_cal,self.radioButton_pto_cal = self.Rbutton_group([self.radioButton_pto_cal_medidor,
-                                                                       self.radioButton_pto_cal_usuario])
+        self.bg_xaxis      = self.Rbutton_group([self.radioButton_lineal, self.radioButton_log])
+        self.bg_xaxis_2    = self.Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
+        self.bg_DC         = self.Rbutton_group([self.radioButton_DC_ON, self.radioButton_DC_OFF])
+        self.bg_DC_2       = self.Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
+        self.bg_config_cal = self.Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
+        self.bg_pto_cal    = self.Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
+
+
+        # Data Mirroring through GUI
+        self.mirror =  {'f_inicial':   {'array':['f_inicial', 'f_inicial_2'],'qt':'QLineEdit'},
+                        'f_final':     {'array':['f_final',   'f_final_2'],  'qt':'QLineEdit'},
+                        'n_puntos':    {'array':['n_puntos',  'n_puntos_2'],  'qt':'QLineEdit'},
+                        'ancho_banda': {'array':['ancho_banda', 'ancho_banda_2'],  'qt':'QLineEdit'},
+                        'vosc':        {'array':['vosc',        'vosc_2'],   'qt':'QLineEdit'},
+                        'tipo_barrido':{'array':['bg_xaxis', 'bg_xaxis_2'],  'qt':'QButtonGroup'},
+                        'DC_bias':     {'array':['bg_DC',    'bg_DC_2'],     'qt':'QButtonGroup'},
+                        'nivel_DC':    {'array':['nivel_DC', 'nivel_DC_2'],  'qt':'QLineEdit'},
+                        'avg':         {'array':['avg',      'avg_2'],  'qt':'QCheckBox'},
+                        'n_medidas_punto':{'array':['n_medidas_punto', 'n_medidas_punto_2'],  'qt':'QLineEdit'}}
+        # Paths
+        self.paths = {'load_mfile_name':'load_path',
+                      'save_mfile_name':'save_path',
+                      'load_cal_file_name':'load_path_2',
+                      'save_cal_file_name':'save_path_2'}
+        # Other controls
+        self.others = {'conf_cal':{'array':'bg_config_cal', 'qt':'QButtonGroup'},
+                       'c_load':{'array':'c_load', 'qt':'QLineEdit'},
+                       'g_load':{'array':'g_load', 'qt':'QLineEdit'},
+                       'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'}}
+
 
         # Controls Defaults
         self.be.default_data()
 
-
         # Clicked Calls
-        self.toolButton_load.clicked.connect(self.brw.load_mfile_browser)
-        self.toolButton_save.clicked.connect(self.brw.save_mfile_browser)
-        self.toolButton_load_2.clicked.connect(self.brw.load_calibration_file_browser)
-        self.toolButton_save_2.clicked.connect(self.brw.save_calibration_file_browser)
-        self.REDRAW_MEASURE.clicked.connect(self.be.redraw_measure)
-        self.MEDIR.clicked.connect(self.be.medir)
-        self.LOAD_M.clicked.connect(self.be.load_m)
-        self.SAVE_M.clicked.connect(self.be.save_m)
-        self.GO_CAL.clicked.connect(self.be.go_cal)
-        self.LOAD_CAL.clicked.connect(self.be.load_cal)
-        self.SAVE_CAL.clicked.connect(self.be.save_cal)
-        self.SAVE_cfg.clicked.connect(self.be.save_config)
-        # self.CONTINUAR.clicked.connect(self.be.continuar)
+        clicked  = [{'wdg':self.toolButton_load,   'func':self.brw.load_mfile_browser},
+                    {'wdg':self.toolButton_save,   'func':self.brw.save_mfile_browser},
+                    {'wdg':self.toolButton_load_2, 'func':self.brw.load_calibration_file_browser},
+                    {'wdg':self.toolButton_save_2, 'func':self.brw.save_calibration_file_browser},
+                    {'wdg':self.REDRAW_MEASURE,    'func':self.be.redraw_measure},
+                    {'wdg':self.MEDIR,             'func':self.be.medir},
+                    {'wdg':self.LOAD_M,            'func':self.be.load_m},
+                    {'wdg':self.SAVE_M,            'func':self.be.save_m},
+                    {'wdg':self.GO_CAL,            'func':self.be.go_cal},
+                    {'wdg':self.LOAD_CAL,          'func':self.be.load_cal},
+                    {'wdg':self.SAVE_CAL,          'func':self.be.save_cal},
+                    {'wdg':self.SAVE_cfg,          'func':self.be.save_config}]
+
+        for i in clicked:
+            i['wdg'].clicked.connect(i['func'])
 
 
-        # Duplicated control
-        # Measurement
-        self.f_inicial.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.f_final.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.n_puntos.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.ancho_banda.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.vosc.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.nivel_DC.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.n_medidas_punto.editingFinished.connect(lambda id='meas': self.be.store_data(id))
-        self.avg.stateChanged.connect(lambda ch,id='meas': self.be.store_data(id))
-        # Calibration
-        self.f_inicial_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.f_final_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.n_puntos_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.ancho_banda_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.vosc_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.nivel_DC_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        self.n_medidas_punto_2.editingFinished.connect(lambda id='cal': self.be.store_data(id))
-        # This one sends an argument to the function so ch (void) is needed to bypass it
-        self.avg_2.stateChanged.connect(lambda none,id='cal': self.be.store_data(id))
+        for i in self.mirror.keys():
+            if self.mirror[i]['qt'] == 'QLineEdit':
+                event = 'editingFinished'
+            elif self.mirror[i]['qt'] == 'QButtonGroup':
+                event = 'buttonClicked'
+            elif self.mirror[i]['qt'] == 'QCheckBox':
+                event = 'stateChanged'
 
-        # Other parameters
-        self.load_path.textChanged.connect(lambda id='none': self.be.store_data(id))
-        self.save_path.textChanged.connect(lambda id='none': self.be.store_data(id))
-        self.load_path_2.textChanged.connect(lambda id='none': self.be.store_data(id))
-        self.save_path_2.textChanged.connect(lambda id='none': self.be.store_data(id))
-        self.c_load.editingFinished.connect(lambda id='none': self.be.store_data(id))
-        self.g_load.editingFinished.connect(lambda id='none': self.be.store_data(id))
+            for j in self.mirror[i]['array']:
+                eval("self." + j + "." + event).connect(self.be.store_data)
 
-        # Magic button groups
-        self.bg_xaxis.buttonClicked[int].connect(lambda id,mode='meas': self.be.bt_xaxis(id=id,mode=mode))
-        self.bg_DC.buttonClicked[int].connect(lambda id,mode='meas': self.be.bt_DC(id=id,mode=mode))
-        self.bg_xaxis_2.buttonClicked[int].connect(lambda id,mode='cal': self.be.bt_xaxis(id=id,mode=mode))
-        self.bg_DC_2.buttonClicked[int].connect(lambda id,mode='cal': self.be.bt_DC(id=id,mode=mode))
+        for i in self.others.keys():
+            if self.others[i]['qt'] == 'QLineEdit':
+                event = 'editingFinished'
+            elif self.others[i]['qt'] == 'QButtonGroup':
+                event = 'buttonClicked'
+            elif self.others[i]['qt'] == 'QCheckBox':
+                event = 'stateChanged'
+            eval("self." + self.others[i]['array'] + "." + event).connect(self.be.store_data)
 
-        self.bg_config_cal.buttonClicked[int].connect(self.be.bt_config_cal)
-        self.bg_pto_cal.buttonClicked[int].connect(self.be.bt_pto_cal)
+        for i in self.paths.keys():
+            eval("self." + self.paths[i] + "." + 'editingFinished').connect(self.be.store_data)
+
 
 
     def Rbutton_group(self, button_array):
@@ -605,7 +552,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             bg_config_cal.addButton(i)
             bg_config_cal.setId(i,j)
             j+=1
-        return bg_config_cal,radioButton
+        return bg_config_cal
 
     def closeEvent(self, event):
         quit_msg = "¿Seguro que quiere salir del programa?"
@@ -656,10 +603,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
-    myappid = 'UPV.instrumentation.4294A.1' # arbitrary string
+    myappid = 'UPV.visa.4294A.1' # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    app.setWindowIcon(QtGui.QIcon('pollo.jpg'))
+
     data = DATA(read=True)
     window = MyApp(data)
+    window.setWindowIcon(QtGui.QIcon('pollo.jpg'))
     window.addmpl_1(data.fig1)
     window.addmpl_2(data.fig2)
     window.show()
