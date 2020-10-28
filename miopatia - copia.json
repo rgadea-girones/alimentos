@@ -40,7 +40,7 @@
         "type": "float"
     },
     "tipo_barrido": {
-        "value": 1,
+        "value": 0,
         "limits": [
             0,
             1
@@ -48,7 +48,7 @@
         "type": "int"
     },
     "DC_bias": {
-        "value": 1,
+        "value": 0,
         "limits": [
             0,
             1
@@ -93,7 +93,7 @@
         "type": "int"
     },
     "c_load": {
-        "value": 500.0,
+        "value": 500,
         "limits": [
             0,
             1000000.0

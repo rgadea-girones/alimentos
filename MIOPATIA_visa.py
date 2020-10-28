@@ -59,27 +59,27 @@ class VISA():
         #fprintf(handles.GPIBobj,'PAVER OFF'); % Desactivo el promediado. Añadido por mi.
 
         # Average of measurement points
-        self.inst.write('PAVERFACT %s' % str(self.sd.def_cfg['n_medidas_punto']))
+        self.inst.write('PAVERFACT %s' % str(self.sd.def_cfg['n_medidas_punto']['value']))
         # Activate average or not
-        self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.sd.def_cfg['avg']))
+        self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.sd.def_cfg['avg']['value']))
         # Frequency sweep starting at ...
-        self.inst.write('STAR %s' % str(self.sd.def_cfg['f_inicial']))
+        self.inst.write('STAR %s' % str(self.sd.def_cfg['f_inicial']['value']))
         # Frequency sweep stopping at ...
-        self.inst.write('STOP %s' % str(self.sd.def_cfg['f_final']))
+        self.inst.write('STOP %s' % str(self.sd.def_cfg['f_final']['value']))
         # Tipo de barrido
-        self.inst.write('SWPT %s' % self.switch({0:'LIN', 1:'LOG'},self.sd.def_cfg['tipo_barrido']))
+        self.inst.write('SWPT %s' % self.switch({0:'LIN', 1:'LOG'},self.sd.def_cfg['tipo_barrido']['value']))
         # Number of points
-        self.inst.write('POIN %s' % str(self.sd.def_cfg['n_puntos']))
+        self.inst.write('POIN %s' % str(self.sd.def_cfg['n_puntos']['value']))
         # Bandwidth - resolución de la medida.
-        self.inst.write('BWFACT %s' % str(self.sd.def_cfg['ancho_banda']))
+        self.inst.write('BWFACT %s' % str(self.sd.def_cfg['ancho_banda']['value']))
         # Configura la tensión de salida del oscilador
-        self.inst.write('POWMOD VOLT;POWE %s' % str(self.sd.def_cfg['vosc']))
+        self.inst.write('POWMOD VOLT;POWE %s' % str(self.sd.def_cfg['vosc']['value']))
 
 
         # DC_bias active
         if (self.sd.def_cfg['DC_bias']==0):
             # Tensión de polarización.
-            self.inst.write('DCV %s' % str(self.sd.def_cfg['nivel_DC']))
+            self.inst.write('DCV %s' % str(self.sd.def_cfg['nivel_DC']['value']))
             # Modo de BIAS
             self.inst.write('DCMOD CVOLT')
             # Rango de tensión de bias.
@@ -175,14 +175,14 @@ class VISA():
         # Compute Err, Eri, Er_mod, Er_fase_data
         # First create frequency array based on actual gui conditions
         # The freq array will not be changed until next data acquisition even if GUI changes
-        if (self.sd.def_cfg['tipo_barrido']==0):
-            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial'],
-                                       self.sd.def_cfg['f_final'],
-                                       self.sd.def_cfg['n_puntos'])
-        elif(self.sd.def_cfg['tipo_barrido']==1):
-            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']),
-                                       np.log10(self.sd.def_cfg['f_final']),
-                                       self.sd.def_cfg['n_puntos'])
+        if (self.sd.def_cfg['tipo_barrido']['value']==0):
+            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
+                                       self.sd.def_cfg['f_final']['value'],
+                                       self.sd.def_cfg['n_puntos']['value'])
+        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
+            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
+                                       np.log10(self.sd.def_cfg['f_final']['value']),
+                                       self.sd.def_cfg['n_puntos']['value'])
 
         complex_aux         = self.sd.R_data + self.sd.X_data*1j
         self.sd.Z_mod_data  = np.abs(complex_aux)
@@ -224,14 +224,14 @@ class VISA():
                                 4:self.sd.Er_mod_data,
                                 5:self.sd.Er_fase_data}, comboBox_trazaB)
 
-        if (self.sd.def_cfg['tipo_barrido']==0):
+        if (self.sd.def_cfg['tipo_barrido']['value']==0):
             self.sd.axes['ax0'].plot(self.sd.freq, traza_A, color='red')
             self.sd.axes['ax0'].tick_params(axis='y', colors='red')
             self.sd.axes['ax1'].plot(self.sd.freq, traza_B, color='blue')
             self.sd.axes['ax1'].grid(True)
             self.sd.axes['ax1'].tick_params(axis='y',colors='blue')
 
-        elif(self.sd.def_cfg['tipo_barrido']==1):
+        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
             self.sd.axes['ax0'].semilogx(self.sd.freq, traza_A, color='red')
             self.sd.axes['ax0'].tick_params(axis='y',colors='red')
             self.sd.axes['ax1'].semilogx(self.sd.freq, traza_B, color='blue')
@@ -262,14 +262,14 @@ class VISA():
                                 5:data['E_fase']},
                                 comboBox_trazaB)
 
-        if (self.sd.def_cfg['tipo_barrido']==0):
+        if (self.sd.def_cfg['tipo_barrido']['value']==0):
             self.sd.axes['ax2'].plot(data['Freq'], traza_A, color='red')
             self.sd.axes['ax2'].tick_params(axis='y', colors='red')
             self.sd.axes['ax3'].plot(data['Freq'], traza_B, color='blue')
             self.sd.axes['ax3'].grid(True)
             self.sd.axes['ax3'].tick_params(axis='y',colors='blue')
 
-        elif(self.sd.def_cfg['tipo_barrido']==1):
+        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
             self.sd.axes['ax2'].semilogx(data['Freq'], traza_A, color='red')
             self.sd.axes['ax2'].tick_params(axis='y',colors='red')
             self.sd.axes['ax3'].semilogx(data['Freq'], traza_B, color='blue')
@@ -285,21 +285,21 @@ class VISA():
         # COMMON PARAMETERS
         # Average of measurement points
 
-        self.inst.write('PAVERFACT %s' % str(self.sd.def_cfg['n_medidas_punto']))
+        self.inst.write('PAVERFACT %s' % str(self.sd.def_cfg['n_medidas_punto']['value']))
         # Activate average or not
-        self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.sd.def_cfg['avg']))
+        self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.sd.def_cfg['avg']['value']))
         # Frequency sweep starting at ...
-        self.inst.write('STAR %s' % str(self.sd.def_cfg['f_inicial']))
+        self.inst.write('STAR %s' % str(self.sd.def_cfg['f_inicial']['value']))
         # Frequency sweep stopping at ...
-        self.inst.write('STOP %s' % str(self.sd.def_cfg['f_final']))
+        self.inst.write('STOP %s' % str(self.sd.def_cfg['f_final']['value']))
         # Tipo de barrido
-        self.inst.write('SWPT %s' % self.switch({0:'LIN', 1:'LOG'},self.sd.def_cfg['tipo_barrido']))
+        self.inst.write('SWPT %s' % self.switch({0:'LIN', 1:'LOG'},self.sd.def_cfg['tipo_barrido']['value']))
         # Number of points
-        self.inst.write('POIN %s' % str(self.sd.def_cfg['n_puntos']))
+        self.inst.write('POIN %s' % str(self.sd.def_cfg['n_puntos']['value']))
         # Bandwidth - resolución de la medida.
-        self.inst.write('BWFACT %s' % str(self.sd.def_cfg['ancho_banda']))
+        self.inst.write('BWFACT %s' % str(self.sd.def_cfg['ancho_banda']['value']))
         # Configura la tensión de salida del oscilador
-        self.inst.write('POWMOD VOLT;POWE %s' % str(self.sd.def_cfg['vosc']))
+        self.inst.write('POWMOD VOLT;POWE %s' % str(self.sd.def_cfg['vosc']['value']))
 
         # Desativo bias
         self.inst.write('DCO OFF')
@@ -307,7 +307,7 @@ class VISA():
         self.inst.write('DCRNG M1')
 
         # Configure calibration/measurement process
-        self.inst.write('CALP %s' % self.switch({0:'FIXED', 1:'USER'},self.sd.def_cfg['pto_cal']))
+        self.inst.write('CALP %s' % self.switch({0:'FIXED', 1:'USER'},self.sd.def_cfg['pto_cal']['value']))
 
         # % ************** IMPORTANTE ***********************************
         # % * Los valores de la calibración en abierto serán usados para la
@@ -316,9 +316,9 @@ class VISA():
         # % ***************************************************************
 
         # Conductancia esparada en la calibración en abierto
-        self.inst.write('DCOMOPENG %s' % str(self.sd.def_cfg['g_load']))
+        self.inst.write('DCOMOPENG %s' % str(self.sd.def_cfg['g_load']['value']))
         # Capacidad esparada en la calibración en abierto (fF)
-        self.inst.write('DCOMOPENC %s' % str(self.sd.def_cfg['c_load']))
+        self.inst.write('DCOMOPENC %s' % str(self.sd.def_cfg['c_load']['value']))
 
         # Resistencia esperada calibración corto
         self.inst.write('DCOMSHORR %s' % str(self.sd.Short_r))
@@ -419,14 +419,14 @@ class VISA():
         print(test)
 
         # Frequency array creation
-        if (self.sd.def_cfg['tipo_barrido']==0):
-            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial'],
-                                       self.sd.def_cfg['f_final'],
-                                       self.sd.def_cfg['n_puntos'])
-        elif(self.sd.def_cfg['tipo_barrido']==1):
-            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']),
-                                       np.log10(self.sd.def_cfg['f_final']),
-                                       self.sd.def_cfg['n_puntos'])
+        if (self.sd.def_cfg['tipo_barrido']['value']==0):
+            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
+                                       self.sd.def_cfg['f_final']['value'],
+                                       self.sd.def_cfg['n_puntos']['value'])
+        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
+            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
+                                       np.log10(self.sd.def_cfg['f_final']['value']),
+                                       self.sd.def_cfg['n_puntos']['value'])
 
     def send_calibration(self):
         # Create arrays to send CALIBRATION information
