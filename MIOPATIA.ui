@@ -33,12 +33,12 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>pollo.jpeg</normaloff>pollo.jpeg</iconset>
+    <normaloff>pollo.jpg</normaloff>pollo.jpg</iconset>
   </property>
   <property name="iconSize">
    <size>
-    <width>128</width>
-    <height>128</height>
+    <width>120</width>
+    <height>120</height>
    </size>
   </property>
   <property name="toolButtonStyle">
