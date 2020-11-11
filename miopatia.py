@@ -3,6 +3,7 @@ import pyvisa
 import time
 import sys
 import json
+import fit_library as fit
 import numpy as np
 import pandas as pd
 import MIOPATIA_visa as mv
@@ -14,7 +15,7 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import QMessageBox
-
+from collections import OrderedDict
 import ctypes
 
 # PYINSTALLER : pyinstaller -D --specpath .\EXE miopatia.py
@@ -38,8 +39,9 @@ class DATA(object):
         # Figure handlers
         self.fig1 = Figure()
         self.fig2 = Figure()
+        self.fig3 = Figure()
         # Axes for plotting
-        self.axes={'ax0':0,'ax1':0,'ax2':0,'ax3':0}
+        self.axes={'ax0':0,'ax1':0,'ax2':0,'ax3':0,'ax4':0}
 
         if (read==True):
             self.config_read()
@@ -65,6 +67,12 @@ class DATA(object):
                             'g_load':{'value':0.1, 'limits':[0,1E6],'type':'float'},
                             'pto_cal':{'value':1, 'limits':[0,1],'type':'int'},
                             'combox':['|Z|','F.Z','E\'r','E\'\'r','|Er|','F.Er'],
+                            'load_mfile_fit':"./medida.csv",
+                            'origen_fit':{'value':0, 'limits':[0,1],'type':'int'},
+                            'param_fit':{'value':[0,0,0,0,0,0,0,0,0,0], 'limits':[],'type':'array'},
+                            'n_func_fit': {'value':1, 'limits':[1,3],'type':'int'},
+                            'f_low_fit': {'value':0, 'limits':[0,100E6],'type':'float'},
+                            'f_high_fit': {'value':100E6, 'limits':[0,100E6],'type':'float'},
                             'VI_ADDRESS': 'GPIB0::17::INSTR',
                             'GPIB_timeout':12000
                             }
@@ -237,6 +245,22 @@ class BACK_END(object):
                               data)
             self.pw.canvas2.draw()
 
+    def load_m_fit(self):
+        self.vi.append_plus("CARGA MEDIDA")
+        file = self.sd.def_cfg['load_mfile_fit']
+        try:
+            data = pd.read_csv(file,header=0,
+                            names=['Freq','Z_mod','Z_Fase', 'Err',
+                                    'Eri','E_mod','E_fase','R','X'],
+                            delim_whitespace=True)
+        except:
+            self.vi.append_plus("Fichero no encontrado\n")
+        else:
+            self.vi.append_plus(file)
+            self.vi.show_data_fit(self.pw.comboBox_mag_fit.currentIndex(),
+                                  data)
+            self.pw.canvas3.draw()
+
 
     def save_m(self):
         def justify(input_str,n_char):
@@ -351,16 +375,45 @@ class BACK_END(object):
             if self.pw.others[i]['qt'] == 'QLineEdit':
                 eval("self.pw." + aux).setText(str(self.sd.def_cfg[i]['value']))
             elif self.pw.others[i]['qt'] == 'QButtonGroup':
-                pass
                 eval("self.pw." + aux).button(self.sd.def_cfg[i]['value']).setChecked(True)
             elif self.pw.others[i]['qt'] == 'QCheckBox':
                 eval("self.pw." + aux).setChecked(self.sd.def_cfg[i]['value'])
 
-        self.store_data()
+        for i in self.pw.fit_param.keys():
+            if i == 'n_func_fit':
+                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(self.sd.def_cfg['n_func_fit']['value']))
+            elif i == 'f_low_fit':
+                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(self.sd.def_cfg['f_low_fit']['value']))
+            elif i == 'f_high_fit':
+                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(self.sd.def_cfg['f_high_fit']['value']))
+            else:
+                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(0))
 
+        # Default fit magnitude ABS(EPSILON)
+        self.pw.comboBox_mag_fit.setCurrentIndex(4)
+
+        self.store_data()
+        self.store_fit()
+
+    def store_fit(self):
+        params=[]
+        for i in self.pw.fit_param.keys():
+            aux = self.pw.fit_param[i]['array']
+            if (i == 'n_func_fit') or (i == 'f_low_fit') or (i == 'f_high_fit'):
+                new_data = self.value_control(eval("self.pw."+ aux ), self.sd.def_cfg[i]['limits'],
+                                              type = self.sd.def_cfg[i]['type'],
+                                              qt_obj = self.pw.fit_param[i]['qt'])
+                self.sd.def_cfg[i]['value'] = new_data
+            else:
+                new_data = self.value_control(eval("self.pw." + aux),
+                                                   limits=[-1E12,1E12],
+                                                   type = 'float',
+                                                   qt_obj ="QLineEdit")
+            params.append(new_data)
+
+        self.sd.def_cfg['param_fit'] = params
 
     def store_data(self):
-
         for i in self.pw.mirror.keys():
             for j in self.pw.mirror[i]['array']:
                 new_data = self.value_control(eval("self.pw."+j), self.sd.def_cfg[i]['limits'],
@@ -391,6 +444,8 @@ class BACK_END(object):
                     eval("self.pw."+j).button(self.sd.def_cfg[i]['value']).setChecked(True)
                 elif self.pw.mirror[i]['qt'] == 'QCheckBox':
                     eval("self.pw."+j).setChecked(self.sd.def_cfg[i]['value'])
+
+
 
         print(self.sd.def_cfg)
 
@@ -446,6 +501,15 @@ class BROWSERS(object):
         #Trick for Qstring converting to standard string
         self.pw.save_path_2.setText(self.sd.def_cfg['save_cal_file_name'])
 
+    def load_fit_data_browser(self):
+        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
+                                        'Abrir fichero de medidas',
+                                        self.sd.def_cfg['def_path'],
+                                        "Ficheros de calibración (*.csv)")
+        fname_aux = ([str(x) for x in file_aux])
+        self.sd.def_cfg['load_mfile_fit'] = fname_aux[0]
+        #Trick for Qstring converting to standard string
+        self.pw.load_path_3.setText(self.sd.def_cfg['load_mfile_fit'])
 
 
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -460,12 +524,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Classes Instantiation
         self.brw = BROWSERS(self,data)
         # VISA start
-        self.vi  = mv.VISA(self.sd,[self.textBrowser,self.textBrowser_2])
+        self.vi  = mv.VISA(self.sd,[self.textBrowser,self.textBrowser_2],self.textBrowser_3)
         self.be  = BACK_END(self,data,self.vi)
 
 
         self.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
         self.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
+        self.comboBox_mag_fit.addItems(self.sd.def_cfg['combox'])
 
         self.bg_xaxis      = self.Rbutton_group([self.radioButton_lineal, self.radioButton_log])
         self.bg_xaxis_2    = self.Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
@@ -473,7 +538,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_DC_2       = self.Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
         self.bg_config_cal = self.Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
         self.bg_pto_cal    = self.Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
-
+        self.bg_fit_origin = self.Rbutton_group([self.radioButton_d_m, self.radioButton_d_f])
 
         # Data Mirroring through GUI
         self.mirror =  {'f_inicial':   {'array':['f_inicial', 'f_inicial_2'],'qt':'QLineEdit'},
@@ -495,7 +560,27 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.others = {'conf_cal':{'array':'bg_config_cal', 'qt':'QButtonGroup'},
                        'c_load':{'array':'c_load', 'qt':'QLineEdit'},
                        'g_load':{'array':'g_load', 'qt':'QLineEdit'},
-                       'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'}}
+                       'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'},
+                       'origen_fit':{'array':'bg_fit_origin', 'qt':'QButtonGroup'}
+                       }
+        #Fit Parameters
+        self.fit_param = OrderedDict(
+                         [
+                         ('n_func_fit',{'array':'n_func', 'qt':'QLineEdit'}),
+                         ('f_low_fit' ,{'array':'f_low', 'qt':'QLineEdit'}),
+                         ('f_high_fit',{'array':'f_high', 'qt':'QLineEdit'}),
+                         ('param_A1',{'array':'param_A1', 'qt':'QLineEdit'}),
+                         ('param_B1',{'array':'param_B1', 'qt':'QLineEdit'}),
+                         ('param_C1',{'array':'param_C1', 'qt':'QLineEdit'}),
+                         ('param_D1',{'array':'param_D1', 'qt':'QLineEdit'}),
+                         ('param_B2',{'array':'param_B2', 'qt':'QLineEdit'}),
+                         ('param_C2',{'array':'param_C2', 'qt':'QLineEdit'}),
+                         ('param_D2',{'array':'param_D2', 'qt':'QLineEdit'}),
+                         ('param_B3',{'array':'param_B3', 'qt':'QLineEdit'}),
+                         ('param_C3',{'array':'param_C3', 'qt':'QLineEdit'}),
+                         ('param_D3',{'array':'param_D3', 'qt':'QLineEdit'})
+                         ]
+                         )
 
 
         # Controls Defaults
@@ -513,7 +598,15 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.GO_CAL,            'func':self.be.go_cal},
                     {'wdg':self.LOAD_CAL,          'func':self.be.load_cal},
                     {'wdg':self.SAVE_CAL,          'func':self.be.save_cal},
-                    {'wdg':self.SAVE_cfg,          'func':self.be.save_config}]
+                    {'wdg':self.SAVE_cfg,          'func':self.be.save_config},
+                    {'wdg':self.LOAD_fit_data,     'func':self.be.load_m_fit},
+                    {'wdg':self.toolButton_load_3, 'func':self.brw.load_fit_data_browser},
+                    {'wdg':self.AJUSTA,            'func':self.be.load_m_fit}]
+
+
+
+        for i in self.fit_param.keys():
+            eval("self." + self.fit_param[i]['array'] +".editingFinished").connect(self.be.store_fit)
 
         for i in clicked:
             i['wdg'].clicked.connect(i['func'])
@@ -598,6 +691,17 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sd.axes['ax3'].tick_params(axis="y", labelsize=8)
 
 
+    def addmpl_3(self, fig):
+        # Matplotlib constructor
+        self.canvas3 = FigureCanvas(fig)
+        self.mpl_3.addWidget(self.canvas3)
+        self.canvas3.draw()
+        self.toolbar = NavigationToolbar(self.canvas3, self.frame_5,
+                                         coordinates=True)
+        self.mpl_3.addWidget(self.toolbar)
+        self.sd.axes['ax4'] = fig.add_subplot(111)
+        self.sd.axes['ax4'].tick_params(axis="x", labelsize=8)
+        self.sd.axes['ax4'].tick_params(axis="y", labelsize=8)
 
 
 if __name__ == "__main__":
@@ -612,5 +716,6 @@ if __name__ == "__main__":
     window.setWindowIcon(QtGui.QIcon('pollo.jpg'))
     window.addmpl_1(data.fig1)
     window.addmpl_2(data.fig2)
+    window.addmpl_3(data.fig3)
     window.show()
     sys.exit(app.exec_())

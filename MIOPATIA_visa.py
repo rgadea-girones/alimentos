@@ -6,13 +6,14 @@ import time
 import os
 import numpy as np
 from PyQt5.QtWidgets import QMessageBox
-
+import fit_library as fit
 
 
 class VISA():
-    def __init__(self,shared_data,txt_browser):
+    def __init__(self,shared_data,txt_browser,fit_browser):
         self.sd = shared_data
         self.tb = txt_browser
+        self.fit_browser = fit_browser
 
         # Visa initializationg
         self.rm = visa.ResourceManager()
@@ -37,9 +38,14 @@ class VISA():
 
             self.inst.write('HOLD')
 
+
     def append_plus(self,message):
         for text_browser in self.tb:
             text_browser.append(message)
+
+    def append_fit(self,message):
+        self.fit_browser.append(message)
+
 
     def switch(self,switcher,input):
         #Switch case function
@@ -278,6 +284,57 @@ class VISA():
 
         self.sd.fig2.tight_layout()
 
+        # A = fit.gompertz()
+        #
+        # A(traza_A, data['Freq'],1,[300,1,100,1])
+        #
+        # self.sd.axes['ax2'].plot(data['Freq'], A.evaluate(data['Freq']), color='green')
+
+    def show_data_fit(self, comboBox_trazaA, data):
+        A = fit.gompertz()
+        traza_A = self.switch({ 0:data['Z_mod'],
+                                1:data['Z_Fase'],
+                                2:data['Err'],
+                                3:data['Eri'],
+                                4:np.log10(data['E_mod']),
+                                5:data['E_fase']},
+                                comboBox_trazaA)
+
+        x_data = np.array(data['Freq'])
+        index_range = np.where((x_data > self.sd.def_cfg['f_low_fit']['value'])*
+                               (x_data < self.sd.def_cfg['f_high_fit']['value']))[0]
+
+
+        A(np.log10(traza_A[index_range]),
+               np.log10(x_data[index_range]),
+               self.sd.def_cfg['n_func_fit']['value'],
+               self.sd.def_cfg['param_fit'][3:4+3*(self.sd.def_cfg['n_func_fit']['value'])]
+               )
+
+        self.append_fit("PARAMETROS \n" + str(A.coeff))
+        self.append_fit("ERROR \n" + str(A.perr))
+        self.append_fit("Goodnes of Fit - R2 = %f" % A.r_sqr)
+
+
+
+        self.sd.axes['ax4'].cla()
+
+        if (self.sd.def_cfg['tipo_barrido']['value']==0):
+            self.sd.axes['ax4'].plot(x_data, traza_A, color='red')
+            self.sd.axes['ax4'].tick_params(axis='y', colors='red')
+            #self.sd.axes['ax4'].plot(data['Freq'], traza_B, color='blue')
+            self.sd.axes['ax4'].plot(x_data, A.evaluate(x_data), color='green')
+            self.sd.axes['ax4'].grid(True)
+
+
+        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
+            self.sd.axes['ax4'].loglog(x_data, traza_A, color='red')
+            self.sd.axes['ax4'].tick_params(axis='y',colors='red')
+            #self.sd.axes['ax4'].semilogx(data['Freq'], traza_B, color='blue')
+            self.sd.axes['ax4'].loglog(x_data, 10**(A.evaluate(np.log10(x_data))), color='green')
+            self.sd.axes['ax4'].grid(True)
+
+        self.sd.fig3.tight_layout()
 
     def config_calibration(self):
         # Configuración de los valores para la calibración en abierto, corto y carga

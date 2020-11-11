@@ -73,7 +73,7 @@
           <bool>false</bool>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="datos">
           <attribute name="title">
@@ -1526,6 +1526,644 @@ CONFIG.</string>
            </property>
            <property name="text">
             <string>CALIBRACIÓN</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="fit">
+          <attribute name="title">
+           <string>AJUSTE</string>
+          </attribute>
+          <widget class="QFrame" name="frame_5">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>10</y>
+             <width>1091</width>
+             <height>541</height>
+            </rect>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <widget class="QWidget" name="verticalLayoutWidget_3">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>30</y>
+              <width>781</width>
+              <height>501</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="mpl_3"/>
+           </widget>
+           <widget class="QLabel" name="label_5">
+            <property name="geometry">
+             <rect>
+              <x>310</x>
+              <y>0</y>
+              <width>191</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>12</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>AJUSTE DE GOMPERTZ</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="LOAD_fit_data">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>150</y>
+              <width>141</width>
+              <height>41</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>CARGAR DATOS</string>
+            </property>
+           </widget>
+           <widget class="QToolButton" name="toolButton_load_3">
+            <property name="geometry">
+             <rect>
+              <x>1050</x>
+              <y>200</y>
+              <width>31</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="load_path_3">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>200</y>
+              <width>221</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QGroupBox" name="groupBox_10">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>30</y>
+              <width>191</width>
+              <height>91</height>
+             </rect>
+            </property>
+            <property name="title">
+             <string>Origen de Datos</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+            <widget class="QRadioButton" name="radioButton_d_f">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>53</y>
+               <width>151</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Datos de Fichero</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="radioButton_d_m">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>30</y>
+               <width>141</width>
+               <height>23</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Datos de Medida</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QLabel" name="label_22">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>243</y>
+              <width>111</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Magnitud ajuste</string>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="comboBox_mag_fit">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>270</y>
+              <width>91</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="maxVisibleItems">
+             <number>6</number>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="AJUSTA">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>380</y>
+              <width>141</width>
+              <height>41</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>AJUSTA</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_27">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>310</y>
+              <width>191</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Rango frecuencias ajuste</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="f_high">
+            <property name="geometry">
+             <rect>
+              <x>920</x>
+              <y>340</y>
+              <width>91</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="f_low">
+            <property name="geometry">
+             <rect>
+              <x>820</x>
+              <y>340</y>
+              <width>91</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_31">
+            <property name="geometry">
+             <rect>
+              <x>950</x>
+              <y>243</y>
+              <width>121</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Número funciones</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="n_func">
+            <property name="geometry">
+             <rect>
+              <x>970</x>
+              <y>270</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_11">
+           <property name="geometry">
+            <rect>
+             <x>20</x>
+             <y>610</y>
+             <width>141</width>
+             <height>171</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>GOMPERTZ 1</string>
+           </property>
+           <widget class="QLabel" name="label_23">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>40</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>A</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_A1">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>40</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_24">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>70</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_B1">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>70</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_25">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>100</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_C1">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>100</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_D1">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>130</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_26">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>130</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_12">
+           <property name="geometry">
+            <rect>
+             <x>190</x>
+             <y>610</y>
+             <width>141</width>
+             <height>171</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>GOMPERTZ 2</string>
+           </property>
+           <widget class="QLabel" name="label_28">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>70</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_B2">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>70</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_29">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>100</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_C2">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>100</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_D2">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>130</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_30">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>130</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QGroupBox" name="groupBox_15">
+           <property name="geometry">
+            <rect>
+             <x>360</x>
+             <y>610</y>
+             <width>141</width>
+             <height>171</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>GOMPERTZ 3</string>
+           </property>
+           <widget class="QLabel" name="label_32">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>70</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>B</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_B3">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>70</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_33">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>100</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>C</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_C3">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>100</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="param_D3">
+            <property name="geometry">
+             <rect>
+              <x>50</x>
+              <y>130</y>
+              <width>71</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_34">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>130</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Courier 10 Pitch</family>
+              <pointsize>9</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>D</string>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QTextBrowser" name="textBrowser_3">
+           <property name="geometry">
+            <rect>
+             <x>600</x>
+             <y>560</y>
+             <width>491</width>
+             <height>241</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_6">
+           <property name="geometry">
+            <rect>
+             <x>190</x>
+             <y>570</y>
+             <width>141</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>VALORES INICIALES</string>
            </property>
           </widget>
          </widget>
