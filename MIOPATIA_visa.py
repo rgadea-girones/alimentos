@@ -290,7 +290,12 @@ class VISA():
         #
         # self.sd.axes['ax2'].plot(data['Freq'], A.evaluate(data['Freq']), color='green')
 
-    def show_data_fit(self, comboBox_trazaA, data):
+    def show_data_fit(self, comboBox_trazaA, comboBox_fit_alg, data):
+        # Posición en el vector de parametros
+        pos_low = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])=='f_low_fit')[0][0]
+        pos_high = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])=='f_high_fit')[0][0]
+        pos_n_func = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])=='n_func_fit')[0][0]
+
         A = fit.gompertz()
         traza_A = self.switch({ 0:data['Z_mod'],
                                 1:data['Z_Fase'],
@@ -301,14 +306,25 @@ class VISA():
                                 comboBox_trazaA)
 
         x_data = np.array(data['Freq'])
-        index_range = np.where((x_data > self.sd.def_cfg['f_low_fit']['value'])*
-                               (x_data < self.sd.def_cfg['f_high_fit']['value']))[0]
 
+        index_range = np.where((x_data > self.sd.def_cfg['param_fit']['value'][pos_low])*
+                               (x_data < self.sd.def_cfg['param_fit']['value'][pos_high]))[0]
+
+        
+
+        param_n_func = self.sd.def_cfg['param_fit']['value'][pos_n_func]
+        bounds = np.array(self.sd.def_cfg['param_fit']['limits'][3:])
+        bounds_low = bounds[0:param_n_func*3+1,0]
+        bounds_high = bounds[0:param_n_func*3+1,1]
+        print([bounds_low.tolist(),bounds_high.tolist()])
+        print(self.sd.def_cfg['param_fit']['value'][3:4+3*(param_n_func)])
 
         A(np.log10(traza_A[index_range]),
                np.log10(x_data[index_range]),
-               self.sd.def_cfg['n_func_fit']['value'],
-               self.sd.def_cfg['param_fit'][3:4+3*(self.sd.def_cfg['n_func_fit']['value'])]
+               param_n_func,
+               self.sd.def_cfg['param_fit']['value'][3:4+3*(param_n_func)],
+               method = comboBox_fit_alg,
+               bounds = [bounds_low.tolist(),bounds_high.tolist()]
                )
 
         self.append_fit("PARAMETROS \n" + str(A.coeff))

@@ -52,7 +52,7 @@ class DATA(object):
                             'n_puntos':{'value':25, 'limits':[1,801],'type':'int'},
                             'ancho_banda':{'value':3, 'limits':[1,5],'type':'int'},
                             'vosc':{'value':0.5, 'limits':[0.0,1.0],'type':'float'},
-                            'tipo_barrido':{'value':0, 'limits':[0,1],'type':'int'},
+                            'tipo_barrido':{'value':1, 'limits':[0,1],'type':'int'},
                             'DC_bias':{'value':0, 'limits':[0,1],'type':'int'},
                             'nivel_DC':{'value':0, 'limits':[-40.0,40.0],'type':'float'},
                             'avg':{'value':0, 'limits':[0,1],'type':'int'},
@@ -67,12 +67,30 @@ class DATA(object):
                             'g_load':{'value':0.1, 'limits':[0,1E6],'type':'float'},
                             'pto_cal':{'value':1, 'limits':[0,1],'type':'int'},
                             'combox':['|Z|','F.Z','E\'r','E\'\'r','|Er|','F.Er'],
+                            'combox_fit':['lm','trf','dogbox'],
                             'load_mfile_fit':"./medida.csv",
                             'origen_fit':{'value':0, 'limits':[0,1],'type':'int'},
-                            'param_fit':{'value':[0,0,0,0,0,0,0,0,0,0], 'limits':[],'type':'array'},
-                            'n_func_fit': {'value':1, 'limits':[1,3],'type':'int'},
-                            'f_low_fit': {'value':0, 'limits':[0,100E6],'type':'float'},
-                            'f_high_fit': {'value':100E6, 'limits':[0,100E6],'type':'float'},
+                            # FIT PARAMETERS
+                            'param_fit':{'names' :['n_func_fit','f_low_fit','f_high_fit',
+                                                   'param_A1','param_B1','param_C1','param_D1',
+                                                   'param_B2','param_C2','param_D2',
+                                                   'param_B3','param_C3','param_D3'],
+                                         'value' :[ 1,0,100E6,
+                                                    0,0,0,0,
+                                                    0,0,0,
+                                                    0,0,0],
+                                         'limits':[[1,3],[0,100E6],[0,100E6],
+                                                   [-1E12,1E12],[-1E12,1E12],[-1E12,1E12],[-1E12,1E12],
+                                                   [-1E12,1E12],[-1E12,1E12],[-1E12,1E12],
+                                                   [-1E12,1E12],[-1E12,1E12],[-1E12,1E12]],
+                                         'type'  :['int','float','float',
+                                                   'float','float','float','float',
+                                                   'float','float','float',
+                                                   'float','float','float']},
+
+                            #'n_func_fit': {'value':1, 'limits':[1,3],'type':'int'},
+                            #'f_low_fit': {'value':0, 'limits':[0,100E6],'type':'float'},
+                            #'f_high_fit': {'value':100E6, 'limits':[0,100E6],'type':'float'},
                             'VI_ADDRESS': 'GPIB0::17::INSTR',
                             'GPIB_timeout':12000
                             }
@@ -154,6 +172,7 @@ class DATA(object):
 
         self.cal_points      = 100
 
+        self.fit_params_glb = []
 
     def config_write(self):
         writeName = self.filename
@@ -258,6 +277,7 @@ class BACK_END(object):
         else:
             self.vi.append_plus(file)
             self.vi.show_data_fit(self.pw.comboBox_mag_fit.currentIndex(),
+                                  self.pw.comboBox_fit_alg.currentText(),
                                   data)
             self.pw.canvas3.draw()
 
@@ -380,14 +400,17 @@ class BACK_END(object):
                 eval("self.pw." + aux).setChecked(self.sd.def_cfg[i]['value'])
 
         for i in self.pw.fit_param.keys():
-            if i == 'n_func_fit':
-                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(self.sd.def_cfg['n_func_fit']['value']))
-            elif i == 'f_low_fit':
-                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(self.sd.def_cfg['f_low_fit']['value']))
-            elif i == 'f_high_fit':
-                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(self.sd.def_cfg['f_high_fit']['value']))
+            if i[0:6] == 'lparam':
+                pass
+            elif i[0:5] == 'param':
+                pos = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])==i)[0][0]
+                eval("self.pw." + self.pw.fit_param[i]['array'] + "_L").setText(str(self.sd.def_cfg['param_fit']['limits'][pos][0]))
+                eval("self.pw." + self.pw.fit_param[i]['array'] + "_H").setText(str(self.sd.def_cfg['param_fit']['limits'][pos][1]))
+                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(self.sd.def_cfg['param_fit']['value'][pos]))
             else:
-                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(0))
+                pos = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])==i)[0][0]
+                eval("self.pw." + self.pw.fit_param[i]['array']).setText(str(self.sd.def_cfg['param_fit']['value'][pos]))
+
 
         # Default fit magnitude ABS(EPSILON)
         self.pw.comboBox_mag_fit.setCurrentIndex(4)
@@ -396,22 +419,33 @@ class BACK_END(object):
         self.store_fit()
 
     def store_fit(self):
-        params=[]
-        for i in self.pw.fit_param.keys():
-            aux = self.pw.fit_param[i]['array']
-            if (i == 'n_func_fit') or (i == 'f_low_fit') or (i == 'f_high_fit'):
-                new_data = self.value_control(eval("self.pw."+ aux ), self.sd.def_cfg[i]['limits'],
-                                              type = self.sd.def_cfg[i]['type'],
-                                              qt_obj = self.pw.fit_param[i]['qt'])
-                self.sd.def_cfg[i]['value'] = new_data
-            else:
-                new_data = self.value_control(eval("self.pw." + aux),
-                                                   limits=[-1E12,1E12],
-                                                   type = 'float',
-                                                   qt_obj ="QLineEdit")
-            params.append(new_data)
 
-        self.sd.def_cfg['param_fit'] = params
+        # Add fit parameters to params
+        for i in self.pw.fit_param.keys():
+            if i[0:6] == 'lparam':
+                pass
+            else:
+                pos = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])==i)[0][0]
+                aux = self.pw.fit_param[i]['array']
+                new_data = self.value_control(eval("self.pw."+ aux ), self.sd.def_cfg['param_fit']['limits'][pos],
+                                            type = self.sd.def_cfg['param_fit']['type'][pos],
+                                            qt_obj = self.pw.fit_param[i]['qt'])
+                self.sd.def_cfg['param_fit']['value'][pos] = new_data
+
+        # Add boundary array to params
+        for i in self.pw.fit_param.keys():
+            if i[0:5] == 'param':
+                pos = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])==i)[0][0]
+                aux = self.pw.fit_param[i]['array']
+                new_data_L = self.value_control(eval("self.pw."+ aux +"_L" ), [-1E12,1E12],
+                                              type = self.sd.def_cfg['param_fit']['type'][pos],
+                                              qt_obj = self.pw.fit_param[i]['qt'])
+                new_data_H = self.value_control(eval("self.pw."+ aux +"_H" ), [-1E12,1E12],
+                                              type = self.sd.def_cfg['param_fit']['type'][pos],
+                                              qt_obj = self.pw.fit_param[i]['qt'])
+                self.sd.def_cfg['param_fit']['limits'][pos] = [new_data_L, new_data_H]
+
+
 
     def store_data(self):
         for i in self.pw.mirror.keys():
@@ -531,6 +565,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
         self.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
         self.comboBox_mag_fit.addItems(self.sd.def_cfg['combox'])
+        self.comboBox_fit_alg.addItems(self.sd.def_cfg['combox_fit'])
 
         self.bg_xaxis      = self.Rbutton_group([self.radioButton_lineal, self.radioButton_log])
         self.bg_xaxis_2    = self.Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
@@ -538,7 +573,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_DC_2       = self.Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
         self.bg_config_cal = self.Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
         self.bg_pto_cal    = self.Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
-        self.bg_fit_origin = self.Rbutton_group([self.radioButton_d_m, self.radioButton_d_f])
+
 
         # Data Mirroring through GUI
         self.mirror =  {'f_inicial':   {'array':['f_inicial', 'f_inicial_2'],'qt':'QLineEdit'},
@@ -560,8 +595,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.others = {'conf_cal':{'array':'bg_config_cal', 'qt':'QButtonGroup'},
                        'c_load':{'array':'c_load', 'qt':'QLineEdit'},
                        'g_load':{'array':'g_load', 'qt':'QLineEdit'},
-                       'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'},
-                       'origen_fit':{'array':'bg_fit_origin', 'qt':'QButtonGroup'}
+                       'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'}
                        }
         #Fit Parameters
         self.fit_param = OrderedDict(
@@ -578,7 +612,27 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                          ('param_D2',{'array':'param_D2', 'qt':'QLineEdit'}),
                          ('param_B3',{'array':'param_B3', 'qt':'QLineEdit'}),
                          ('param_C3',{'array':'param_C3', 'qt':'QLineEdit'}),
-                         ('param_D3',{'array':'param_D3', 'qt':'QLineEdit'})
+                         ('param_D3',{'array':'param_D3', 'qt':'QLineEdit'}),
+                         ('lparam_A1_H',{'array':'param_A1_H', 'qt':'QLineEdit'}),
+                         ('lparam_B1_H',{'array':'param_B1_H', 'qt':'QLineEdit'}),
+                         ('lparam_C1_H',{'array':'param_C1_H', 'qt':'QLineEdit'}),
+                         ('lparam_D1_H',{'array':'param_D1_H', 'qt':'QLineEdit'}),
+                         ('lparam_B2_H',{'array':'param_B2_H', 'qt':'QLineEdit'}),
+                         ('lparam_C2_H',{'array':'param_C2_H', 'qt':'QLineEdit'}),
+                         ('lparam_D2_H',{'array':'param_D2_H', 'qt':'QLineEdit'}),
+                         ('lparam_B3_H',{'array':'param_B3_H', 'qt':'QLineEdit'}),
+                         ('lparam_C3_H',{'array':'param_C3_H', 'qt':'QLineEdit'}),
+                         ('lparam_D3_H',{'array':'param_D3_H', 'qt':'QLineEdit'}),
+                          ('lparam_A1_L',{'array':'param_A1_L', 'qt':'QLineEdit'}),
+                          ('lparam_B1_L',{'array':'param_B1_L', 'qt':'QLineEdit'}),
+                          ('lparam_C1_L',{'array':'param_C1_L', 'qt':'QLineEdit'}),
+                          ('lparam_D1_L',{'array':'param_D1_L', 'qt':'QLineEdit'}),
+                          ('lparam_B2_L',{'array':'param_B2_L', 'qt':'QLineEdit'}),
+                          ('lparam_C2_L',{'array':'param_C2_L', 'qt':'QLineEdit'}),
+                          ('lparam_D2_L',{'array':'param_D2_L', 'qt':'QLineEdit'}),
+                          ('lparam_B3_L',{'array':'param_B3_L', 'qt':'QLineEdit'}),
+                          ('lparam_C3_L',{'array':'param_C3_L', 'qt':'QLineEdit'}),
+                          ('lparam_D3_L',{'array':'param_D3_L', 'qt':'QLineEdit'})
                          ]
                          )
 

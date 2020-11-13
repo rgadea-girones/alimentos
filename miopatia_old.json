@@ -124,13 +124,13 @@
         "|Er|",
         "F.Er"
     ],
-    "combox_fit": [
+	"combox_fit": [
         "lm",
-        "trf",
-        "dogbox"
+		"trf",
+		"dogbox"        
     ],
-    "load_mfile_fit": "G:/MIOPATIA/pechuga_con_piel.csv",
-    "origen_fit": {
+	"load_mfile_fit": "./medida.csv",
+	"origen_fit": {
         "value": 0,
         "limits": [
             0,
@@ -138,106 +138,36 @@
         ],
         "type": "int"
     },
-    "param_fit": {
-        "names": [
-            "n_func_fit",
-            "f_low_fit",
-            "f_high_fit",
-            "param_A1",
-            "param_B1",
-            "param_C1",
-            "param_D1",
-            "param_B2",
-            "param_C2",
-            "param_D2",
-            "param_B3",
-            "param_C3",
-            "param_D3"
-        ],
+	"param_fit":{
         "value": [
-            2,
-            0.0,
-            100000000.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
-        ],
+		],
         "limits": [
-            [
-                1,
-                3
-            ],
-            [
-                0,
-                100000000.0
-            ],
-            [
-                0,
-                100000000.0
-            ],
-            [
-                0.0,
-                10.0
-            ],
-            [
-                0.0,
-                10.0
-            ],
-            [
-                0.0,
-                6.0
-            ],
-            [
-                0.0,
-                1.0
-            ],
-            [
-                0.0,
-                10.0
-            ],
-            [
-                0.0,
-                6.0
-            ],
-            [
-                0.0,
-                1.0
-            ],
-            [
-                0.0,
-                10.0
-            ],
-            [
-                0.0,
-                6.0
-            ],
-            [
-                0.0,
-                1.0
-            ]
         ],
-        "type": [
-            "int",
-            "float",
-            "float",
-            "float",
-            "float",
-            "float",
-            "float",
-            "float",
-            "float",
-            "float",
-            "float",
-            "float",
-            "float"
-        ]
+        "type": "array"
+    },
+	"n_func_fit": {
+        "value": 1,
+        "limits": [
+            0,
+            4
+        ],
+        "type": "int"
+    },
+	"f_low_fit": {
+        "value": 1,
+        "limits": [
+            0,
+            100000000.0
+        ],
+        "type": "float"
+    },
+	"f_high_fit": {
+        "value": 100000000.0,
+        "limits": [
+            0,
+            100000001.0
+        ],
+        "type": "float"
     },
     "VI_ADDRESS": "GPIB0::17::INSTR",
     "GPIB_timeout": 12000

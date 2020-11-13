@@ -37,7 +37,7 @@ class fitting(object):
 
 
 class fitting_nohist(object):
-    def __call__(self, data, time, fit_func, guess):
+    def __call__(self, data, time, fit_func, guess, method, bounds):
         self.bins  = time
         self.data  = data
         self.fit_func = fit_func
@@ -45,13 +45,22 @@ class fitting_nohist(object):
 
         # Fitting function call
         try:
-            self.coeff, self.var_matrix = curve_fit(self.fit_func, self.bins,
-                                                    self.data, p0=self.guess,
-                                                    method='lm')
-            self.perr = np.sqrt(np.absolute(np.diag(self.var_matrix)))
-            self.fit = self.fit_func(self.bins, *self.coeff)
-            self.r_sqr = self.R_square()
-            #Gets fitted function and R_square value for GOF
+            if (method=='lm'):
+                self.coeff, self.var_matrix = curve_fit(self.fit_func, self.bins,
+                                                        self.data, p0=self.guess,
+                                                        method=method)
+                self.perr = np.sqrt(np.absolute(np.diag(self.var_matrix)))
+                self.fit = self.fit_func(self.bins, *self.coeff)
+                self.r_sqr = self.R_square()
+            else:
+                self.coeff, self.var_matrix = curve_fit(self.fit_func, self.bins,
+                                                        self.data, p0=self.guess,
+                                                        method=method,
+                                                        bounds=bounds)
+                self.perr = np.sqrt(np.absolute(np.diag(self.var_matrix)))
+                self.fit = self.fit_func(self.bins, *self.coeff)
+                self.r_sqr = self.R_square()
+                #Gets fitted function and R_square value for GOF
         # Error in parameter estimation
         except:
             print("Fitting Problems")
@@ -81,14 +90,16 @@ class gompertz(fitting_nohist):
             aux = aux + Gomp(x,*param_inner)
         return aux + param[0]
 
-    def __call__(self, data, time, n, p0):
+    def __call__(self, data, time, n, p0, method, bounds):
         def G_aux(x,*param):
             return self.Gomp_n(x,n,*param)
         # lambda x,*param: self.Gompertz(x,n,*param)
         super(gompertz,self).__call__( data=data,
                                        time=time,
                                        fit_func= G_aux,
-                                       guess=p0)
+                                       guess=p0,
+                                       method = method,
+                                       bounds = bounds)
 
     def plot(self,axis,title,xlabel,ylabel,res=True,fit=True):
         axis.plot(self.data, self.bins, align='mid', facecolor='green', edgecolor='white', linewidth=0.5)
