@@ -230,21 +230,35 @@ class VISA():
                                 4:self.sd.Er_mod_data,
                                 5:self.sd.Er_fase_data}, comboBox_trazaB)
 
+
         if (self.sd.def_cfg['tipo_barrido']['value']==0):
-            self.sd.axes['ax0'].plot(self.sd.freq, traza_A, color='red')
+            string_A = self.switch({0:'plot', 1:'plot', 2:'plot',
+                                    3:'plot', 4:'semilogy', 5:'plot'},
+                                    comboBox_trazaA)
+            string_B = self.switch({0:'plot', 1:'plot', 2:'plot',
+                                    3:'plot', 4:'semilogy', 5:'plot'},
+                                    comboBox_trazaB)
+            eval("self.sd.axes['ax0']." + string_A + "(self.sd.freq, traza_A, color='red')")
             self.sd.axes['ax0'].tick_params(axis='y', colors='red')
-            self.sd.axes['ax1'].plot(self.sd.freq, traza_B, color='blue')
+            eval("self.sd.axes['ax1']." + string_B + "(self.sd.freq, traza_B, color='blue')")
             self.sd.axes['ax1'].grid(True)
             self.sd.axes['ax1'].tick_params(axis='y',colors='blue')
 
         elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-            self.sd.axes['ax0'].semilogx(self.sd.freq, traza_A, color='red')
+            string_A = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
+                                    3:'semilogx', 4:'loglog', 5:'semilogx'},
+                                    comboBox_trazaA)
+            string_B = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
+                                    3:'semilogx', 4:'loglog', 5:'semilogx'},
+                                    comboBox_trazaB)
+            eval("self.sd.axes['ax0']." + string_A + "(self.sd.freq, traza_A, color='red')")
             self.sd.axes['ax0'].tick_params(axis='y',colors='red')
-            self.sd.axes['ax1'].semilogx(self.sd.freq, traza_B, color='blue')
+            eval("self.sd.axes['ax1']." + string_B + "(self.sd.freq, traza_B, color='blue')")
             self.sd.axes['ax1'].grid(True)
             self.sd.axes['ax1'].tick_params(axis='y', colors='blue')
 
         self.sd.fig1.tight_layout()
+
 
 
     def show_data(self, comboBox_trazaA, comboBox_trazaB, data):
@@ -269,26 +283,36 @@ class VISA():
                                 comboBox_trazaB)
 
         if (self.sd.def_cfg['tipo_barrido']['value']==0):
-            self.sd.axes['ax2'].plot(data['Freq'], traza_A, color='red')
+            string_A = self.switch({0:'plot', 1:'plot', 2:'plot',
+                                    3:'plot', 4:'semilogy', 5:'plot'},
+                                    comboBox_trazaA)
+            string_B = self.switch({0:'plot', 1:'plot', 2:'plot',
+                                    3:'plot', 4:'semilogy', 5:'plot'},
+                                    comboBox_trazaB)
+            print(string_A)
+            eval("self.sd.axes['ax2']." + string_A + "(data['Freq'], traza_A, color='red')")
             self.sd.axes['ax2'].tick_params(axis='y', colors='red')
-            self.sd.axes['ax3'].plot(data['Freq'], traza_B, color='blue')
+            eval("self.sd.axes['ax3']." + string_B + "(data['Freq'], traza_B, color='blue')")
             self.sd.axes['ax3'].grid(True)
             self.sd.axes['ax3'].tick_params(axis='y',colors='blue')
 
         elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-            self.sd.axes['ax2'].semilogx(data['Freq'], traza_A, color='red')
+            string_A = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
+                                    3:'semilogx', 4:'loglog', 5:'semilogx'},
+                                    comboBox_trazaA)
+            string_B = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
+                                    3:'semilogx', 4:'loglog', 5:'semilogx'},
+                                    comboBox_trazaB)
+            eval("self.sd.axes['ax2']." + string_A + "(data['Freq'], traza_A, color='red')")
             self.sd.axes['ax2'].tick_params(axis='y',colors='red')
-            self.sd.axes['ax3'].semilogx(data['Freq'], traza_B, color='blue')
+            eval("self.sd.axes['ax3']." + string_B + "(data['Freq'], traza_B, color='blue')")
             self.sd.axes['ax3'].grid(True)
             self.sd.axes['ax3'].tick_params(axis='y', colors='blue')
 
         self.sd.fig2.tight_layout()
 
-        # A = fit.gompertz()
-        #
-        # A(traza_A, data['Freq'],1,[300,1,100,1])
-        #
-        # self.sd.axes['ax2'].plot(data['Freq'], A.evaluate(data['Freq']), color='green')
+
+
 
     def show_data_fit(self, comboBox_trazaA, comboBox_fit_alg, data):
         # Posición en el vector de parametros
@@ -310,7 +334,7 @@ class VISA():
         index_range = np.where((x_data > self.sd.def_cfg['param_fit']['value'][pos_low])*
                                (x_data < self.sd.def_cfg['param_fit']['value'][pos_high]))[0]
 
-        
+
 
         param_n_func = self.sd.def_cfg['param_fit']['value'][pos_n_func]
         bounds = np.array(self.sd.def_cfg['param_fit']['limits'][3:])
@@ -327,28 +351,83 @@ class VISA():
                bounds = [bounds_low.tolist(),bounds_high.tolist()]
                )
 
+        epsilon_inf  = 10**A.coeff[0]
+        dispersion_1 = 10**A.coeff[1]
+        errord1=10**A.perr[1]
+        tiempo_relajacion_1 = (10**A.coeff[2])
+        errort1=10**A.perr[2]
+        pendiente_dispersion_1 = 10**A.coeff[3]
+
+        string1 = (("Epsilon_inf = %3.3e \n" +\
+                   "Dispersion 1 = %3.3e (+/- %3.3e)  \n" +\
+                   "Tiempo Relajación 1 = %3.3e (+/- %3.3e)  \n" +\
+                   "Pendiente Dispersión 1 = %3.3e") % \
+                   (epsilon_inf,
+                    dispersion_1, errord1,
+                    tiempo_relajacion_1, errort1,
+                    pendiente_dispersion_1))
+
+        string2 = ""
+        string3 = ""
+
+        if param_n_func > 1:
+            dispersion_2 = 10**A.coeff[4]
+            errord2=10**A.perr[4]
+            tiempo_relajacion_2 = (10**A.coeff[5])
+            errort2=10**A.perr[5]
+            pendiente_dispersion_2 = 10**A.coeff[6]
+
+            string2 = (("Dispersion 2 = %3.3e (+/- %3.3e)  \n" +\
+                       "Tiempo Relajación 2 = %3.3e (+/- %3.3e)  \n" +\
+                       "Pendiente Dispersión 2 = %3.3e") % \
+                       (dispersion_2, errord2,
+                        tiempo_relajacion_2, errort2,
+                        pendiente_dispersion_2))
+
+        if param_n_func > 2:
+            dispersion_3 = 10**A.coeff[7]
+            errord3=10**A.perr[7]
+            tiempo_relajacion_3 = (10**A.coeff[8])
+            errort3=10**A.perr[8]
+            pendiente_dispersion_3 = 10**A.coeff[9]
+
+            string3 = (("Dispersion 3 = %3.3e (+/- %3.3e)  \n" +\
+                       "Tiempo Relajación 3 = %3.3e (+/- %3.3e)  \n" +\
+                       "Pendiente Dispersión 3 = %3.3e") % \
+                       (dispersion_3, errord3,
+                        tiempo_relajacion_3, errort3,
+                        pendiente_dispersion_3))
+
+
         self.append_fit("PARAMETROS \n" + str(A.coeff))
         self.append_fit("ERROR \n" + str(A.perr))
         self.append_fit("Goodnes of Fit - R2 = %f" % A.r_sqr)
-
-
+        self.append_fit(string1)
+        self.append_fit(string2)
+        self.append_fit(string3)
 
         self.sd.axes['ax4'].cla()
 
-        if (self.sd.def_cfg['tipo_barrido']['value']==0):
-            self.sd.axes['ax4'].plot(x_data, traza_A, color='red')
-            self.sd.axes['ax4'].tick_params(axis='y', colors='red')
-            #self.sd.axes['ax4'].plot(data['Freq'], traza_B, color='blue')
-            self.sd.axes['ax4'].plot(x_data, A.evaluate(x_data), color='green')
-            self.sd.axes['ax4'].grid(True)
+        # if (self.sd.def_cfg['tipo_barrido']['value']==0):
+        #     self.sd.axes['ax4'].plot(x_data, traza_A, color='red')
+        #     self.sd.axes['ax4'].tick_params(axis='y', colors='red')
+        #     #self.sd.axes['ax4'].plot(data['Freq'], traza_B, color='blue')
+        #     self.sd.axes['ax4'].plot(x_data, A.evaluate(x_data), color='green')
+        #     self.sd.axes['ax4'].grid(True)
+        #
+        #
+        # elif(self.sd.def_cfg['tipo_barrido']['value']==1):
+        #     self.sd.axes['ax4'].loglog(x_data, traza_A, color='red')
+        #     self.sd.axes['ax4'].tick_params(axis='y',colors='red')
+        #     #self.sd.axes['ax4'].semilogx(data['Freq'], traza_B, color='blue')
+        #     self.sd.axes['ax4'].loglog(x_data, 10**(A.evaluate(np.log10(x_data))), color='green')
+        #     self.sd.axes['ax4'].grid(True)
 
-
-        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-            self.sd.axes['ax4'].loglog(x_data, traza_A, color='red')
-            self.sd.axes['ax4'].tick_params(axis='y',colors='red')
-            #self.sd.axes['ax4'].semilogx(data['Freq'], traza_B, color='blue')
-            self.sd.axes['ax4'].loglog(x_data, 10**(A.evaluate(np.log10(x_data))), color='green')
-            self.sd.axes['ax4'].grid(True)
+        self.sd.axes['ax4'].loglog(x_data, traza_A, color='red')
+        self.sd.axes['ax4'].tick_params(axis='y',colors='red')
+        #self.sd.axes['ax4'].semilogx(data['Freq'], traza_B, color='blue')
+        self.sd.axes['ax4'].loglog(x_data, 10**(A.evaluate(np.log10(x_data))), color='green')
+        self.sd.axes['ax4'].grid(True)
 
         self.sd.fig3.tight_layout()
 

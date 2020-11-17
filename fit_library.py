@@ -73,6 +73,7 @@ class fitting_nohist(object):
         return self.fit_func(in_data,*self.coeff)
 
     def R_square(self):
+        # WARNING: R^2 Lineal
         ss_res = np.sum((self.data-self.fit)**2)
         ss_tot = np.sum((self.data-np.mean(self.data))**2)
         return 1-(ss_res / ss_tot)
