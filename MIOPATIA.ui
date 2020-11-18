@@ -73,7 +73,7 @@
           <bool>false</bool>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="datos">
           <attribute name="title">
@@ -1585,12 +1585,12 @@ CONFIG.</string>
              <rect>
               <x>810</x>
               <y>60</y>
-              <width>141</width>
+              <width>221</width>
               <height>41</height>
              </rect>
             </property>
             <property name="text">
-             <string>CARGAR DATOS</string>
+             <string>AJUSTA DATOS GUARDADOS</string>
             </property>
            </widget>
            <widget class="QToolButton" name="toolButton_load_3">
@@ -1624,12 +1624,12 @@ CONFIG.</string>
              <rect>
               <x>810</x>
               <y>270</y>
-              <width>141</width>
+              <width>221</width>
               <height>41</height>
              </rect>
             </property>
             <property name="text">
-             <string>AJUSTA</string>
+             <string>AJUSTA MEDIDA</string>
             </property>
            </widget>
            <widget class="QGroupBox" name="groupBox_16">

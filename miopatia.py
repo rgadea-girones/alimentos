@@ -281,6 +281,25 @@ class BACK_END(object):
                                   data)
             self.pw.canvas3.draw()
 
+    def measure_fit(self):
+        self.vi.append_plus("AJUSTE DE DATOS MEDIDOS")
+        data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
+                                     np.reshape(self.sd.Z_mod_data,(-1,1)),
+                                     np.reshape(self.sd.Z_fase_data,(-1,1)),
+                                     np.reshape(self.sd.Err_data,(-1,1)),
+                                     np.reshape(self.sd.Eri_data,(-1,1)),
+                                     np.reshape(self.sd.Er_mod_data,(-1,1)),
+                                     np.reshape(self.sd.Er_fase_data,(-1,1)),
+                                     np.reshape(self.sd.R_data,(-1,1)),
+                                     np.reshape(self.sd.X_data,(-1,1))],
+                                     axis=1)
+        data_frame = pd.DataFrame(data_array,
+                                  columns=['Freq','Z_mod','Z_Fase','Err','Eri',
+                                           'E_mod','E_fase','R','X'])
+        self.vi.show_data_fit(self.pw.comboBox_mag_fit.currentIndex(),
+                              self.pw.comboBox_fit_alg.currentText(),
+                              data_frame)
+        self.pw.canvas3.draw()
 
     def save_m(self):
         def justify(input_str,n_char):
@@ -655,7 +674,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.SAVE_cfg,          'func':self.be.save_config},
                     {'wdg':self.LOAD_fit_data,     'func':self.be.load_m_fit},
                     {'wdg':self.toolButton_load_3, 'func':self.brw.load_fit_data_browser},
-                    {'wdg':self.AJUSTA,            'func':self.be.load_m_fit}]
+                    {'wdg':self.AJUSTA,            'func':self.be.measure_fit}]
 
 
 

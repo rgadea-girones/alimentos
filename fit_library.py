@@ -61,6 +61,7 @@ class fitting_nohist(object):
                 self.fit = self.fit_func(self.bins, *self.coeff)
                 self.r_sqr = self.R_square()
                 #Gets fitted function and R_square value for GOF
+
         # Error in parameter estimation
         except:
             print("Fitting Problems")
@@ -101,6 +102,12 @@ class gompertz(fitting_nohist):
                                        guess=p0,
                                        method = method,
                                        bounds = bounds)
+        if len(self.coeff)>0:
+            # Sort coefficients by alfa frequency
+            alfa_f_array = self.coeff[2::3]
+            order = np.argsort(alfa_f_array)
+            order_full = np.concatenate([[i*3+2-1,i*3+2,i*3+2+1] for i in order], axis=0)
+            self.coeff = np.concatenate([[self.coeff[0]],self.coeff[order_full]], axis=0)
 
     def plot(self,axis,title,xlabel,ylabel,res=True,fit=True):
         axis.plot(self.data, self.bins, align='mid', facecolor='green', edgecolor='white', linewidth=0.5)

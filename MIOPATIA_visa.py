@@ -289,7 +289,7 @@ class VISA():
             string_B = self.switch({0:'plot', 1:'plot', 2:'plot',
                                     3:'plot', 4:'semilogy', 5:'plot'},
                                     comboBox_trazaB)
-            print(string_A)
+
             eval("self.sd.axes['ax2']." + string_A + "(data['Freq'], traza_A, color='red')")
             self.sd.axes['ax2'].tick_params(axis='y', colors='red')
             eval("self.sd.axes['ax3']." + string_B + "(data['Freq'], traza_B, color='blue')")
@@ -340,8 +340,8 @@ class VISA():
         bounds = np.array(self.sd.def_cfg['param_fit']['limits'][3:])
         bounds_low = bounds[0:param_n_func*3+1,0]
         bounds_high = bounds[0:param_n_func*3+1,1]
-        print([bounds_low.tolist(),bounds_high.tolist()])
-        print(self.sd.def_cfg['param_fit']['value'][3:4+3*(param_n_func)])
+        # print([bounds_low.tolist(),bounds_high.tolist()])
+        # print(self.sd.def_cfg['param_fit']['value'][3:4+3*(param_n_func)])
 
         A(np.log10(traza_A[index_range]),
                np.log10(x_data[index_range]),
@@ -351,82 +351,39 @@ class VISA():
                bounds = [bounds_low.tolist(),bounds_high.tolist()]
                )
 
-        epsilon_inf  = 10**A.coeff[0]
-        dispersion_1 = 10**A.coeff[1]
-        errord1=10**A.perr[1]
-        tiempo_relajacion_1 = (10**A.coeff[2])
-        errort1=10**A.perr[2]
-        pendiente_dispersion_1 = 10**A.coeff[3]
+        # Main PARAMETERS
+        epsilon_inf    = 10**A.coeff[0]
+        epsilon_inf_e  = 10**A.perr[0]
+        epsilon_alfa   = 10**(A.coeff[0]+np.cumsum(A.coeff[1::3])-A.coeff[1::3]/2)
+        epsilon_alfa_e = 10**(A.perr[0]+np.cumsum(A.perr[1::3])-A.perr[1::3]/2)
+        f_alfa         = 10**(A.coeff[2::3]) # Pedro usa /(2.pi)
+        f_alfa_e       = 10**(A.perr[2::3]) # Pedro usa /(2.pi)
 
-        string1 = (("Epsilon_inf = %3.3e \n" +\
-                   "Dispersion 1 = %3.3e (+/- %3.3e)  \n" +\
-                   "Tiempo Relajación 1 = %3.3e (+/- %3.3e)  \n" +\
-                   "Pendiente Dispersión 1 = %3.3e") % \
-                   (epsilon_inf,
-                    dispersion_1, errord1,
-                    tiempo_relajacion_1, errort1,
-                    pendiente_dispersion_1))
+        string0 = (("Epsilon_inf = %3.3e (+/- %3.3e) \n" ) %  (epsilon_inf, epsilon_inf_e))
 
-        string2 = ""
-        string3 = ""
+        string1 = [(("Epsilon Alfa %d = %3.3e (+/- %3.3e)  \n" ) % \
+                   (i+1,epsilon_alfa[i],epsilon_alfa_e[i])) for i in range(param_n_func)]
 
-        if param_n_func > 1:
-            dispersion_2 = 10**A.coeff[4]
-            errord2=10**A.perr[4]
-            tiempo_relajacion_2 = (10**A.coeff[5])
-            errort2=10**A.perr[5]
-            pendiente_dispersion_2 = 10**A.coeff[6]
-
-            string2 = (("Dispersion 2 = %3.3e (+/- %3.3e)  \n" +\
-                       "Tiempo Relajación 2 = %3.3e (+/- %3.3e)  \n" +\
-                       "Pendiente Dispersión 2 = %3.3e") % \
-                       (dispersion_2, errord2,
-                        tiempo_relajacion_2, errort2,
-                        pendiente_dispersion_2))
-
-        if param_n_func > 2:
-            dispersion_3 = 10**A.coeff[7]
-            errord3=10**A.perr[7]
-            tiempo_relajacion_3 = (10**A.coeff[8])
-            errort3=10**A.perr[8]
-            pendiente_dispersion_3 = 10**A.coeff[9]
-
-            string3 = (("Dispersion 3 = %3.3e (+/- %3.3e)  \n" +\
-                       "Tiempo Relajación 3 = %3.3e (+/- %3.3e)  \n" +\
-                       "Pendiente Dispersión 3 = %3.3e") % \
-                       (dispersion_3, errord3,
-                        tiempo_relajacion_3, errort3,
-                        pendiente_dispersion_3))
+        string2 = [(("Frecuencia Alfa %d = %3.3e (+/- %3.3e)  \n" ) % \
+                   (i+1,f_alfa[i],f_alfa_e[i])) for i in range(param_n_func)]
 
 
-        self.append_fit("PARAMETROS \n" + str(A.coeff))
-        self.append_fit("ERROR \n" + str(A.perr))
-        self.append_fit("Goodnes of Fit - R2 = %f" % A.r_sqr)
-        self.append_fit(string1)
-        self.append_fit(string2)
-        self.append_fit(string3)
+        self.append_fit("PARAMETROS \n" + str(A.coeff) + "\n")
+        self.append_fit("ERROR \n" + str(A.perr) + "\n")
+        self.append_fit("Goodnes of Fit - R2 = %f \n" % A.r_sqr + "\n")
+        self.append_fit(string0)
+        for i in range(param_n_func):
+            self.append_fit(string1[i])
+        for i in range(param_n_func):
+            self.append_fit(string2[i])
 
         self.sd.axes['ax4'].cla()
 
-        # if (self.sd.def_cfg['tipo_barrido']['value']==0):
-        #     self.sd.axes['ax4'].plot(x_data, traza_A, color='red')
-        #     self.sd.axes['ax4'].tick_params(axis='y', colors='red')
-        #     #self.sd.axes['ax4'].plot(data['Freq'], traza_B, color='blue')
-        #     self.sd.axes['ax4'].plot(x_data, A.evaluate(x_data), color='green')
-        #     self.sd.axes['ax4'].grid(True)
-        #
-        #
-        # elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-        #     self.sd.axes['ax4'].loglog(x_data, traza_A, color='red')
-        #     self.sd.axes['ax4'].tick_params(axis='y',colors='red')
-        #     #self.sd.axes['ax4'].semilogx(data['Freq'], traza_B, color='blue')
-        #     self.sd.axes['ax4'].loglog(x_data, 10**(A.evaluate(np.log10(x_data))), color='green')
-        #     self.sd.axes['ax4'].grid(True)
 
         self.sd.axes['ax4'].loglog(x_data, traza_A, color='red')
-        self.sd.axes['ax4'].tick_params(axis='y',colors='red')
         #self.sd.axes['ax4'].semilogx(data['Freq'], traza_B, color='blue')
         self.sd.axes['ax4'].loglog(x_data, 10**(A.evaluate(np.log10(x_data))), color='green')
+        #self.sd.axes['ax4'].tick_params(axis='y',colors='red')
         self.sd.axes['ax4'].grid(True)
 
         self.sd.fig3.tight_layout()
@@ -568,8 +525,6 @@ class VISA():
         self.sd.COM_LOAD_data_R = LOAD_cal[0::2]
         self.sd.COM_LOAD_data_X = LOAD_cal[1::2]
 
-        print(test)
-
         # Frequency array creation
         if (self.sd.def_cfg['tipo_barrido']['value']==0):
             self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
@@ -600,7 +555,6 @@ class VISA():
         load_data_string = ''.join(str("{:-8.6e}".format(i))+","  for i in load_data)
         load_data_string = load_data_string[:-1]
 
-        print(open_data_string)
 
         self.inst.write('INPUCOMC1 ' + open_data_string)
         self.inst.write('INPUCOMC2 ' + short_data_string)
