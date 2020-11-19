@@ -581,11 +581,22 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.be  = BACK_END(self,data,self.vi)
 
 
+        ######### Combos Initialization and RadiButton Groups creation #########
+        # Button groups creation
+        def Rbutton_group(self, button_array):
+            bg_config_cal = QtWidgets.QButtonGroup()
+            radioButton = button_array
+            j=0
+            for i in radioButton:
+                bg_config_cal.addButton(i)
+                bg_config_cal.setId(i,j)
+                j+=1
+            return bg_config_cal
+            
         self.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
         self.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
         self.comboBox_mag_fit.addItems(self.sd.def_cfg['combox'])
         self.comboBox_fit_alg.addItems(self.sd.def_cfg['combox_fit'])
-
         self.bg_xaxis      = self.Rbutton_group([self.radioButton_lineal, self.radioButton_log])
         self.bg_xaxis_2    = self.Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
         self.bg_DC         = self.Rbutton_group([self.radioButton_DC_ON, self.radioButton_DC_OFF])
@@ -594,6 +605,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_pto_cal    = self.Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
 
 
+        ############## Widget to internal variables assignment #################
         # Data Mirroring through GUI
         self.mirror =  {'f_inicial':   {'array':['f_inicial', 'f_inicial_2'],'qt':'QLineEdit'},
                         'f_final':     {'array':['f_final',   'f_final_2'],  'qt':'QLineEdit'},
@@ -655,9 +667,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                          ]
                          )
 
-
-        # Controls Defaults
+        ########### Controls Defaults ############
         self.be.default_data()
+
+
+        ############# Function to Widget assignment
 
         # Clicked Calls
         clicked  = [{'wdg':self.toolButton_load,   'func':self.brw.load_mfile_browser},
@@ -676,15 +690,13 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.toolButton_load_3, 'func':self.brw.load_fit_data_browser},
                     {'wdg':self.AJUSTA,            'func':self.be.measure_fit}]
 
-
-
+        # Fit calls
         for i in self.fit_param.keys():
             eval("self." + self.fit_param[i]['array'] +".editingFinished").connect(self.be.store_fit)
-
         for i in clicked:
             i['wdg'].clicked.connect(i['func'])
 
-
+        # Mirrored calls
         for i in self.mirror.keys():
             if self.mirror[i]['qt'] == 'QLineEdit':
                 event = 'editingFinished'
@@ -695,7 +707,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
             for j in self.mirror[i]['array']:
                 eval("self." + j + "." + event).connect(self.be.store_data)
-
+        # Other widgets calls
         for i in self.others.keys():
             if self.others[i]['qt'] == 'QLineEdit':
                 event = 'editingFinished'
@@ -704,22 +716,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             elif self.others[i]['qt'] == 'QCheckBox':
                 event = 'stateChanged'
             eval("self." + self.others[i]['array'] + "." + event).connect(self.be.store_data)
-
+        # Path edit calls
         for i in self.paths.keys():
             eval("self." + self.paths[i] + "." + 'editingFinished').connect(self.be.store_data)
 
 
-
-    def Rbutton_group(self, button_array):
-        bg_config_cal = QtWidgets.QButtonGroup()
-        radioButton = button_array
-        j=0
-        for i in radioButton:
-            bg_config_cal.addButton(i)
-            bg_config_cal.setId(i,j)
-            j+=1
-        return bg_config_cal
-
+    # Close Window event treatment
     def closeEvent(self, event):
         quit_msg = "¿Seguro que quiere salir del programa?"
         reply = QMessageBox.question(self, 'Cuidado!',
