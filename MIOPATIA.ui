@@ -73,7 +73,7 @@
           <bool>false</bool>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="datos">
           <attribute name="title">
@@ -1580,52 +1580,13 @@ CONFIG.</string>
              <string>AJUSTE DE GOMPERTZ</string>
             </property>
            </widget>
-           <widget class="QPushButton" name="LOAD_fit_data">
-            <property name="geometry">
-             <rect>
-              <x>810</x>
-              <y>60</y>
-              <width>221</width>
-              <height>41</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>AJUSTA DATOS GUARDADOS</string>
-            </property>
-           </widget>
-           <widget class="QToolButton" name="toolButton_load_3">
-            <property name="geometry">
-             <rect>
-              <x>1040</x>
-              <y>30</y>
-              <width>41</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="load_path_3">
-            <property name="geometry">
-             <rect>
-              <x>810</x>
-              <y>30</y>
-              <width>221</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="readOnly">
-             <bool>false</bool>
-            </property>
-           </widget>
            <widget class="QPushButton" name="AJUSTA">
             <property name="geometry">
              <rect>
-              <x>810</x>
-              <y>270</y>
-              <width>221</width>
-              <height>41</height>
+              <x>820</x>
+              <y>250</y>
+              <width>181</width>
+              <height>21</height>
              </rect>
             </property>
             <property name="text">
@@ -1636,7 +1597,7 @@ CONFIG.</string>
             <property name="geometry">
              <rect>
               <x>810</x>
-              <y>110</y>
+              <y>280</y>
               <width>271</width>
               <height>151</height>
              </rect>
@@ -1786,10 +1747,10 @@ CONFIG.</string>
            <widget class="QLabel" name="label_7">
             <property name="geometry">
              <rect>
-              <x>800</x>
-              <y>330</y>
-              <width>281</width>
-              <height>71</height>
+              <x>820</x>
+              <y>440</y>
+              <width>251</width>
+              <height>51</height>
              </rect>
             </property>
             <property name="text">
@@ -1801,6 +1762,156 @@ CONFIG.</string>
             <property name="scaledContents">
              <bool>true</bool>
             </property>
+           </widget>
+           <widget class="QGroupBox" name="groupBox_10">
+            <property name="geometry">
+             <rect>
+              <x>810</x>
+              <y>150</y>
+              <width>271</width>
+              <height>91</height>
+             </rect>
+            </property>
+            <property name="title">
+             <string>Datos desde Fichero CSV</string>
+            </property>
+            <widget class="QLineEdit" name="load_path_3">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>211</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="readOnly">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="LOAD_fit_data">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>60</y>
+               <width>181</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>AJUSTA DATOS CSV</string>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_load_3">
+             <property name="geometry">
+              <rect>
+               <x>230</x>
+               <y>30</y>
+               <width>31</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QGroupBox" name="groupBox_17">
+            <property name="geometry">
+             <rect>
+              <x>810</x>
+              <y>10</y>
+              <width>271</width>
+              <height>131</height>
+             </rect>
+            </property>
+            <property name="title">
+             <string>Datos desde Base de Datos HDF5</string>
+            </property>
+            <widget class="QLineEdit" name="load_path_4">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>211</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="readOnly">
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="toolButton_load_4">
+             <property name="geometry">
+              <rect>
+               <x>230</x>
+               <y>30</y>
+               <width>31</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+            <widget class="QSpinBox" name="spinBox_pollo">
+             <property name="geometry">
+              <rect>
+               <x>80</x>
+               <y>60</y>
+               <width>44</width>
+               <height>26</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_8">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>60</y>
+               <width>67</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Pollo</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_9">
+             <property name="geometry">
+              <rect>
+               <x>150</x>
+               <y>60</y>
+               <width>67</width>
+               <height>17</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Medida</string>
+             </property>
+            </widget>
+            <widget class="QSpinBox" name="spinBox_medida">
+             <property name="geometry">
+              <rect>
+               <x>220</x>
+               <y>60</y>
+               <width>44</width>
+               <height>26</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="LOAD_fit_data_2">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>100</y>
+               <width>221</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>AJUSTA DATOS BASE DATOS</string>
+             </property>
+            </widget>
            </widget>
           </widget>
           <widget class="QGroupBox" name="groupBox_11">

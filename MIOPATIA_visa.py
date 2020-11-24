@@ -321,15 +321,15 @@ class VISA():
         pos_n_func = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])=='n_func_fit')[0][0]
 
         A = fit.gompertz()
-        traza_A = self.switch({ 0:data['Z_mod'],
-                                1:data['Z_Fase'],
-                                2:data['Err'],
-                                3:data['Eri'],
-                                4:np.log10(data['E_mod']),
-                                5:data['E_fase']},
+        traza_A = self.switch({ 0:data['Z_mod'].to_numpy(dtype=float),
+                                1:data['Z_Fase'].to_numpy(dtype=float),
+                                2:data['Err'].to_numpy(dtype=float),
+                                3:data['Eri'].to_numpy(dtype=float),
+                                4:np.log10(data['E_mod'].to_numpy(dtype=float)),
+                                5:data['E_fase'].to_numpy(dtype=float)},
                                 comboBox_trazaA)
 
-        x_data = np.array(data['Freq'])
+        x_data = data['Freq'].to_numpy(dtype=float)
 
         index_range = np.where((x_data > self.sd.def_cfg['param_fit']['value'][pos_low])*
                                (x_data < self.sd.def_cfg['param_fit']['value'][pos_high]))[0]

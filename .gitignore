@@ -6,3 +6,5 @@ dist/
 build/
 
 *.cal
+
+hdf_test/

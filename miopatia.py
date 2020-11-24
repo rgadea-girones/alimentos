@@ -61,6 +61,7 @@ class DATA(object):
                             'save_mfile_name':"./medida.csv",
                             'load_cal_file_name':"./calibracion.cal",
                             'save_cal_file_name':"./calibracion_new.cal",
+                            'load_h5file_name':"./espectros.hdf",
                             'def_path':"./",
                             'conf_cal':{'value':0, 'limits':[0,1],'type':'int'},
                             'c_load':{'value':500, 'limits':[0,1E6],'type':'float'},
@@ -281,8 +282,31 @@ class BACK_END(object):
                                   data)
             self.pw.canvas3.draw()
 
+    def load_h5_fit(self):
+        self.vi.append_fit("CARGA MEDIDA BASE DATOS H5")
+        file = self.sd.def_cfg['load_h5file_name']
+        try:
+            with pd.HDFStore(file,'r',complib="zlib",complevel=4) as hdf_db:
+                pollos = hdf_db.get('data/index/pollos')
+                indice_medidas = hdf_db.get('data/index/medidas')
+                tabla = hdf_db.get('data/tabla')
+                #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
+        except:
+            self.vi.append_fit("Fichero no encontrado\n")
+        else:
+            self.vi.append_fit(file)
+            pollo_sel = pollos[int(self.pw.spinBox_pollo.value())]
+            inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            print(inicio_medida,fin_medida)
+            data = tabla[inicio_medida:fin_medida]
+            self.vi.show_data_fit(self.pw.comboBox_mag_fit.currentIndex(),
+                                  self.pw.comboBox_fit_alg.currentText(),
+                                  data)
+            self.pw.canvas3.draw()
+
     def measure_fit(self):
-        self.vi.append_plus("AJUSTE DE DATOS MEDIDOS")
+        self.vi.append_fit("AJUSTE DE DATOS MEDIDOS")
         data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
                                      np.reshape(self.sd.Z_mod_data,(-1,1)),
                                      np.reshape(self.sd.Z_fase_data,(-1,1)),
@@ -564,6 +588,16 @@ class BROWSERS(object):
         #Trick for Qstring converting to standard string
         self.pw.load_path_3.setText(self.sd.def_cfg['load_mfile_fit'])
 
+    def load_h5file_browser(self):
+        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
+                                        'Abrir fichero medida',
+                                        self.sd.def_cfg['def_path'],
+                                        "Ficheros de medida (*.hdf)")
+        fname_aux = ([str(x) for x in file_aux])
+        self.sd.def_cfg['load_h5file_name'] = fname_aux[0]
+        #Trick for Qstring converting to standard string
+        self.pw.load_path_4.setText(self.sd.def_cfg['load_h5file_name'])
+
 
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self,data):
@@ -583,7 +617,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         ######### Combos Initialization and RadiButton Groups creation #########
         # Button groups creation
-        def Rbutton_group(self, button_array):
+        def Rbutton_group(button_array):
             bg_config_cal = QtWidgets.QButtonGroup()
             radioButton = button_array
             j=0
@@ -592,17 +626,17 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 bg_config_cal.setId(i,j)
                 j+=1
             return bg_config_cal
-            
+
         self.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
         self.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
         self.comboBox_mag_fit.addItems(self.sd.def_cfg['combox'])
         self.comboBox_fit_alg.addItems(self.sd.def_cfg['combox_fit'])
-        self.bg_xaxis      = self.Rbutton_group([self.radioButton_lineal, self.radioButton_log])
-        self.bg_xaxis_2    = self.Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
-        self.bg_DC         = self.Rbutton_group([self.radioButton_DC_ON, self.radioButton_DC_OFF])
-        self.bg_DC_2       = self.Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
-        self.bg_config_cal = self.Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
-        self.bg_pto_cal    = self.Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
+        self.bg_xaxis      = Rbutton_group([self.radioButton_lineal, self.radioButton_log])
+        self.bg_xaxis_2    = Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
+        self.bg_DC         = Rbutton_group([self.radioButton_DC_ON, self.radioButton_DC_OFF])
+        self.bg_DC_2       = Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
+        self.bg_config_cal = Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
+        self.bg_pto_cal    = Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
 
 
         ############## Widget to internal variables assignment #################
@@ -675,6 +709,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Clicked Calls
         clicked  = [{'wdg':self.toolButton_load,   'func':self.brw.load_mfile_browser},
+                    {'wdg':self.toolButton_load_4,   'func':self.brw.load_h5file_browser},
                     {'wdg':self.toolButton_save,   'func':self.brw.save_mfile_browser},
                     {'wdg':self.toolButton_load_2, 'func':self.brw.load_calibration_file_browser},
                     {'wdg':self.toolButton_save_2, 'func':self.brw.save_calibration_file_browser},
@@ -688,7 +723,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.SAVE_cfg,          'func':self.be.save_config},
                     {'wdg':self.LOAD_fit_data,     'func':self.be.load_m_fit},
                     {'wdg':self.toolButton_load_3, 'func':self.brw.load_fit_data_browser},
-                    {'wdg':self.AJUSTA,            'func':self.be.measure_fit}]
+                    {'wdg':self.AJUSTA,            'func':self.be.measure_fit},
+                    {'wdg':self.LOAD_fit_data_2,   'func':self.be.load_h5_fit}]
 
         # Fit calls
         for i in self.fit_param.keys():
