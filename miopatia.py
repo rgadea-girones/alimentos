@@ -597,7 +597,13 @@ class BROWSERS(object):
         self.sd.def_cfg['load_h5file_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
         self.pw.load_path_4.setText(self.sd.def_cfg['load_h5file_name'])
-
+        with pd.HDFStore(self.sd.def_cfg['load_h5file_name'],'r',complib="zlib",complevel=4) as hdf_db:
+            pollos = hdf_db.get('data/index/pollos').to_numpy(dtype=float)
+        size = np.shape(pollos)
+        n_medidas = size[0]
+        n_pollos  = size[1]
+        self.pw.spinBox_medida.setMaximum(n_medidas-1)
+        self.pw.spinBox_pollo.setMaximum(n_pollos-1)
 
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self,data):
