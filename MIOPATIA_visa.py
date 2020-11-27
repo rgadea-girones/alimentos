@@ -7,6 +7,7 @@ import os
 import numpy as np
 from PyQt5.QtWidgets import QMessageBox
 import fit_library as fit
+import pandas as pd
 
 
 class VISA():
@@ -353,11 +354,15 @@ class VISA():
 
         # Main PARAMETERS
         epsilon_inf    = 10**A.coeff[0]
-        epsilon_inf_e  = 10**A.perr[0]
+        epsilon_inf_e  = np.log(10)*(10**A.coeff[0])*np.sqrt(A.perr[0])
         epsilon_alfa   = 10**(A.coeff[0]+np.cumsum(A.coeff[1::3])-A.coeff[1::3]/2)
-        epsilon_alfa_e = 10**(A.perr[0]+np.cumsum(A.perr[1::3])-A.perr[1::3]/2)
+        # El término que resta se pone para compensar la última suma que lleva 1/2
+        # y se hace algo similar para el error
+        epsilon_alfa_e = np.log(10)*epsilon_alfa*np.sqrt(np.cumsum(A.perr[1::3])-A.perr[1::3]*0.75)
+        #10**(A.perr[0]+np.cumsum(A.perr[1::3])-A.perr[1::3]/2)
         f_alfa         = 10**(A.coeff[2::3]) # Pedro usa /(2.pi)
-        f_alfa_e       = 10**(A.perr[2::3]) # Pedro usa /(2.pi)
+        f_alfa_e       = np.log(10)*f_alfa*np.sqrt(A.perr[2::3])
+
 
         string0 = (("Epsilon_inf = %3.3e (+/- %3.3e) \n" ) %  (epsilon_inf, epsilon_inf_e))
 
@@ -387,6 +392,31 @@ class VISA():
         self.sd.axes['ax4'].grid(True)
 
         self.sd.fig3.tight_layout()
+
+        # Save fit information in Shared Data
+        fit_data_HF = np.zeros((1,35))
+        p_count = 0
+        strt_p  = [0,10,20,21,24,27,28,31,34]
+        strt_count = 0
+        for j in [A.coeff, A.perr, [epsilon_inf], epsilon_alfa, f_alfa,
+                                   [epsilon_inf_e], epsilon_alfa_e, f_alfa_e,
+                                   [A.r_sqr]]:
+            p_count = strt_p[strt_count]
+            strt_count = strt_count = strt_count + 1
+
+            for i in j:
+                fit_data_HF[0,p_count] = i
+                p_count = p_count + 1
+
+
+        self.sd.fit_data_frame = pd.DataFrame(fit_data_HF,
+                            columns=['A','B1','C1','D1','B2','C2','D2','B3','C3','D3',
+                                     'Ae','B1e','C1e','D1e','B2e','C2e','D2e','B3e','C3e','D3e',
+                                     'EPS_INF','EPS_ALFA1','EPS_ALFA2','EPS_ALFA3',
+                                     'F_ALFA1','F_ALFA2','F_ALFA3',
+                                     'EPS_INFe','EPS_ALFA1e','EPS_ALFA2e','EPS_ALFA3e',
+                                     'F_ALFA1e','F_ALFA2e','F_ALFA3e','R2'])
+
 
     def config_calibration(self):
         # Configuración de los valores para la calibración en abierto, corto y carga

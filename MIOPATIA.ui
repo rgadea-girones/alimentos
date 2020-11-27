@@ -1585,7 +1585,7 @@ CONFIG.</string>
              <rect>
               <x>820</x>
               <y>250</y>
-              <width>181</width>
+              <width>161</width>
               <height>21</height>
              </rect>
             </property>
@@ -1793,7 +1793,7 @@ CONFIG.</string>
               <rect>
                <x>10</x>
                <y>60</y>
-               <width>181</width>
+               <width>161</width>
                <height>21</height>
               </rect>
              </property>
@@ -1904,12 +1904,25 @@ CONFIG.</string>
               <rect>
                <x>10</x>
                <y>100</y>
-               <width>221</width>
+               <width>141</width>
                <height>21</height>
               </rect>
              </property>
              <property name="text">
-              <string>AJUSTA DATOS BASE DATOS</string>
+              <string>AJUSTA BASE DATOS</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="SAVE_fit">
+             <property name="geometry">
+              <rect>
+               <x>156</x>
+               <y>100</y>
+               <width>111</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>SALVA AJUSTE</string>
              </property>
             </widget>
            </widget>

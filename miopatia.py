@@ -175,6 +175,10 @@ class DATA(object):
 
         self.fit_params_glb = []
 
+        self.fit_data_frame = []
+
+        self.pollo_fitado = 0
+
     def config_write(self):
         writeName = self.filename
         try:
@@ -286,11 +290,11 @@ class BACK_END(object):
         self.vi.append_fit("CARGA MEDIDA BASE DATOS H5")
         file = self.sd.def_cfg['load_h5file_name']
         try:
-            with pd.HDFStore(file,'r',complib="zlib",complevel=4) as hdf_db:
-                pollos = hdf_db.get('data/index/pollos')
-                indice_medidas = hdf_db.get('data/index/medidas')
-                tabla = hdf_db.get('data/tabla')
-                #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
+            hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
+            pollos = hdf_db.get('data/index/pollos')
+            indice_medidas = hdf_db.get('data/index/medidas')
+            tabla = hdf_db.get('data/tabla')
+            #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
         except:
             self.vi.append_fit("Fichero no encontrado\n")
         else:
@@ -298,12 +302,14 @@ class BACK_END(object):
             pollo_sel = pollos[int(self.pw.spinBox_pollo.value())]
             inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
             fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
-            print(inicio_medida,fin_medida)
             data = tabla[inicio_medida:fin_medida]
+            self.sd.pollo_fitado = int(self.pw.spinBox_pollo.value())
             self.vi.show_data_fit(self.pw.comboBox_mag_fit.currentIndex(),
                                   self.pw.comboBox_fit_alg.currentText(),
                                   data)
             self.pw.canvas3.draw()
+            hdf_db.close()
+
 
     def measure_fit(self):
         self.vi.append_fit("AJUSTE DE DATOS MEDIDOS")
@@ -324,6 +330,21 @@ class BACK_END(object):
                               self.pw.comboBox_fit_alg.currentText(),
                               data_frame)
         self.pw.canvas3.draw()
+
+    def save_fit(self):
+        self.vi.append_fit("SALVA FIT BASE DATOS H5")
+        file = self.sd.def_cfg['load_h5file_name']
+        #try:
+        hdf_db = pd.HDFStore(file,'a',complib="zlib",complevel=4)
+        fit_data = hdf_db.get('data/fit')
+        print(self.sd.pollo_fitado)
+        fit_data.loc[self.sd.pollo_fitado]=self.sd.fit_data_frame.to_numpy()
+        hdf_db.put('data/fit',fit_data)
+        hdf_db.close()
+        #except:
+        #    self.vi.append_fit("Error en Base de Datos\n")
+        #else:
+
 
     def save_m(self):
         def justify(input_str,n_char):
@@ -730,7 +751,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.LOAD_fit_data,     'func':self.be.load_m_fit},
                     {'wdg':self.toolButton_load_3, 'func':self.brw.load_fit_data_browser},
                     {'wdg':self.AJUSTA,            'func':self.be.measure_fit},
-                    {'wdg':self.LOAD_fit_data_2,   'func':self.be.load_h5_fit}]
+                    {'wdg':self.LOAD_fit_data_2,   'func':self.be.load_h5_fit},
+                    {'wdg':self.SAVE_fit,          'func':self.be.save_fit}]
 
         # Fit calls
         for i in self.fit_param.keys():
