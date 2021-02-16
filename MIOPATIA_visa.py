@@ -408,9 +408,12 @@ class VISA():
                 fit_data_HF[0,p_count] = i
                 p_count = p_count + 1
 
+        pollo_medida = np.array([np.array(data['Pollo'])[0],np.array(data['Medida'])[0]]).reshape(1,2)
+        print("Pollo y medida",pollo_medida)
+        fit_data_HF = np.concatenate([pollo_medida,fit_data_HF],axis=1)
 
         self.sd.fit_data_frame = pd.DataFrame(fit_data_HF,
-                            columns=['A','B1','C1','D1','B2','C2','D2','B3','C3','D3',
+                            columns=['Pollo','Medida','A','B1','C1','D1','B2','C2','D2','B3','C3','D3',
                                      'Ae','B1e','C1e','D1e','B2e','C2e','D2e','B3e','C3e','D3e',
                                      'EPS_INF','EPS_ALFA1','EPS_ALFA2','EPS_ALFA3',
                                      'F_ALFA1','F_ALFA2','F_ALFA3',

@@ -177,7 +177,8 @@ class DATA(object):
 
         self.fit_data_frame = []
 
-        self.pollo_fitado = 0
+        self.pollo_fitado  = 0
+        self.medida_fitada = 0
 
     def config_write(self):
         writeName = self.filename
@@ -291,19 +292,23 @@ class BACK_END(object):
         file = self.sd.def_cfg['load_h5file_name']
         try:
             hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
-            pollos = hdf_db.get('data/index/pollos')
-            indice_medidas = hdf_db.get('data/index/medidas')
+            #pollos = hdf_db.get('data/index/pollos')
+            #indice_medidas = hdf_db.get('data/index/medidas')
             tabla = hdf_db.get('data/tabla')
             #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
         except:
             self.vi.append_fit("Fichero no encontrado\n")
         else:
             self.vi.append_fit(file)
-            pollo_sel = pollos[int(self.pw.spinBox_pollo.value())]
-            inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
-            fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
-            data = tabla[inicio_medida:fin_medida]
-            self.sd.pollo_fitado = int(self.pw.spinBox_pollo.value())
+            pollo_sel = int(self.pw.spinBox_pollo.value())
+            medida_sel = int(self.pw.spinBox_medida.value())
+            #inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #data = tabla[inicio_medida:fin_medida]
+            data = tabla[(tabla['Pollo']==pollo_sel)&(tabla['Medida']==medida_sel)]
+            self.sd.pollo_fitado = pollo_sel
+            self.sd.medida_fitada = medida_sel
+
             self.vi.show_data_fit(self.pw.comboBox_mag_fit.currentIndex(),
                                   self.pw.comboBox_fit_alg.currentText(),
                                   data)
@@ -336,10 +341,10 @@ class BACK_END(object):
         file = self.sd.def_cfg['load_h5file_name']
         #try:
         hdf_db = pd.HDFStore(file,'a',complib="zlib",complevel=4)
-        fit_data = hdf_db.get('data/fit')
-        print(self.sd.pollo_fitado)
-        fit_data.loc[self.sd.pollo_fitado]=self.sd.fit_data_frame.to_numpy()
-        hdf_db.put('data/fit',fit_data)
+        #fit_data = hdf_db.get('data/fit')
+        print(self.sd.pollo_fitado,self.sd.medida_fitada)
+        #fit_data.loc[self.sd.pollo_fitado]=self.sd.fit_data_frame.to_numpy()
+        hdf_db.append('data/fit',self.sd.fit_data_frame)
         hdf_db.close()
         #except:
         #    self.vi.append_fit("Error en Base de Datos\n")
@@ -619,12 +624,13 @@ class BROWSERS(object):
         #Trick for Qstring converting to standard string
         self.pw.load_path_4.setText(self.sd.def_cfg['load_h5file_name'])
         with pd.HDFStore(self.sd.def_cfg['load_h5file_name'],'r',complib="zlib",complevel=4) as hdf_db:
-            pollos = hdf_db.get('data/index/pollos').to_numpy(dtype=float)
-        size = np.shape(pollos)
-        n_medidas = size[0]
-        n_pollos  = size[1]
-        self.pw.spinBox_medida.setMaximum(n_medidas-1)
-        self.pw.spinBox_pollo.setMaximum(n_pollos-1)
+            pollos = hdf_db.get('data/tabla') #.to_numpy(dtype=float)
+        n_pollos = np.max(np.array(pollos['Pollo']))
+        n_medidas = np.max(np.array(pollos['Medida']))
+
+        self.pw.spinBox_medida.setMaximum(n_medidas)
+        self.pw.spinBox_pollo.setMaximum(n_pollos)
+
 
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self,data):
