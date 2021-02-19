@@ -53,7 +53,7 @@ class BACK_END(object):
 
     def medir(self):
         self.pw.MEDIR.setEnabled(False)
-        app.processEvents()
+        #app.processEvents()
         self.dv.append_plus("MEDIR")
         self.vi.config_measurement()
         self.vi.measure()
