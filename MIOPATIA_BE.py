@@ -57,7 +57,7 @@ class BACK_END(object):
         self.dv.append_plus("MEDIR")
         self.vi.config_measurement()
         self.vi.measure()
-        self.vi.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
+        self.dv.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
                                  self.pw.comboBox_trazaB.currentIndex())
         self.pw.canvas1.draw()
         self.pw.MEDIR.setEnabled(True)
