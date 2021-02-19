@@ -146,3 +146,6 @@ class DB_management(object):
         hdf_db.close()
 
         return last_pollo, last_medida
+
+
+    
