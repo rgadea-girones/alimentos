@@ -36,11 +36,14 @@ class DATA(object):
                             'nivel_DC':{'value':0, 'limits':[-40.0,40.0],'type':'float'},
                             'avg':{'value':0, 'limits':[0,1],'type':'int'},
                             'n_medidas_punto':{'value':1, 'limits':[1,256],'type':'int'},
+                            'ultimo_pollo':{'value':0, 'limits':[0,99],'type':'int'},
+                            'ultima_medida':{'value':0, 'limits':[0,9],'type':'int'},
                             'load_mfile_name':"./medida.csv",
                             'save_mfile_name':"./medida.csv",
                             'load_cal_file_name':"./calibracion.cal",
                             'save_cal_file_name':"./calibracion_new.cal",
                             'load_h5file_name':"./espectros.hdf",
+                            'io_h5file_name':"./test_hdf.hdf",
                             'def_path':"./",
                             'conf_cal':{'value':0, 'limits':[0,1],'type':'int'},
                             'c_load':{'value':500, 'limits':[0,1E6],'type':'float'},
@@ -158,6 +161,8 @@ class DATA(object):
 
         self.pollo_fitado  = 0
         self.medida_fitada = 0
+
+
 
     def config_write(self):
         writeName = self.filename

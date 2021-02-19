@@ -79,7 +79,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.paths = {'load_mfile_name':'load_path',
                       'save_mfile_name':'save_path',
                       'load_cal_file_name':'load_path_2',
-                      'save_cal_file_name':'save_path_2'}
+                      'save_cal_file_name':'save_path_2',
+                      'io_h5file_name':'load_path_db'}
         # Other controls
         self.others = {'conf_cal':{'array':'bg_config_cal', 'qt':'QButtonGroup'},
                        'c_load':{'array':'c_load', 'qt':'QLineEdit'},
@@ -133,10 +134,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Clicked Calls
         clicked  = [{'wdg':self.toolButton_load,   'func':self.brw.load_mfile_browser},
-                    {'wdg':self.toolButton_load_4,   'func':self.brw.load_h5file_browser},
+                    {'wdg':self.toolButton_load_4,  'func':self.brw.load_h5file_browser},
                     {'wdg':self.toolButton_save,   'func':self.brw.save_mfile_browser},
                     {'wdg':self.toolButton_load_2, 'func':self.brw.load_calibration_file_browser},
                     {'wdg':self.toolButton_save_2, 'func':self.brw.save_calibration_file_browser},
+                    {'wdg':self.toolButton_load_db,'func':self.brw.load_h5file_DB_browser},
                     {'wdg':self.REDRAW_MEASURE,    'func':self.be.redraw_measure},
                     {'wdg':self.MEDIR,             'func':self.be.medir},
                     {'wdg':self.LOAD_M,            'func':self.be.load_m},
@@ -149,7 +151,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.toolButton_load_3, 'func':self.brw.load_fit_data_browser},
                     {'wdg':self.AJUSTA,            'func':self.be.measure_fit},
                     {'wdg':self.LOAD_fit_data_2,   'func':self.be.load_h5_fit},
-                    {'wdg':self.SAVE_fit,          'func':self.be.save_fit}]
+                    {'wdg':self.SAVE_fit,          'func':self.be.save_fit},
+                    {'wdg':self.SAVE_DB,          'func':self.be.save_measure_to_DB}]
 
         # Fit calls
         for i in self.fit_param.keys():

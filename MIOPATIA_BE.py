@@ -123,15 +123,13 @@ class BACK_END(object):
             self.sd.pollo_fitado = pollo_sel
             self.sd.medida_fitada = medida_sel
 
-            if (data==-1):
+            if (data.empty):
                 self.dv.append_fit("Medidas no encontradas en la Base de Datos")
             else:
                 self.dv.show_data_fit(self.pw.comboBox_mag_fit.currentIndex(),
                                       self.pw.comboBox_fit_alg.currentText(),
                                       data)
                 self.pw.canvas3.draw()
-
-
 
     def measure_fit(self):
         self.dv.append_plus("AJUSTE DE DATOS MEDIDOS")
@@ -365,11 +363,35 @@ class BACK_END(object):
                 elif self.pw.mirror[i]['qt'] == 'QCheckBox':
                     eval("self.pw."+j).setChecked(self.sd.def_cfg[i]['value'])
 
-
-
-        #print(self.sd.def_cfg)
-
-
+    def save_measure_to_DB(self):
+        file_name = self.sd.def_cfg['io_h5file_name']
+        base_io = DB(file_name)
+        try:
+            data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
+                                         np.reshape(self.sd.Z_mod_data,(-1,1)),
+                                         np.reshape(self.sd.Z_fase_data,(-1,1)),
+                                         np.reshape(self.sd.Err_data,(-1,1)),
+                                         np.reshape(self.sd.Eri_data,(-1,1)),
+                                         np.reshape(self.sd.Er_mod_data,(-1,1)),
+                                         np.reshape(self.sd.Er_fase_data,(-1,1)),
+                                         np.reshape(self.sd.R_data,(-1,1)),
+                                         np.reshape(self.sd.X_data,(-1,1))],
+                                         axis=1)
+            # data_frame = pd.DataFrame(data_array,
+            #                           columns=['Freq','Z_mod','Z_Fase','Err','Eri',
+            #                                    'E_mod','E_fase','R','X'])
+        except:
+            self.dv.append_plus("El fichero de datos no se ha podido salvar\n")
+        else:
+            last_pollo,last_medida = base_io.escribe_medida_BD(self.pw.spinBox_pollo_db.value(),
+                                                                self.pw.spinBox_medida_db.value(),
+                                                                data_array,
+                                                                self.pw.spinBox_pollo_db_2.value())
+            self.sd.def_cfg['ultimo_pollo'] = last_pollo
+            self.sd.def_cfg['ultima_medida'] = last_medida
+            self.pw.last_pollo.display(self.sd.def_cfg['ultimo_pollo'])
+            self.pw.last_medida.display(self.sd.def_cfg['ultima_medida'])
+            self.dv.append_plus("SALVA MEDIDA en BASE de DATOS")
 
 class BROWSERS(object):
     """ File Browsers for config files, input and output files etc.
@@ -440,12 +462,22 @@ class BROWSERS(object):
         self.sd.def_cfg['load_h5file_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
         self.pw.load_path_4.setText(self.sd.def_cfg['load_h5file_name'])
-        # with pd.HDFStore(self.sd.def_cfg['load_h5file_name'],'r',complib="zlib",complevel=4) as hdf_db:
-        #     pollos = hdf_db.get('data/tabla') #.to_numpy(dtype=float)
-        # n_pollos = np.max(np.array(pollos['Pollo']))
-        # n_medidas = np.max(np.array(pollos['Medida']))
-        #
-        # self.pw.spinBox_medida.setMaximum(n_medidas)
-        # self.pw.spinBox_pollo.setMaximum(n_pollos)
         self.pw.spinBox_medida.setMaximum(12)
         self.pw.spinBox_pollo.setMaximum(100)
+
+    def load_h5file_DB_browser(self):
+        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
+                                        'Abrir fichero medida',
+                                        self.sd.def_cfg['def_path'],
+                                        "Ficheros de medida (*.hdf)")
+        fname_aux = ([str(x) for x in file_aux])
+        self.sd.def_cfg['io_h5file_name'] = fname_aux[0]
+        #Trick for Qstring converting to standard string
+        self.pw.load_path_db.setText(self.sd.def_cfg['io_h5file_name'])
+
+        #self.dv.append_plus("CHEQUEA BASE DATOS H5")
+        file_name = self.sd.def_cfg['io_h5file_name']
+        base_io = DB(file_name)
+        self.sd.def_cfg['ultimo_pollo'],self.sd.def_cfg['ultima_medida'] = base_io.chequea_ultimos()
+        self.pw.last_pollo.display(self.sd.def_cfg['ultimo_pollo'])
+        self.pw.last_medida.display(self.sd.def_cfg['ultima_medida'])
