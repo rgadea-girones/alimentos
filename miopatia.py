@@ -32,11 +32,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Shared data
         self.sd = data
         # Classes Instantiation
-        self.brw = BROWSERS(self,data)
+
         # VISA start
         self.dv  = DATA_VIEW(self.sd,[self.textBrowser,self.textBrowser_2],self.textBrowser_3)
         self.vi  = VISA(self.sd,self.dv)
         self.be  = BACK_END(self,data,self.vi,self.dv)
+        self.brw = BROWSERS(self,data,self.dv)
 
 
         ######### Combos Initialization and RadiButton Groups creation #########

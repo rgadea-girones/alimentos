@@ -7,11 +7,15 @@ class DB_management(object):
     """ Functions to create, write and read chicken database
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, dataview):
         self.filename = filename
-        self.hdf_db = pd.HDFStore(self.filename,'a',complib="zlib",complevel=4)
-        print(self.hdf_db.info())
-        self.hdf_db.close()
+        self.dv = dataview
+        try:
+            with pd.HDFStore(self.filename,'r',complib="zlib",complevel=4) as self.hdf_db:
+                self.dv.append_plus(self.hdf_db.info(verbose=False))
+        except EnvironmentError:
+            self.dv.append_plus("Base de Datos no encontrada")
+
 
 
     def crea_BD(self):
@@ -84,30 +88,37 @@ class DB_management(object):
 
     def lee_medida_BD(self, pollo, medida):
         # Devuelve los datos de la tabla correspondientes con el pollo y la medida en formato DataFrame
+        try:
+            with pd.HDFStore(self.filename,complib="zlib",complevel=4) as hdf_db:
+                p_e  = hdf_db.get('data/pollos_estado')
+                t    = hdf_db.get('data/tabla')
+                extracto = p_e[(p_e['Pollo']==str(pollo))&(p_e['Medida']==str(medida))]
 
-        hdf_db = pd.HDFStore(self.filename,complib="zlib",complevel=4)
-        p_e  = hdf_db.get('data/pollos_estado')
-        t    = hdf_db.get('data/tabla')
-        extracto = p_e[(p_e['Pollo']==str(pollo))&(p_e['Medida']==str(medida))]
-
-        if (np.array(extracto).size==0):
-            return_value = pd.DataFrame([])
-        else:
-            Primero = extracto['Primero'].to_numpy(dtype='int')[0]
-            Ultimo  = extracto['Ultimo'].to_numpy(dtype='int')[0]
-            return_value = t.iloc[Primero:Ultimo+1]
-        hdf_db.close()
+                if (np.array(extracto).size==0):
+                    return_value = pd.DataFrame([])
+                else:
+                    Primero = extracto['Primero'].to_numpy(dtype='int')[0]
+                    Ultimo  = extracto['Ultimo'].to_numpy(dtype='int')[0]
+                    return_value = t.iloc[Primero:Ultimo+1]
+        except EnvironmentError:
+            self.dv.append_plus("Base de Datos no encontrada")
+            return_value = -1
 
         return return_value
 
     def chequea_ultimos(self):
+        try:
+            with pd.HDFStore(self.filename,'r',complib="zlib",complevel=4) as hdf_db:
+                pollos = hdf_db.get('data/pollos_estado') #.to_numpy(dtype=float)
 
-        with pd.HDFStore(self.filename,'r',complib="zlib",complevel=4) as hdf_db:
-            pollos = hdf_db.get('data/pollos_estado') #.to_numpy(dtype=float)
+            last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
+            extracto = pollos[(pollos['Pollo']==str(last_pollo))]
+            last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
 
-        last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
-        extracto = pollos[(pollos['Pollo']==str(last_pollo))]
-        last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
+        except EnvironmentError:
+            self.dv.append_plus("Base de Datos no encontrada")
+            last_pollo = 0
+            last_medida = 0
 
         return last_pollo, last_medida
 
@@ -120,32 +131,31 @@ class DB_management(object):
         # El número de medidas por pollo o pollos es totalmente arbitrario
 
         fecha_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        hdf_db = pd.HDFStore(self.filename,'a',complib="zlib",complevel=4)
-        n_freq = np.shape(datos)[0]
+        try:
+            with pd.HDFStore(self.filename,'a',complib="zlib",complevel=4) as hdf_db:
+                n_freq = np.shape(datos)[0]
+                datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
+                                            np.ones((n_freq,1),dtype=int)*(medida),
+                                            datos],axis=1)
 
-        datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
-                                    np.ones((n_freq,1),dtype=int)*(medida),
-                                   datos],axis=1)
-
-        data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
+                data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
                                                     'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
-        t    = hdf_db.get('data/tabla')
-        Primero = len(t)
-        Ultimo  = Primero + n_freq - 1
-        pollo_aux = np.array([pollo,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
-        pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
+                t    = hdf_db.get('data/tabla')
+                Primero = len(t)
+                Ultimo  = Primero + n_freq - 1
+                pollo_aux = np.array([pollo,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
+                pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
 
-        hdf_db.append('data/tabla', data_aux_df)
-        hdf_db.append('data/pollos_estado', pollo_aux_df)
+                hdf_db.append('data/tabla', data_aux_df)
+                hdf_db.append('data/pollos_estado', pollo_aux_df)
 
-        pollos = hdf_db.get('data/pollos_estado')
-        last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
-        extracto = pollos[(pollos['Pollo']==str(last_pollo))]
-        last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
-
-        hdf_db.close()
+                pollos = hdf_db.get('data/pollos_estado')
+                last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
+                extracto = pollos[(pollos['Pollo']==str(last_pollo))]
+                last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
+        except EnvironmentError:
+            self.dv.append_plus("Base de Datos no encontrada")
+            last_pollo = 0
+            last_medida = 0
 
         return last_pollo, last_medida
-
-
-    

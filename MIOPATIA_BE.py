@@ -100,7 +100,7 @@ class BACK_END(object):
         self.dv.append_plus("CARGA MEDIDA BASE DATOS H5")
         file = self.sd.def_cfg['load_h5file_name']
         try:
-            hdf_db = DB(file)
+            hdf_db = DB(file,self.dv)
             #hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
             #pollos = hdf_db.get('data/index/pollos')
             #indice_medidas = hdf_db.get('data/index/medidas')
@@ -302,6 +302,15 @@ class BACK_END(object):
         self.store_data()
         self.store_fit()
 
+        file_name = self.sd.def_cfg['io_h5file_name']
+        base_io = DB(file_name,self.dv)
+        ultimo_pollo,ultima_medida = base_io.chequea_ultimos()
+        self.sd.def_cfg['ultimo_pollo'] = int(ultimo_pollo)
+        self.sd.def_cfg['ultima_medida'] = int(ultima_medida)
+        self.pw.last_pollo.display(self.sd.def_cfg['ultimo_pollo'])
+        self.pw.last_medida.display(self.sd.def_cfg['ultima_medida'])
+
+
 
     def store_fit(self):
         # Add fit parameters to params
@@ -365,7 +374,7 @@ class BACK_END(object):
 
     def save_measure_to_DB(self):
         file_name = self.sd.def_cfg['io_h5file_name']
-        base_io = DB(file_name)
+        base_io = DB(file_name,self.dv)
         try:
             data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
                                          np.reshape(self.sd.Z_mod_data,(-1,1)),
@@ -396,9 +405,10 @@ class BACK_END(object):
 class BROWSERS(object):
     """ File Browsers for config files, input and output files etc.
     """
-    def __init__(self,parent_wdg,shared_data):
+    def __init__(self,parent_wdg,shared_data, dataview):
         self.sd = shared_data
         self.pw = parent_wdg
+        self.dv = dataview
 
     def load_mfile_browser(self):
         file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
@@ -477,7 +487,9 @@ class BROWSERS(object):
 
         #self.dv.append_plus("CHEQUEA BASE DATOS H5")
         file_name = self.sd.def_cfg['io_h5file_name']
-        base_io = DB(file_name)
-        self.sd.def_cfg['ultimo_pollo'],self.sd.def_cfg['ultima_medida'] = base_io.chequea_ultimos()
+        base_io = DB(file_name,self.dv)
+        ultimo_pollo,ultima_medida = base_io.chequea_ultimos()
+        self.sd.def_cfg['ultimo_pollo'] = int(ultimo_pollo)
+        self.sd.def_cfg['ultima_medida'] = int(ultima_medida)
         self.pw.last_pollo.display(self.sd.def_cfg['ultimo_pollo'])
         self.pw.last_medida.display(self.sd.def_cfg['ultima_medida'])
