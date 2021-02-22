@@ -143,8 +143,14 @@ class DB_management(object):
 
                 data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
                                                     'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
-                t    = hdf_db.get('data/tabla')
-                Primero = len(t)
+                try:
+                    t    = hdf_db.get('data/tabla')
+                except:
+                    Primero = 0
+                    #Empty DataBase
+                else:
+                    Primero = len(t)
+
                 Ultimo  = Primero + n_freq - 1
                 pollo_aux = np.array([pollo,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
                 pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
