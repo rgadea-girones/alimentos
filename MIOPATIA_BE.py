@@ -148,7 +148,9 @@ class BACK_END(object):
                                            'E_mod','E_fase','R','X'])
         self.dv.show_data_fit(self.pw.comboBox_mag_fit.currentIndex(),
                               self.pw.comboBox_fit_alg.currentText(),
-                              data_frame)
+                              data_frame,
+                              self.pw.spinBox_pollo_db.value(),
+                              self.pw.spinBox_medida_db.value())
         self.pw.canvas3.draw()
 
     def save_fit(self):

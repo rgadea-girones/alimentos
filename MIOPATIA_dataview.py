@@ -25,8 +25,8 @@ class DATA_VIEW(object):
 
 
     def show_measurement(self,comboBox_trazaA,comboBox_trazaB):
-        self.sd.axes['ax0'].cla()
-        self.sd.axes['ax1'].cla()
+        self.sd.axes['ax0'].clear()
+        self.sd.axes['ax1'].clear()
 
         traza_A = self.switch({ 0:self.sd.Z_mod_data,
                                 1:self.sd.Z_fase_data,
@@ -121,7 +121,7 @@ class DATA_VIEW(object):
         self.sd.fig2.tight_layout()
 
 
-    def show_data_fit(self, comboBox_trazaA, comboBox_fit_alg, data):
+    def show_data_fit(self, comboBox_trazaA, comboBox_fit_alg, data, pollo_pw=0, medida_pw=0):
         # Posición en el vector de parametros
         pos_low = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])=='f_low_fit')[0][0]
         pos_high = np.argwhere(np.array(self.sd.def_cfg['param_fit']['names'])=='f_high_fit')[0][0]
@@ -160,14 +160,21 @@ class DATA_VIEW(object):
 
         # Main PARAMETERS
         epsilon_inf    = 10**A.coeff[0]
-        epsilon_inf_e  = np.log(10)*(10**A.coeff[0])*np.sqrt(A.perr[0])
         epsilon_alfa   = 10**(A.coeff[0]+np.cumsum(A.coeff[1::3])-A.coeff[1::3]/2)
         # El término que resta se pone para compensar la última suma que lleva 1/2
         # y se hace algo similar para el error
-        epsilon_alfa_e = np.log(10)*epsilon_alfa*np.sqrt(np.cumsum(A.perr[1::3])-A.perr[1::3]*0.75)
         #10**(A.perr[0]+np.cumsum(A.perr[1::3])-A.perr[1::3]/2)
         f_alfa         = 10**(A.coeff[2::3]) # Pedro usa /(2.pi)
+
+
+        if (np.isnan(A.perr).any()) or (np.isinf(A.perr).any()) :
+            A.perr = np.zeros(np.shape(A.perr))
+        # Get rid of warnings and errors due to perr NaN and Inf values
+
+        epsilon_inf_e  = np.log(10)*(10**A.coeff[0])*np.sqrt(A.perr[0])
+        epsilon_alfa_e = np.log(10)*epsilon_alfa*np.sqrt(np.cumsum(A.perr[1::3])-A.perr[1::3]*0.75)
         f_alfa_e       = np.log(10)*f_alfa*np.sqrt(A.perr[2::3])
+
 
 
         string0 = (("Epsilon_inf = %3.3e (+/- %3.3e) \n" ) %  (epsilon_inf, epsilon_inf_e))
@@ -214,8 +221,14 @@ class DATA_VIEW(object):
                 fit_data_HF[0,p_count] = i
                 p_count = p_count + 1
 
-        pollo_medida = np.array([np.array(data['Pollo'])[0],np.array(data['Medida'])[0]]).reshape(1,2)
-        print("Pollo y medida",pollo_medida)
+        keys = data.keys()
+
+        if 'Pollo' in keys:
+            pollo_medida = np.array([np.array(data['Pollo'])[0],np.array(data['Medida'])[0]]).reshape(1,2)
+            print("Pollo y medida",pollo_medida)
+        else:
+            pollo_medida = np.array([pollo_pw,medida_pw]).reshape(1,2)
+
         fit_data_HF = np.concatenate([pollo_medida,fit_data_HF],axis=1)
 
         self.sd.fit_data_frame = pd.DataFrame(fit_data_HF,
