@@ -109,12 +109,15 @@ class DB_management(object):
     def chequea_ultimos(self):
         try:
             with pd.HDFStore(self.filename,'r',complib="zlib",complevel=4) as hdf_db:
-                pollos = hdf_db.get('data/pollos_estado') #.to_numpy(dtype=float)
-
-            last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
-            extracto = pollos[(pollos['Pollo']==str(last_pollo))]
-            last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
-
+                try:
+                    pollos = hdf_db.get('data/pollos_estado') #.to_numpy(dtype=float)
+                except:
+                    last_pollo = 0
+                    last_medida = 0
+                else:
+                    last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
+                    extracto = pollos[(pollos['Pollo']==str(last_pollo))]
+                    last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
         except EnvironmentError:
             self.dv.append_plus("Base de Datos no encontrada")
             last_pollo = 0
