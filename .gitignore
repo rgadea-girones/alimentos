@@ -8,3 +8,7 @@ build/
 *.cal
 
 hdf_test/
+
+__pycache__
+
+
