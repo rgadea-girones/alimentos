@@ -12,7 +12,7 @@ class DB_management(object):
         self.dv = dataview
         try:
             with pd.HDFStore(self.filename,'r',complib="zlib",complevel=4) as self.hdf_db:
-                self.dv.append_plus(self.hdf_db.info(verbose=False))
+                self.dv.append_plus("Acceso a Base de Datos: " + self.filename)
         except EnvironmentError:
             self.dv.append_plus("Base de Datos no encontrada")
 
