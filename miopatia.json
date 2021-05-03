@@ -79,8 +79,8 @@
         ],
         "type": "int"
     },
-    "ultimo_pollo": 19,
-    "ultima_medida": 2,
+    "ultimo_pollo": 0,
+    "ultima_medida": 0,
     "load_mfile_name": "./medida.csv",
     "save_mfile_name": "./medida.csv",
     "load_cal_file_name": "./calibracion.cal",
