@@ -1,15 +1,13 @@
 import sys
 import redpitaya_scpi as scpi
 import numpy as np
-from time import perf_counter as pc
-from time import sleep
 from scipy.fft import fft, fftfreq
 import matplotlib.pyplot as plt
 
 rp_s = scpi.scpi(sys.argv[1])
 
 wave_form = 'sine'
-freq = 10
+freq = 5000000
 fm=125000000
 numero_pulsos=10
 ampl = 1
@@ -36,7 +34,9 @@ rp_s.tx_txt('SOUR1:BURS:NCYC 10') # Set 10 pulses of sine wave
 
 # parametros de la adquisicion
 
-rp_s.tx_txt('ACQ:DEC 8192')
+rp_s.tx_txt('ACQ:DEC 1')
+rp_s.tx_txt('ACQ:DATA:FORMAT ASCII')
+rp_s.tx_txt('ACQ:DATA:UNITS RAW')
 rp_s.tx_txt('ACQ:TRIG:LEV 500')
 rp_s.tx_txt('ACQ:TRIG:DLY 0')
 rp_s.tx_txt('ACQ:GAIN LV')
@@ -44,7 +44,7 @@ rp_s.tx_txt('ACQ:GAIN LV')
 # EMPEZAMOS CON LA ADQUISION
 
 rp_s.tx_txt('ACQ:START')
-rp_s.tx_txt('ACQ:TRIG CH1_PE')
+rp_s.tx_txt('ACQ:TRIG CH1_NE')
 #Enable output
 rp_s.tx_txt('OUTPUT1:STATE ON')
 
@@ -53,7 +53,6 @@ while 1:
     rp_s.tx_txt('ACQ:TRIG:STAT?')
     if rp_s.rx_txt() == 'TD':
         break
-#sleep(5)
 rp_s.tx_txt('ACQ:TPOS?')
 veamos= rp_s.rx_txt()
 
@@ -61,9 +60,9 @@ rp_s.tx_txt('ACQ:BUF:SIZE?')
 veamos2= rp_s.rx_txt()
 ciclos=5
 offset=fm*ciclos/freq # un pulso
-posicion_trigger=int(veamos)
+posicion_trigger=int(veamos)+offset
 #length=int(veamos2) -posicion_trigger
-length=fm*(ciclos)/(freq*8192)
+length=fm*(ciclos)/(freq*1)
 # length=10000 #fm*(numero_pulsos-ciclos)/freq
 # LEEMOS Y REPRESENTAMOS
 # rp_s.tx_txt('ACQ:SOUR1:DATA?')

@@ -8,12 +8,16 @@ import matplotlib.pyplot as plt
 t0=pc()
 rp_s = scpi.scpi(sys.argv[1])
 
+# superparametros
 wave_form = 'sine'
-frecuencia_min = 100
-frecuencia_max=4000000
-numero_valores=10
-frecuencias =np.geomspace(frecuencia_min,frecuencia_max,numero_valores)
+frecuencia_min = 1
+frecuencia_max=7
+puntos_decada=20
 
+
+numero_valores=(frecuencia_max-frecuencia_min)*puntos_decada
+#frecuencias =np.geomspace(frecuencia_min,frecuencia_max,numero_valores)
+frecuencias =np.logspace(frecuencia_min,frecuencia_max,puntos_decada*(frecuencia_max-frecuencia_min),base=10)
 
 fm=125000000
 numero_pulsos=10
@@ -24,8 +28,8 @@ amplreference=np.linspace(10,1,numero_valores)
 ampl2=1/amplreference
 phases=np.linspace(180,0,numero_valores)
 #decimation=np.logspace(numero_valores-1, 0, num=numero_valores, base=2.0)
-decimation=[1024,1024,64,64,64,64,1,1,1,1]
-
+#decimation=30*[1024]+30*[64]+40*[1]
+decimation=1*puntos_decada*[8192]+2*puntos_decada*[1024]+1*puntos_decada*[64]+2*puntos_decada*[1]
 
 
 
@@ -54,10 +58,10 @@ super_buffer=[]
 super_buffer2=[]
 Z=np.zeros(numero_valores)
 PHASE=np.zeros(numero_valores)
-rp_s.tx_txt('ACQ:DATA:FORMAT ASCII') 
-rp_s.tx_txt('ACQ:DATA:UNITS VOLTS')
-rp_s.tx_txt('ACQ:TRIG:LEV 125mV')
-rp_s.tx_txt('ACQ:TRIG:DLY 8000')
+rp_s.tx_txt('ACQ:DATA:FORMAT ASCII') #NO HACE NADA PORQUE SE RESETEA
+
+rp_s.tx_txt('ACQ:TRIG:LEV 125mV') #NO HACE NADA PORQUE SE RESETEA
+rp_s.tx_txt('ACQ:TRIG:DLY 8000') #NO HACE NADA PORQUE SE RESETEA
 configuracion=0
 adquisicion=0
 postprocesamiento=0
@@ -66,6 +70,7 @@ for freq in (frecuencias):
     t1=pc()
     rp_s.tx_txt('GEN:RST')
     rp_s.tx_txt('ACQ:RST')
+    rp_s.tx_txt('ACQ:DATA:UNITS VOLTS')
     rp_s.tx_txt('SOUR1:BURS:STAT BURST') # % Set burst mode to ON
     rp_s.tx_txt('SOUR1:BURS:NCYC 10') # Set 10 pulses of sine wave
  
@@ -85,7 +90,8 @@ for freq in (frecuencias):
 
     # rp_s.tx_txt('ACQ:DEC 8')
     rp_s.tx_txt('ACQ:DEC ' + str(decimation[iteracion-1]))
-
+    # rp_s.tx_txt('ACQ:DEC?')
+    # veamosdecimation=rp_s.rx_txt()
 
     rp_s.tx_txt('ACQ:START')
     rp_s.tx_txt('ACQ:TRIG CH1_PE')
@@ -94,15 +100,19 @@ for freq in (frecuencias):
     t2=pc()
 # ESPERAMOS EL TRIGGER
     # sleep(1)
-    #while 1:
-    #    rp_s.tx_txt('ACQ:TRIG:STAT?')
-    #    if rp_s.rx_txt() == 'TD':
-    #        break
+    while freq<100:
+        rp_s.tx_txt('ACQ:TRIG:STAT?')
+        if rp_s.rx_txt() == 'TD':
+            break
     t2t=pc()
-    print (t2t-t2)
+
+    print (iteracion)
+    print(freq)
+    sleep(0.2)
     rp_s.tx_txt('ACQ:TPOS?')
     veamos= rp_s.rx_txt()
     posicion_trigger=int(veamos)
+    print('posicion trigger:',veamos)
     #rp_s.tx_txt('ACQ:BUF:SIZE?')
     #veamos2= rp_s.rx_txt()
     #rp_s.tx_txt('ACQ:DEC?')
@@ -154,11 +164,11 @@ for freq in (frecuencias):
     super_buffer2.append(buff)
     super_buffer_flat2=sum(super_buffer2, [])
     yf2 = fft(my_array2)
-    dif=my_array-my_array2
-    yf3=fft(dif)
+    #dif=my_array-my_array2
+    #yf3=fft(dif)
     indice1=np.argmax(np.abs(yf))
     indice2=np.argmax(np.abs(yf2))
-    indice3=np.argmax(np.abs(yf3))
+    #indice3=np.argmax(np.abs(yf3))
 
     Z[iteracion-1]=np.max(np.abs(yf))/np.max(np.abs(yf2))
 
@@ -205,13 +215,15 @@ plt.plot(super_buffer_flat2)
 plt.ylabel('Current')
 
 plotZ=plt.figure(2*iteracion+1)
-plt.plot(Z)
-plt.plot(amplreference)
+plt.semilogx(frecuencias, Z,'o')
+plt.semilogx(frecuencias,amplreference,'o')
+plt.grid(True, color='0.7', linestyle='-', which='both', axis='both')
 plt.ylabel('Z')
 
 plotPHASE=plt.figure(2*iteracion+2)
-plt.plot(PHASE)
-plt.plot(phases)
+plt.semilogx(frecuencias,PHASE, 'o')
+plt.semilogx(frecuencias,phases,'o')
+plt.grid(True, color='0.7', linestyle='-', which='both', axis='both')
 plt.ylabel('PHASE')
 
 t11=pc()
