@@ -55,7 +55,7 @@ class BACK_END(object):
         self.pw.MEDIR.setEnabled(False)
         #app.processEvents()
         self.dv.append_plus("MEDIR")
-        # self.vi.config_measurement()
+        self.vi.config_measurement()
         self.vi.measure()
         self.dv.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
                                  self.pw.comboBox_trazaB.currentIndex())

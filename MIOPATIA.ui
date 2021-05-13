@@ -180,7 +180,7 @@
             <rect>
              <x>650</x>
              <y>10</y>
-             <width>291</width>
+             <width>321</width>
              <height>21</height>
             </rect>
            </property>
@@ -193,7 +193,7 @@
             </font>
            </property>
            <property name="text">
-            <string>CONTROL REMOTO 4294A</string>
+            <string>CONTROL REMOTO REDPITAYA</string>
            </property>
           </widget>
           <widget class="QFrame" name="frame_4">

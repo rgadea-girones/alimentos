@@ -35,7 +35,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # VISA start
         self.dv  = DATA_VIEW(self.sd,[self.textBrowser,self.textBrowser_2],self.textBrowser_3)
-        self.vi  = VISA(self.sd,self.dv)
+        self.vi  = VISA(sys.argv[1], self.sd,self.dv)
         self.be  = BACK_END(self,data,self.vi,self.dv)
         self.brw = BROWSERS(self,data,self.dv)
 
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     app.setWindowIcon(QtGui.QIcon('pollo.jpg'))
 
-    data = DATA(read=True)
+    data = DATA(read=False)
     window = MyApp(data)
     window.setWindowIcon(QtGui.QIcon('pollo.jpg'))
     window.addmpl_1(data.fig1)

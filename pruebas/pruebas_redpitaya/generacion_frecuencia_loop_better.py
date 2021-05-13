@@ -127,6 +127,7 @@ for freq in (frecuencias):
     posicion_trigger=int(veamos)
     # length=fm*(numero_pulsos-ciclos)/freq
     length=fm*(ciclos)/(freq*decimation[iteracion-1])
+    print('length:',length)    
     # length=int(veamos2) -posicion_trigger
     # LEEMOS Y REPRESENTAMOS 1
     # rp_s.tx_txt('ACQ:SOUR1:DATA?')

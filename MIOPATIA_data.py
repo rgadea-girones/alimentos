@@ -28,7 +28,7 @@ class DATA(object):
             # These are the default values.
             self.def_cfg= {'f_inicial':{'value':10, 'limits':[10.0,100.0E6],'type':'float'},
                             'f_final' :{'value':10000000, 'limits':[10.0,100.0E6],'type':'float'},
-                            'n_puntos':{'value':25, 'limits':[1,801],'type':'int'},
+                            'n_puntos':{'value':20, 'limits':[1,801],'type':'int'},
                             'ancho_banda':{'value':3, 'limits':[1,5],'type':'int'},
                             'vosc':{'value':0.5, 'limits':[0.0,1.0],'type':'float'},
                             'tipo_barrido':{'value':1, 'limits':[0,1],'type':'int'},

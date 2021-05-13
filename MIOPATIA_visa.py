@@ -1,41 +1,155 @@
-
 import pyvisa as visa
+import socket
 import numpy as np
+from time import perf_counter as pc
+from time import sleep
+from scipy.fft import fft, fftfreq, fftshift
 from PyQt5.QtWidgets import QMessageBox
 import fit_library as fit
 import pandas as pd
 
 
 
-class VISA():
-    def __init__(self,shared_data,dataview):
+class VISA(object):
+    delimiter = '\r\n'
+    def __init__(self, host, shared_data, dataview, timeout=None, port=5000):
         self.sd = shared_data
         #self.tb = txt_browser
         #self.fit_browser = fit_browser
         self.dv = dataview
 
         # Visa initializationg
-        self.rm = visa.ResourceManager()
-        self.lor = self.rm.list_resources()
-        ("Lista de dispositivos encontrados:")
-        self.dv.append_plus(str(self.lor))
+        # self.rm = visa.ResourceManager()
+        # self.lor = self.rm.list_resources()
+        # ("Lista de dispositivos encontrados:") 
+        # self.dv.append_plus(str(self.lor)) 
+
+        """Initialize object and open IP connection.
+        Host IP should be a string in parentheses, like '192.168.1.100'.
+        """
+        self.host    = host
+        self.port    = port
+        self.timeout = timeout
+
         try:
-            self.inst = self.rm.open_resource(self.sd.def_cfg['VI_ADDRESS'])
-            self.dv.append_plus("Conectados al equipo:")
-            self.dv.append_plus(str(self.inst.query("*IDN?")))
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        except:
-            self.dv.append_plus("No encuentro el medidor 4294A")
+            if timeout is not None:
+                self._socket.settimeout(timeout)
 
-        else:
-            # Basic parameters
-            self.inst.timeout = self.sd.def_cfg['GPIB_timeout']
-            # Self-test operation takes a long time [self.inst.query("*TST?")]
-            self.inst.read_termination  = '\n'
-            self.inst.write_termination = '\n'
-            # Avoids reading/sending carriage return inside messages
+            self._socket.connect((host, port))
+            print('conexion establecida con redpitaya')
 
-            self.inst.write('HOLD')
+        except socket.error as e:
+            print('SCPI >> connect({:s}:{:d}) failed: {:s}'.format(host, port, e))
+
+    def __del__(self):
+        if self._socket is not None:
+            self._socket.close()
+        self._socket = None
+
+    def close(self):
+        """Close IP connection."""
+        self.__del__()
+
+    def rx_txt(self, chunksize = 4096):
+        """Receive text string and return it after removing the delimiter."""
+        msg = ''
+        while 1:
+            chunk = self._socket.recv(chunksize + len(self.delimiter)).decode('utf-8') # Receive chunk size of 2^n preferably
+            msg += chunk
+            if (len(chunk) and chunk[-2:] == self.delimiter):
+                break
+        return msg[:-2]
+
+    def rx_arb(self):
+        numOfBytes = 0
+        """ Recieve binary data from scpi server"""
+        str=''
+        while (len(str) != 1):
+            str = (self._socket.recv(1))
+        if not (str == '#'):
+            return False
+        str=''
+        while (len(str) != 1):
+            str = (self._socket.recv(1))
+        numOfNumBytes = int(str)
+        if not (numOfNumBytes > 0):
+            return False
+        str=''
+        while (len(str) != numOfNumBytes):
+            str += (self._socket.recv(1))
+        numOfBytes = int(str)
+        str=''
+        while (len(str) != numOfBytes):
+            str += (self._socket.recv(1))
+        return str
+
+    def tx_txt(self, msg):
+        """Send text string ending and append delimiter."""
+        return self._socket.send((msg + self.delimiter).encode('utf-8'))
+
+    def txrx_txt(self, msg):
+        """Send/receive text string."""
+        self.tx_txt(msg)
+        return self.rx_txt()
+
+# IEEE Mandated Commands
+
+    def cls(self):
+        """Clear Status Command"""
+        return self.tx_txt('*CLS')
+
+    def ese(self, value: int):
+        """Standard Event Status Enable Command"""
+        return self.tx_txt('*ESE {}'.format(value))
+
+    def ese_q(self):
+        """Standard Event Status Enable Query"""
+        return self.txrx_txt('*ESE?')
+
+    def esr_q(self):
+        """Standard Event Status Register Query"""
+        return self.txrx_txt('*ESR?')
+
+    def idn_q(self):
+        """Identification Query"""
+        return self.txrx_txt('*IDN?')
+
+    def opc(self):
+        """Operation Complete Command"""
+        return self.tx_txt('*OPC')
+
+    def opc_q(self):
+        """Operation Complete Query"""
+        return self.txrx_txt('*OPC?')
+
+    def rst(self):
+        """Reset Command"""
+        return self.tx_txt('*RST')
+
+    def sre(self):
+        """Service Request Enable Command"""
+        return self.tx_txt('*SRE')
+
+    def sre_q(self):
+        """Service Request Enable Query"""
+        return self.txrx_txt('*SRE?')
+
+    def stb_q(self):
+        """Read Status Byte Query"""
+        return self.txrx_txt('*STB?')
+
+# :SYSTem
+
+    def err_c(self):
+        """Error count."""
+        return rp.txrx_txt('SYST:ERR:COUN?')
+
+    def err_c(self):
+        """Error next."""
+        return rp.txrx_txt('SYST:ERR:NEXT?')
+
 
     def switch(self,switcher,input):
         #Switch case function
@@ -52,98 +166,273 @@ class VISA():
 
     def config_measurement(self):
 
+        frecuencia_min = self.sd.def_cfg['f_inicial']['value']
+        frecuencia_max= self.sd.def_cfg['f_inicial']['value']
+        puntos_decada= self.sd.def_cfg['n_puntos']['value']
+        ampl =self.sd.def_cfg['vosc']['value']
+        decimation=1*puntos_decada*[8192]+2*puntos_decada*[1024]+1*puntos_decada*[64]+2*puntos_decada*[1]
+        numero_valores=(frecuencia_max-frecuencia_min)*puntos_decada
+        # valores no configurables desde el front-end
+        wave_form = 'sine'
+        Rs=1000
+        fm=125000000
+        numero_pulsos=10
+        ciclos=5
+        # borra cuando quite la SOURCE 2
+        amplreference=np.linspace(10,1,numero_valores)
+        ampl2=1/amplreference
+        phases=np.linspace(180,0,numero_valores)
+        # prueba de conexion
+        # self.tx_txt('SOUR2:BURS:STAT?')
+        # veamosburst= self.rx_txt() 
+        # print(veamosburst)
+        # self.tx_txt('SOUR2:BURS:NCYC?')
+        # veamosCICLOS= self.rx_txt() 
+        # print(veamosCICLOS)
+
         #fprintf(handles.GPIBobj,'PAVER OFF'); % Desactivo el promediado. Añadido por mi.
 
-        # Average of measurement points
-        self.inst.write('PAVERFACT %s' % str(self.sd.def_cfg['n_medidas_punto']['value']))
-        # Activate average or not
-        self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.sd.def_cfg['avg']['value']))
-        # Frequency sweep starting at ...
-        self.inst.write('STAR %s' % str(self.sd.def_cfg['f_inicial']['value']))
-        # Frequency sweep stopping at ...
-        self.inst.write('STOP %s' % str(self.sd.def_cfg['f_final']['value']))
-        # Tipo de barrido
-        self.inst.write('SWPT %s' % self.switch({0:'LIN', 1:'LOG'},self.sd.def_cfg['tipo_barrido']['value']))
-        # Number of points
-        self.inst.write('POIN %s' % str(self.sd.def_cfg['n_puntos']['value']))
-        # Bandwidth - resolución de la medida.
-        self.inst.write('BWFACT %s' % str(self.sd.def_cfg['ancho_banda']['value']))
-        # Configura la tensión de salida del oscilador
-        self.inst.write('POWMOD VOLT;POWE %s' % str(self.sd.def_cfg['vosc']['value']))
+        # # Average of measurement points
+        # self.inst.write('PAVERFACT %s' % str(self.sd.def_cfg['n_medidas_punto']['value']))
+        # # Activate average or not
+        # self.inst.write('PAVER %s' % self.switch({0:'OFF', 1:'ON'},self.sd.def_cfg['avg']['value']))
+        # # Frequency sweep starting at ...
+        # self.inst.write('STAR %s' % str(self.sd.def_cfg['f_inicial']['value']))
+        # # Frequency sweep stopping at ...
+        # self.inst.write('STOP %s' % str(self.sd.def_cfg['f_final']['value']))
+        # # Tipo de barrido
+        # self.inst.write('SWPT %s' % self.switch({0:'LIN', 1:'LOG'},self.sd.def_cfg['tipo_barrido']['value']))
+        # # Number of points
+        # self.inst.write('POIN %s' % str(self.sd.def_cfg['n_puntos']['value']))
+        # # Bandwidth - resolución de la medida.
+        # self.inst.write('BWFACT %s' % str(self.sd.def_cfg['ancho_banda']['value']))
+        # # Configura la tensión de salida del oscilador
+        # self.inst.write('POWMOD VOLT;POWE %s' % str(self.sd.def_cfg['vosc']['value']))
 
 
-        # DC_bias active
-        if (self.sd.def_cfg['DC_bias']==0):
-            # Tensión de polarización.
-            self.inst.write('DCV %s' % str(self.sd.def_cfg['nivel_DC']['value']))
-            # Modo de BIAS
-            self.inst.write('DCMOD CVOLT')
-            # Rango de tensión de bias.
-            self.inst.write('DCRNG M1')
-            # Borrar errores
-            self.inst.write('*CLS')
-            # Activo la tensión de bias.
-            self.inst.write('DCO ON')
-            # Solicito el último error que se ha producido
-            error = self.inst.query('OUTPERRO?')
-            error_code = int(error[0:error.find(',')])
-            if (error_code==0):
-                flag_dcrange = 1
-            elif (error_code==137):
-                self.inst.write('DCRNG M10')
-                self.inst.write('*CLS')
-                self.inst.write('DCO ON')
-                error = self.inst.query('OUTPERRO?')
-                error_code = int(error[0:error.find(',')])
-                if (error_code==0):
-                    flag_dcrange = 10
-                elif (error_code==137):
-                    self.inst.write('DCRNG M100')
-                    self.inst.write('*CLS')
-                    self.inst.write('DCO ON')
-                    error = self.inst.query('OUTPERRO?')
-                    error_code = int(error[0:error.find(',')])
-                    if (error_code==0):
-                        flag_dcrange = 100
-                    elif (error_code==137):
-                        # ERROR: BIAS Voltage too high
-                        self.dv.append_plus("Módulo de BIAS demasiado elevado. Redúzcala o Desactívela")
-                        self.dv.append_plus("ERROR %s" % str(error_code))
-                    else:
-                        self.dv.append_plus("Reconsidere usar la tensión de BIAS")
-                        self.dv.append_plus("ERROR %s" % str(error_code))
-                else:
-                    self.dv.append_plus("Reconsidere usar la tensión de BIAS")
-                    self.dv.append_plus("ERROR %s" % str(error_code))
-            else:
-                self.dv.append_plus("Reconsidere usar la tensión de BIAS")
-                self.dv.append_plus("ERROR %s" % str(error_code))
+        # # DC_bias active
+        # if (self.sd.def_cfg['DC_bias']==0):
+        #     # Tensión de polarización.
+        #     self.inst.write('DCV %s' % str(self.sd.def_cfg['nivel_DC']['value']))
+        #     # Modo de BIAS
+        #     self.inst.write('DCMOD CVOLT')
+        #     # Rango de tensión de bias.
+        #     self.inst.write('DCRNG M1')
+        #     # Borrar errores
+        #     self.inst.write('*CLS')
+        #     # Activo la tensión de bias.
+        #     self.inst.write('DCO ON')
+        #     # Solicito el último error que se ha producido
+        #     error = self.inst.query('OUTPERRO?')
+        #     error_code = int(error[0:error.find(',')])
+        #     if (error_code==0):
+        #         flag_dcrange = 1
+        #     elif (error_code==137):
+        #         self.inst.write('DCRNG M10')
+        #         self.inst.write('*CLS')
+        #         self.inst.write('DCO ON')
+        #         error = self.inst.query('OUTPERRO?')
+        #         error_code = int(error[0:error.find(',')])
+        #         if (error_code==0):
+        #             flag_dcrange = 10
+        #         elif (error_code==137):
+        #             self.inst.write('DCRNG M100')
+        #             self.inst.write('*CLS')
+        #             self.inst.write('DCO ON')
+        #             error = self.inst.query('OUTPERRO?')
+        #             error_code = int(error[0:error.find(',')])
+        #             if (error_code==0):
+        #                 flag_dcrange = 100
+        #             elif (error_code==137):
+        #                 # ERROR: BIAS Voltage too high
+        #                 self.dv.append_plus("Módulo de BIAS demasiado elevado. Redúzcala o Desactívela")
+        #                 self.dv.append_plus("ERROR %s" % str(error_code))
+        #             else:
+        #                 self.dv.append_plus("Reconsidere usar la tensión de BIAS")
+        #                 self.dv.append_plus("ERROR %s" % str(error_code))
+        #         else:
+        #             self.dv.append_plus("Reconsidere usar la tensión de BIAS")
+        #             self.dv.append_plus("ERROR %s" % str(error_code))
+        #     else:
+        #         self.dv.append_plus("Reconsidere usar la tensión de BIAS")
+        #         self.dv.append_plus("ERROR %s" % str(error_code))
 
         # No BIAS voltage
-        else:
-            self.inst.write('DCRNG M1') # Default range
-            self.inst.write('DCO OFF')
+        # else:
+        #     self.inst.write('DCRNG M1') # Default range
+        #     self.inst.write('DCO OFF')
 
 
     def measure(self):
+        t0=pc()
+        frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
+        frecuencia_max= np.log10(self.sd.def_cfg['f_final']['value'])
+        puntos_decada= self.sd.def_cfg['n_puntos']['value']
+        ampl =self.sd.def_cfg['vosc']['value']
+        decimation=1*puntos_decada*[8192]+2*puntos_decada*[1024]+1*puntos_decada*[64]+2*puntos_decada*[1]
+        numero_valores=int((frecuencia_max-frecuencia_min)*puntos_decada)
+
+        if (self.sd.def_cfg['tipo_barrido']['value']==0):
+            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
+                                       self.sd.def_cfg['f_final']['value'],
+                                       self.sd.def_cfg['n_puntos']['value'])
+        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
+            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
+                                       np.log10(self.sd.def_cfg['f_final']['value']),
+                                       numero_valores,base=10)
+        # valores no configurables desde el front-end
+        wave_form = 'sine'
+        Rs=1000
+        fm=125000000
+        numero_pulsos=10
+        ciclos=5
+        # borra cuando quite la SOURCE 2
+        amplreference=np.linspace(10,1,numero_valores)
+        ampl2=1/amplreference
+        phases=np.linspace(180,0,numero_valores)
+        
         self.dv.append_plus("Midiendo Z=R+iX")
+        iteracion=1
+        configuracion=0
+        adquisicion=0
+        postprocesamiento=0
+        espera_trigger=0
+        Z=np.zeros(numero_valores)
+        PHASE=np.zeros(numero_valores)
+        for freq in (self.sd.freq):
+            t1=pc()
+            self.tx_txt('GEN:RST')
+            self.tx_txt('ACQ:RST')
+            self.tx_txt('ACQ:DATA:UNITS VOLTS')
+            self.tx_txt('SOUR1:BURS:STAT BURST') # % Set burst mode to ON
+            self.tx_txt('SOUR1:BURS:NCYC 10') # Set 10 pulses of sine wave
+        
+            self.tx_txt('SOUR1:FUNC ' + str(wave_form).upper())
+            self.tx_txt('SOUR1:VOLT ' + str(ampl))
+            self.tx_txt('SOUR1:FREQ:FIX ' + str(freq))
+            #rp_s.tx_txt('SOUR1:TRIG:SOUR INT')
+            #rp_s.tx_txt('SOUR1:TRIG:IMM')
+# esto habrá que borrarlo !!
+            self.tx_txt('SOUR2:FUNC ' + str(wave_form).upper())
+            self.tx_txt('SOUR2:VOLT ' + str(ampl2[iteracion-1]))
+            self.tx_txt('SOUR2:FREQ:FIX ' + str(freq))
+            self.tx_txt('SOUR2:BURS:STAT BURST') # % Set burst mode to ON
+            self.tx_txt('SOUR2:BURS:NCYC 10') # Set 10 pulses of sine wave     
+            self.tx_txt('SOUR2:PHAS ' + str(phases[iteracion-1]))    
+# hay que borrarlo
 
-        # Service Request instead of using pulling
-        event_type = visa.constants.EventType.service_request
-        # Mechanism by which we want to be notified
-        event_mech = visa.constants.EventMechanism.queue
+            self.tx_txt('ACQ:DEC ' + str(decimation[iteracion-1]))
+            self.tx_txt('ACQ:START')
+            self.tx_txt('ACQ:TRIG CH1_PE')
 
-        self.inst.write('TRGS INT')          # Internal Trigger Source
-        self.inst.write('ESNB 1')            # Event_Status_Register[0]=1 // Enables Sweep Completion bit
-        self.inst.write('*SRE 4')            # Service Request Enable = 1
-        self.inst.write('*CLS')              # Clears Error queue
+            self.tx_txt('OUTPUT:STATE ON')  #cuidado con cambiar esto
+            t2=pc()
+        # ESPERAMOS EL TRIGGER
+            # sleep(1)
+            while freq<100:
+                self.tx_txt('ACQ:TRIG:STAT?')
+                if self.rx_txt() == 'TD':
+                    break
+            t2t=pc()
+            # self.dv.append_plus('iteracion:'+ str(iteracion))
+            # self.dv.append_plus('frecuencia:'+ str(freq))
+            print (iteracion)
+            print(freq)
+            sleep(0.2)
+            self.tx_txt('ACQ:TPOS?')
+            veamos= self.rx_txt()
+            posicion_trigger=int(veamos)
+            # self.dv.append_plus("posicion trigger:" + str(posicion_trigger))
+            print('posicion trigger:',veamos)
+            length=fm*(ciclos)/(freq*decimation[iteracion-1])
+            # print('decimation:',decimation[iteracion-1])
+            # LEEMOS Y REPRESENTAMOS 1
+            
+
+            self.tx_txt('ACQ:SOUR1:DATA:STA:N? ' + str(posicion_trigger)+','+ str(length))
+            
+            t3=pc()
+
+            buff_string = self.rx_txt()
+            buff_string = buff_string.strip('{}\n\r').replace("  ", "").split(',')
+            buff = list(map(float, buff_string))
+            t4=pc()
+            my_array = np.asarray(buff)
+            # super_buffer.append(buff)
+            # super_buffer_flat=sum(super_buffer, [])
+            yf = fft(my_array)
+            t5=pc()
 
 
-        self.inst.write('MEAS IRIM')         # Medida de R y X
-        self.inst.write('HIDI OFF')          # Muestras la traza inactiva
-        self.inst.write('SING')              # Iniciar un barrido único.
 
-        self.dv.append_plus("ACK Instrumento = %s" % self.inst.query('*OPC?'))
+            # LEEMOS Y REPRESENTAMOS2
+            self.tx_txt('ACQ:SOUR2:DATA:STA:N? ' + str(posicion_trigger)+','+ str(length))
+            t6=pc()
+            buff_string = self.rx_txt()
+            buff_string = buff_string.strip('{}\n\r').replace("  ", "").split(',')
+            buff = list(map(float, buff_string))
+            t7=pc()
+            my_array2 = np.asarray(buff)
+            #super_buffer2.append(buff)
+            #super_buffer_flat2=sum(super_buffer2, [])
+            yf2 = fft(my_array2)
+            #dif=my_array-my_array2
+            #yf3=fft(dif)
+            indice1=np.argmax(np.abs(yf))
+            indice2=np.argmax(np.abs(yf2))
+            #indice3=np.argmax(np.abs(yf3))
+            Zq=np.max(np.abs(yf))
+            Zr=np.max(np.abs(yf2))
+            Z[iteracion-1]=np.max(np.abs(yf))/np.max(np.abs(yf2))
+            ## barbaridadZ[iteracion-1]=(Zq-Zr)*Rs/Zr
+            # Y = fftshift(yf2)
+            # p=np.angle(Y)
+            # p[np.abs(Y) < 1] = 0
+            # PHASE[iteracion-1] =np.max(p)*180/np.pi
+            # PHASE[iteracion-1]=((np.angle(yf[indice1])-np.angle(yf2[indice2])))*180/np.pi
+            # PHASE[iteracion-1]=(np.angle(yf2[indice2])+np.pi/2)*180/np.pi
+            PHASE[iteracion-1]=np.abs((np.angle(yf[indice1]/yf2[indice2])))*180/np.pi    
+
+            t8=pc()
+            # N2=my_array2.shape[0]
+            # T=1/fm
+            # idea=N//2
+            # xf2 = fftfreq(N2, T)[:N2//2]
+            # plot2=plt.figure(2*(iteracion-1)+2)
+            # plt.plot(xf2, 2.0/N * np.abs(yf2[0:N2//2]))
+            # plt.plot(xf2, p[0:N2//2])    
+            # plt.xlabel('Frecuencia')
+            # plt.grid()
+
+
+
+
+            iteracion=iteracion+1
+            self.tx_txt('OUTPUT:STATE OFF')
+            self.tx_txt('ACQ:STOP')
+            t9=pc()
+            postprocesamiento=postprocesamiento+(t5-t4)+(t8-t7)
+            configuracion=configuracion+(t2-t1)+(t9-t8)+(t6-t5)+(t3-t2t)
+            adquisicion=adquisicion+(t4-t3)+(t7-t6)  
+            espera_trigger=espera_trigger+ (t2t-t2)  
+
+
+        # # Service Request instead of using pulling
+        # event_type = visa.constants.EventType.service_request
+        # # Mechanism by which we want to be notified
+        # event_mech = visa.constants.EventMechanism.queue
+
+        # self.inst.write('TRGS INT')          # Internal Trigger Source
+        # self.inst.write('ESNB 1')            # Event_Status_Register[0]=1 // Enables Sweep Completion bit
+        # self.inst.write('*SRE 4')            # Service Request Enable = 1
+        # self.inst.write('*CLS')              # Clears Error queue
+
+
+        # self.inst.write('MEAS IRIM')         # Medida de R y X
+        # self.inst.write('HIDI OFF')          # Muestras la traza inactiva
+        # self.inst.write('SING')              # Iniciar un barrido único.
+
+        # self.dv.append_plus("ACK Instrumento = %s" % self.inst.query('*OPC?'))
 
         # self.inst.enable_event(event_type, event_mech)
         #
@@ -157,32 +446,25 @@ class VISA():
         # response.timed_out = False
 
         # Recover Measured Data
-        self.inst.write('TRAC A')           # Selecciona traza A
-        self.inst.write('AUTO')             # Autoescala
-        aux_R = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
+        # self.inst.write('TRAC A')           # Selecciona traza A
+        # self.inst.write('AUTO')             # Autoescala
+        # aux_R = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
 
-        self.inst.write('TRAC B')           # Selecciona traza A
-        self.inst.write('AUTO')             # Autoescala
-        aux_X = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
-
-        self.sd.R_data = aux_R[0::2]
-        self.sd.X_data = aux_X[0::2]
+        # self.inst.write('TRAC B')           # Selecciona traza A
+        # self.inst.write('AUTO')             # Autoescala
+        # aux_X = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
+        t10=pc()
+        self.sd.R_data = Z*np.cos(PHASE)
+        self.sd.X_data = Z*np.cos(PHASE)
 
         # Compute Err, Eri, Er_mod, Er_fase_data
         # First create frequency array based on actual gui conditions
         # The freq array will not be changed until next data acquisition even if GUI changes
-        if (self.sd.def_cfg['tipo_barrido']['value']==0):
-            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
-                                       self.sd.def_cfg['f_final']['value'],
-                                       self.sd.def_cfg['n_puntos']['value'])
-        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
-                                       np.log10(self.sd.def_cfg['f_final']['value']),
-                                       self.sd.def_cfg['n_puntos']['value'])
+
 
         complex_aux         = self.sd.R_data + self.sd.X_data*1j
-        self.sd.Z_mod_data  = np.abs(complex_aux)
-        self.sd.Z_fase_data = np.angle(complex_aux)
+        self.sd.Z_mod_data  = Z
+        self.sd.Z_fase_data = PHASE
 
         admitance_aux       = 1./complex_aux
         G_data              = np.real(admitance_aux)
@@ -193,12 +475,20 @@ class VISA():
 
         self.sd.Er_mod_data  = np.abs(E_data);
         self.sd.Er_fase_data = np.angle(E_data);
-
-        # Deactivate BIAS for security reasons
-        self.inst.write('DCO OFF')
-        self.inst.write('DCRNG M1')
-
-        self.inst.wait_for_srq(self.sd.def_cfg['GPIB_timeout'])
+        t11=pc()
+        # # Deactivate BIAS for security reasons
+        # self.inst.write('DCO OFF')
+        # self.inst.write('DCRNG M1')
+        postprocesamiento=postprocesamiento+(t11-t10)
+        print('espera_trigger:',espera_trigger)
+        print('configuracion:',configuracion)
+        print('adquisicion:',adquisicion)
+        print('postprocesamiento:',postprocesamiento)
+        total=t11-t0
+        print ('total:',total)
+        # self.inst.wait_for_srq(self.sd.def_cfg['GPIB_timeout'])
+        self.dv.append_plus("He finalizado de medir")
+        self.dv.append_plus("tiempo transcurrido:" + str(total))
 
 
     def config_calibration(self):
