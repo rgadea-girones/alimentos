@@ -350,7 +350,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Ancho Banda</string>
+              <string>R shunt</string>
              </property>
             </widget>
             <widget class="QLineEdit" name="ancho_banda">
@@ -401,7 +401,7 @@
               </font>
              </property>
              <property name="text">
-              <string>[1-5]</string>
+              <string>[0-5]</string>
              </property>
             </widget>
             <widget class="QLabel" name="label_52">

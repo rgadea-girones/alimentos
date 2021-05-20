@@ -7,6 +7,7 @@ from scipy.fft import fft, fftfreq, fftshift
 from PyQt5.QtWidgets import QMessageBox
 import fit_library as fit
 import pandas as pd
+from plumbum import SshMachine
 
 
 
@@ -286,11 +287,39 @@ class VISA(object):
         fm=125000000
         numero_pulsos=10
         ciclos=5
-        # borra cuando quite la SOURCE 2
-        amplreference=np.linspace(10,1,numero_valores)
-        ampl2=1/amplreference
-        phases=np.linspace(180,0,numero_valores)
+        R_shunt_k = self.sd.def_cfg['ancho_banda']['value'] #elijo 1000 
+        # print(R_shunt_k)
+        # # borra cuando quite la SOURCE 2
+        # amplreference=np.linspace(10,1,numero_valores)
+        # ampl2=1/amplreference
+        # phases=np.linspace(180,0,numero_valores)
+        shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
+
+
+        #configuro via i2c la resistencia de shunt
         
+        veamos = SshMachine(self.host, user = "root")
+        veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
+        veamos.cwd.chdir("/opt/redpitaya/bin")
+        comando="./i2c_shunt " + str(R_shunt_k)
+        # print (comando)
+        r_back = veamos[comando]
+        # sizeh1=str('-sizeh1={0}'.format(individual[0]))
+        # sizeh2=str('-sizeh2={0}'.format(individual[1]))
+        # epochs=str('-epochs={0}'.format(epochs))
+        # decay=str('-decay={0}'.format(decay_value))
+        # step=str('-step={0}'.format(learning_step))
+        # minibatch=str('-batchsize={0}'.format(batchsize))
+        # idea=str(r_back[epochs, sizeh1,sizeh2, minibatch,decay,step]())
+        # for line in idea.split("\n"):
+        #     if "error_val" in line:
+        #     #print (line.strip())
+        #        error_rate_float=[float(s) for s in re.findall('\d+\.\d+',line)]
+        #        error_rate=error_rate_float[0]
+        veamos.close()
+
+
+
         self.dv.append_plus("Midiendo Z=R+iX")
         iteracion=1
         configuracion=0
@@ -313,12 +342,12 @@ class VISA(object):
             #rp_s.tx_txt('SOUR1:TRIG:SOUR INT')
             #rp_s.tx_txt('SOUR1:TRIG:IMM')
 # esto habrá que borrarlo !!
-            self.tx_txt('SOUR2:FUNC ' + str(wave_form).upper())
-            self.tx_txt('SOUR2:VOLT ' + str(ampl2[iteracion-1]))
-            self.tx_txt('SOUR2:FREQ:FIX ' + str(freq))
-            self.tx_txt('SOUR2:BURS:STAT BURST') # % Set burst mode to ON
-            self.tx_txt('SOUR2:BURS:NCYC 10') # Set 10 pulses of sine wave     
-            self.tx_txt('SOUR2:PHAS ' + str(phases[iteracion-1]))    
+            # self.tx_txt('SOUR2:FUNC ' + str(wave_form).upper())
+            # self.tx_txt('SOUR2:VOLT ' + str(ampl2[iteracion-1]))
+            # self.tx_txt('SOUR2:FREQ:FIX ' + str(freq))
+            # self.tx_txt('SOUR2:BURS:STAT BURST') # % Set burst mode to ON
+            # self.tx_txt('SOUR2:BURS:NCYC 10') # Set 10 pulses of sine wave     
+            # self.tx_txt('SOUR2:PHAS ' + str(phases[iteracion-1]))    
 # hay que borrarlo
 
             self.tx_txt('ACQ:DEC ' + str(decimation[iteracion-1]))
@@ -376,14 +405,19 @@ class VISA(object):
             #super_buffer2.append(buff)
             #super_buffer_flat2=sum(super_buffer2, [])
             yf2 = fft(my_array2)
-            #dif=my_array-my_array2
-            #yf3=fft(dif)
+            dif=my_array-my_array2
+            yf3=fft(dif)
             indice1=np.argmax(np.abs(yf))
             indice2=np.argmax(np.abs(yf2))
-            #indice3=np.argmax(np.abs(yf3))
+            indice3=np.argmax(np.abs(yf3))
             Zq=np.max(np.abs(yf))
             Zr=np.max(np.abs(yf2))
-            Z[iteracion-1]=np.max(np.abs(yf))/np.max(np.abs(yf2))
+            # Z[iteracion-1]=np.max(np.abs(yf))/np.max(np.abs(yf2)) #  primera opcion
+            yf_dif=(yf2-yf)
+            # indice3=np.argmax(np.abs(yf_dif))            
+            # Z[iteracion-1]=np.max(np.abs(yf_dif))*1000/np.max(np.abs(yf2)) # segunda opcion
+            Z[iteracion-1]=np.max(np.abs(yf3))*shunt[R_shunt_k]/np.max(np.abs(yf2))    #tercera opcion         
+            # PHASE[iteracion-1]=(np.angle(yf_dif[indice3])+np.pi/2)*180/np.pi               
             ## barbaridadZ[iteracion-1]=(Zq-Zr)*Rs/Zr
             # Y = fftshift(yf2)
             # p=np.angle(Y)
@@ -391,8 +425,10 @@ class VISA(object):
             # PHASE[iteracion-1] =np.max(p)*180/np.pi
             # PHASE[iteracion-1]=((np.angle(yf[indice1])-np.angle(yf2[indice2])))*180/np.pi
             # PHASE[iteracion-1]=(np.angle(yf2[indice2])+np.pi/2)*180/np.pi
-            PHASE[iteracion-1]=np.abs((np.angle(yf[indice1]/yf2[indice2])))*180/np.pi    
-
+            PHASE[iteracion-1]=np.abs((np.angle(yf[indice1]/yf2[indice2])))*180/np.pi   
+            # PHASE[iteracion-1]=np.abs((np.angle(yf[indice1]/yf2[indice2]))+np.pi/2)*180/np.pi    
+            # metodo alternativo
+            
             t8=pc()
             # N2=my_array2.shape[0]
             # T=1/fm
@@ -403,6 +439,7 @@ class VISA(object):
             # plt.plot(xf2, p[0:N2//2])    
             # plt.xlabel('Frecuencia')
             # plt.grid()
+            
 
 
 
@@ -454,8 +491,8 @@ class VISA(object):
         # self.inst.write('AUTO')             # Autoescala
         # aux_X = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
         t10=pc()
-        self.sd.R_data = Z*np.cos(PHASE)
-        self.sd.X_data = Z*np.cos(PHASE)
+        self.sd.R_data = Z*np.cos(PHASE*np.pi/180)
+        self.sd.X_data = Z*np.sin(PHASE*np.pi/180)
 
         # Compute Err, Eri, Er_mod, Er_fase_data
         # First create frequency array based on actual gui conditions
@@ -486,6 +523,11 @@ class VISA(object):
         print('postprocesamiento:',postprocesamiento)
         total=t11-t0
         print ('total:',total)
+        absolute_val_array = np.abs(self.sd.freq - 1000)
+        smallest_difference_index = absolute_val_array.argmin()
+        print ('R_data =', self.sd.R_data[smallest_difference_index])        
+        print ('X_data=', self.sd.X_data[smallest_difference_index])
+        print ('resistencia shunt=', shunt[R_shunt_k])
         # self.inst.wait_for_srq(self.sd.def_cfg['GPIB_timeout'])
         self.dv.append_plus("He finalizado de medir")
         self.dv.append_plus("tiempo transcurrido:" + str(total))
