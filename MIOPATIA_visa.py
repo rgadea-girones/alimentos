@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QMessageBox
 import fit_library as fit
 import pandas as pd
 from plumbum import SshMachine
+from plumbum.machines.paramiko_machine import ParamikoMachine
 
 
 
@@ -298,7 +299,8 @@ class VISA(object):
 
         #configuro via i2c la resistencia de shunt
         
-        veamos = SshMachine(self.host, user = "root")
+        # veamos = SshMachine(self.host, user = "root")
+        veamos = ParamikoMachine(self.host, user = "root", password="root")
         veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
         veamos.cwd.chdir("/opt/redpitaya/bin")
         comando="./i2c_shunt " + str(R_shunt_k)
