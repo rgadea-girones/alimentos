@@ -288,10 +288,9 @@ class VISA(object):
         fm=125000000
         numero_pulsos=10
         ciclos=5
-        R_shunt_k = self.sd.def_cfg['ancho_banda']['value'] #elijo 1000 
+        R_shunt_k = self.sd.def_cfg['shunt']['value'] #elijo 1000 
         
-        # Postprocesamiento=self.sd.def_cfg['postprocesamiento']['value']
-        tipo_Postprocesamiento=1
+        Postprocesamiento=self.sd.def_cfg['postprocesamiento']['value']
         # print(R_shunt_k)
         # # borra cuando quite la SOURCE 2
         # amplreference=np.linspace(10,1,numero_valores)
@@ -411,7 +410,7 @@ class VISA(object):
             dif=my_array-my_array2
             #super_buffer2.append(buff)
             #super_buffer_flat2=sum(super_buffer2, [])
-            if tipo_Postprocesamiento==0:
+            if postprocesamiento==0:
                 yf = fft(my_array)
                 yf2 = fft(my_array2)
                 yf3=fft(dif)

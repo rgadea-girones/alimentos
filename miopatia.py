@@ -248,7 +248,7 @@ if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
     myappid = 'UPV.visa.4294A.1' # arbitrary string
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    # ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     app.setWindowIcon(QtGui.QIcon('pollo.jpg'))
 
     data = DATA(read=False)
