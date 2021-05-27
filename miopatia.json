@@ -126,9 +126,17 @@
         ],
         "type": "int"
     },
-    "combox": [
+    "comboxA": [
         "|Z|",
         "F.Z",
+        "E'r",
+        "E''r",
+        "|Er|",
+        "F.Er"
+    ],
+    "comboxB": [
+        "F.Z",
+        "|Z|",
         "E'r",
         "E''r",
         "|Er|",

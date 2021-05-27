@@ -35,8 +35,8 @@ class DATA_VIEW(object):
                                 4:self.sd.Er_mod_data,
                                 5:self.sd.Er_fase_data}, comboBox_trazaA)
 
-        traza_B = self.switch({ 0:self.sd.Z_mod_data,
-                                1:self.sd.Z_fase_data,
+        traza_B = self.switch({ 0:self.sd.Z_fase_data,
+                                1:self.sd.Z_mod_data,
                                 2:self.sd.Err_data,
                                 3:self.sd.Eri_data,
                                 4:self.sd.Er_mod_data,
@@ -83,8 +83,8 @@ class DATA_VIEW(object):
                                 5:data['E_fase']},
                                 comboBox_trazaA)
 
-        traza_B = self.switch({ 0:data['Z_mod'],
-                                1:data['Z_Fase'],
+        traza_B = self.switch({ 0:data['Z_Fase'],
+                                1:data['Z_mod'],
                                 2:data['Err'],
                                 3:data['Eri'],
                                 4:data['E_mod'],

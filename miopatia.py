@@ -52,9 +52,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 j+=1
             return bg_config_cal
 
-        self.comboBox_trazaA.addItems(self.sd.def_cfg['combox'])
-        self.comboBox_trazaB.addItems(self.sd.def_cfg['combox'])
-        self.comboBox_mag_fit.addItems(self.sd.def_cfg['combox'])
+        self.comboBox_trazaA.addItems(self.sd.def_cfg['comboxA'])
+        self.comboBox_trazaB.addItems(self.sd.def_cfg['comboxB'])
+        self.comboBox_mag_fit.addItems(self.sd.def_cfg['comboxA'])
         self.comboBox_fit_alg.addItems(self.sd.def_cfg['combox_fit'])
         self.bg_xaxis      = Rbutton_group([self.radioButton_lineal, self.radioButton_log])
         self.bg_xaxis_2    = Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
