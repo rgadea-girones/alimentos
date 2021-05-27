@@ -1736,22 +1736,6 @@ MEDIDA</string>
               <height>121</height>
              </rect>
             </property>
-            <property name="title">
-             <string>Promediado</string>
-            </property>
-            <widget class="QCheckBox" name="avg_2">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>92</width>
-               <height>23</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>Activar</string>
-             </property>
-            </widget>
             <widget class="QLabel" name="label_20">
              <property name="geometry">
               <rect>

@@ -73,7 +73,7 @@
           <bool>false</bool>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="datos">
           <attribute name="title">
@@ -353,7 +353,7 @@
               <string>R shunt</string>
              </property>
             </widget>
-            <widget class="QLineEdit" name="ancho_banda">
+            <widget class="QLineEdit" name="shunt">
              <property name="geometry">
               <rect>
                <x>330</x>
@@ -578,51 +578,32 @@
               </rect>
              </property>
              <property name="title">
-              <string>Promediado</string>
+              <string>Postprocesado</string>
              </property>
-             <widget class="QLabel" name="label_14">
+             <widget class="QRadioButton" name="radioButton_FFT">
               <property name="geometry">
                <rect>
                 <x>30</x>
-                <y>60</y>
-                <width>141</width>
-                <height>20</height>
-               </rect>
-              </property>
-              <property name="font">
-               <font>
-                <family>Courier 10 Pitch</family>
-                <pointsize>9</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Medidas/pto [1-256]</string>
-              </property>
-             </widget>
-             <widget class="QLineEdit" name="n_medidas_punto">
-              <property name="geometry">
-               <rect>
-                <x>100</x>
                 <y>30</y>
-                <width>71</width>
-                <height>20</height>
-               </rect>
-              </property>
-              <property name="readOnly">
-               <bool>false</bool>
-              </property>
-             </widget>
-             <widget class="QCheckBox" name="avg">
-              <property name="geometry">
-               <rect>
-                <x>12</x>
-                <y>30</y>
-                <width>92</width>
-                <height>23</height>
+                <width>82</width>
+                <height>17</height>
                </rect>
               </property>
               <property name="text">
-               <string>Activar</string>
+               <string>FFT</string>
+              </property>
+             </widget>
+             <widget class="QRadioButton" name="radioButton_Corre">
+              <property name="geometry">
+               <rect>
+                <x>30</x>
+                <y>50</y>
+                <width>111</width>
+                <height>17</height>
+               </rect>
+              </property>
+              <property name="text">
+               <string>Correlación</string>
               </property>
              </widget>
             </widget>
@@ -1528,10 +1509,10 @@ MEDIDA</string>
              </font>
             </property>
             <property name="text">
-             <string>Ancho Banda</string>
+             <string>R shunt</string>
             </property>
            </widget>
-           <widget class="QLineEdit" name="ancho_banda_2">
+           <widget class="QLineEdit" name="shunt_2">
             <property name="geometry">
              <rect>
               <x>330</x>
@@ -1579,7 +1560,7 @@ MEDIDA</string>
              </font>
             </property>
             <property name="text">
-             <string>[1-5]</string>
+             <string>[0-5]</string>
             </property>
            </widget>
            <widget class="QLabel" name="label_56">
@@ -1756,51 +1737,32 @@ MEDIDA</string>
              </rect>
             </property>
             <property name="title">
-             <string>Promediado</string>
+             <string>Postprocesado</string>
             </property>
-            <widget class="QCheckBox" name="avg_2">
+            <widget class="QRadioButton" name="radioButton_FFT_2">
              <property name="geometry">
               <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>92</width>
-               <height>23</height>
+               <x>20</x>
+               <y>40</y>
+               <width>99</width>
+               <height>21</height>
               </rect>
              </property>
              <property name="text">
-              <string>Activar</string>
+              <string>FFT</string>
              </property>
             </widget>
-            <widget class="QLabel" name="label_20">
+            <widget class="QRadioButton" name="radioButton_Corre_2">
              <property name="geometry">
               <rect>
-               <x>10</x>
-               <y>60</y>
-               <width>141</width>
-               <height>20</height>
+               <x>20</x>
+               <y>70</y>
+               <width>111</width>
+               <height>21</height>
               </rect>
-             </property>
-             <property name="font">
-              <font>
-               <family>Courier 10 Pitch</family>
-               <pointsize>9</pointsize>
-              </font>
              </property>
              <property name="text">
-              <string>Medidas/pto [1-256]</string>
-             </property>
-            </widget>
-            <widget class="QLineEdit" name="n_medidas_punto_2">
-             <property name="geometry">
-              <rect>
-               <x>50</x>
-               <y>90</y>
-               <width>71</width>
-               <height>20</height>
-              </rect>
-             </property>
-             <property name="readOnly">
-              <bool>false</bool>
+              <string>Correlación</string>
              </property>
             </widget>
            </widget>

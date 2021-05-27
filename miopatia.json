@@ -23,7 +23,7 @@
         ],
         "type": "int"
     },
-    "ancho_banda": {
+    "shunt": {
         "value": 2,
         "limits": [
             0,
@@ -63,19 +63,11 @@
         ],
         "type": "float"
     },
-    "avg": {
-        "value": 0,
+    "post_procesado": {
+        "value": 1,
         "limits": [
             0,
             1
-        ],
-        "type": "int"
-    },
-    "n_medidas_punto": {
-        "value": 1,
-        "limits": [
-            1,
-            256
         ],
         "type": "int"
     },

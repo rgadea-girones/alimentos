@@ -60,22 +60,23 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_xaxis_2    = Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
         self.bg_DC         = Rbutton_group([self.radioButton_DC_ON, self.radioButton_DC_OFF])
         self.bg_DC_2       = Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
+        self.post_pro      = Rbutton_group([self.radioButton_FFT, self.radioButton_Corre])   
+        self.post_pro_2    = Rbutton_group([self.radioButton_FFT_2, self.radioButton_Corre_2])      
         self.bg_config_cal = Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
         self.bg_pto_cal    = Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
 
-
+        #                     'avg':         {'array':['avg',      'avg_2'],  'qt':'QCheckBox'},
         ############## Widget to internal variables assignment #################
         # Data Mirroring through GUI
         self.mirror =  {'f_inicial':   {'array':['f_inicial', 'f_inicial_2'],'qt':'QLineEdit'},
                         'f_final':     {'array':['f_final',   'f_final_2'],  'qt':'QLineEdit'},
                         'n_puntos':    {'array':['n_puntos',  'n_puntos_2'],  'qt':'QLineEdit'},
-                        'ancho_banda': {'array':['ancho_banda', 'ancho_banda_2'],  'qt':'QLineEdit'},
+                        'shunt':       {'array':['shunt', 'shunt_2'],  'qt':'QLineEdit'},
                         'vosc':        {'array':['vosc',        'vosc_2'],   'qt':'QLineEdit'},
                         'tipo_barrido':{'array':['bg_xaxis', 'bg_xaxis_2'],  'qt':'QButtonGroup'},
                         'DC_bias':     {'array':['bg_DC',    'bg_DC_2'],     'qt':'QButtonGroup'},
                         'nivel_DC':    {'array':['nivel_DC', 'nivel_DC_2'],  'qt':'QLineEdit'},
-                        'avg':         {'array':['avg',      'avg_2'],  'qt':'QCheckBox'},
-                        'n_medidas_punto':{'array':['n_medidas_punto', 'n_medidas_punto_2'],  'qt':'QLineEdit'}}
+                        'post_procesado':{'array':['post_pro', 'post_pro_2'],  'qt':'QButtonGroup'}}
         # Paths
         self.paths = {'load_mfile_name':'load_path',
                       'save_mfile_name':'save_path',
