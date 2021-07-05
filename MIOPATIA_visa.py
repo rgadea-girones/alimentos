@@ -309,6 +309,7 @@ class VISA(object):
         comando="./i2c_shunt " + str(R_shunt_k)
         # print (comando)
         r_back = veamos[comando]
+        r_back()
         # sizeh1=str('-sizeh1={0}'.format(individual[0]))
         # sizeh2=str('-sizeh2={0}'.format(individual[1]))
         # epochs=str('-epochs={0}'.format(epochs))
