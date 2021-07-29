@@ -167,7 +167,7 @@ class VISA(object):
 
 
     def config_measurement(self):
-
+        self.tx_txt('RP:FPGABITREAM 0.94')
         frecuencia_min = self.sd.def_cfg['f_inicial']['value']
         frecuencia_max= self.sd.def_cfg['f_inicial']['value']
         puntos_decada= self.sd.def_cfg['n_puntos']['value']
@@ -266,6 +266,7 @@ class VISA(object):
 
 
     def measure(self):
+        self.tx_txt('RP:FPGABITREAM 0.94')
         t0=pc()
         frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
         frecuencia_max= np.log10(self.sd.def_cfg['f_final']['value'])
