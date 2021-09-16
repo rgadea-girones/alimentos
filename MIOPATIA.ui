@@ -578,7 +578,7 @@
               </rect>
              </property>
              <property name="title">
-              <string>Postprocesado</string>
+              <string>Procedimiento</string>
              </property>
              <widget class="QRadioButton" name="radioButton_FFT">
               <property name="geometry">
@@ -590,7 +590,7 @@
                </rect>
               </property>
               <property name="text">
-               <string>FFT</string>
+               <string>Rapido</string>
               </property>
              </widget>
              <widget class="QRadioButton" name="radioButton_Corre">
@@ -603,7 +603,7 @@
                </rect>
               </property>
               <property name="text">
-               <string>Correlación</string>
+               <string>Original</string>
               </property>
              </widget>
             </widget>

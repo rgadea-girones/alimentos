@@ -265,128 +265,400 @@ class VISA(object):
         #     self.inst.write('DCO OFF')
 
 
+
+
+
     def measure(self):
-        self.tx_txt('RP:FPGABITREAM 0.94')
-        t0=pc()
-        frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
-        frecuencia_max= np.log10(self.sd.def_cfg['f_final']['value'])
-        puntos_decada= self.sd.def_cfg['n_puntos']['value']
-        ampl =self.sd.def_cfg['vosc']['value']
-        decimation=1*puntos_decada*[8192]+2*puntos_decada*[1024]+1*puntos_decada*[64]+2*puntos_decada*[1]
-        numero_valores=int((frecuencia_max-frecuencia_min)*puntos_decada)
+        if (self.sd.def_cfg['post_procesado']['value']==1):
+            self.tx_txt('RP:FPGABITREAM 0.94')
+            t0=pc()
+            frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
+            frecuencia_max= np.log10(self.sd.def_cfg['f_final']['value'])
+            puntos_decada= self.sd.def_cfg['n_puntos']['value']
+            ampl =self.sd.def_cfg['vosc']['value']
+            decimation=1*puntos_decada*[8192]+2*puntos_decada*[1024]+1*puntos_decada*[64]+2*puntos_decada*[1]
+            numero_valores=int((frecuencia_max-frecuencia_min)*puntos_decada)
 
-        if (self.sd.def_cfg['tipo_barrido']['value']==0):
-            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
-                                       self.sd.def_cfg['f_final']['value'],
-                                       self.sd.def_cfg['n_puntos']['value'])
-        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
-                                       np.log10(self.sd.def_cfg['f_final']['value']),
-                                       numero_valores,base=10)
-        # valores no configurables desde el front-end
-        wave_form = 'sine'
-        Rs=1000
-        fm=125000000
-        numero_pulsos=10
-        ciclos=5
-        R_shunt_k = self.sd.def_cfg['shunt']['value'] #elijo 1000 
-        
-        # Postprocesamiento=self.sd.def_cfg['postprocesamiento']['value']
-        tipo_Postprocesamiento=self.sd.def_cfg['post_procesado']['value']
-        # print(R_shunt_k)
-        # # borra cuando quite la SOURCE 2
-        # amplreference=np.linspace(10,1,numero_valores)
-        # ampl2=1/amplreference
-        # phases=np.linspace(180,0,numero_valores)
-        shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
+            if (self.sd.def_cfg['tipo_barrido']['value']==0):
+                self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
+                                        self.sd.def_cfg['f_final']['value'],
+                                        self.sd.def_cfg['n_puntos']['value'])
+            elif(self.sd.def_cfg['tipo_barrido']['value']==1):
+                self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
+                                        np.log10(self.sd.def_cfg['f_final']['value']),
+                                        numero_valores,base=10)
 
+            #recortamos a 40 Hz
 
-        #configuro via i2c la resistencia de shunt
-        
-        # veamos = SshMachine(self.host, user = "root")
-        veamos = ParamikoMachine(self.host, user = "root", password="root")
-        veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
-        veamos.cwd.chdir("/opt/redpitaya/bin")
-        comando="./i2c_shunt " + str(R_shunt_k)
-        # print (comando)
-        r_back = veamos[comando]
-        r_back()
-        # sizeh1=str('-sizeh1={0}'.format(individual[0]))
-        # sizeh2=str('-sizeh2={0}'.format(individual[1]))
-        # epochs=str('-epochs={0}'.format(epochs))
-        # decay=str('-decay={0}'.format(decay_value))
-        # step=str('-step={0}'.format(learning_step))
-        # minibatch=str('-batchsize={0}'.format(batchsize))
-        # idea=str(r_back[epochs, sizeh1,sizeh2, minibatch,decay,step]())
-        # for line in idea.split("\n"):
-        #     if "error_val" in line:
-        #     #print (line.strip())
-        #        error_rate_float=[float(s) for s in re.findall('\d+\.\d+',line)]
-        #        error_rate=error_rate_float[0]
-        veamos.close()
+            self.sd.freq=self.sd.freq[self.sd.freq>40]
+            numero_valores=len(self.sd.freq)
+            # valores no configurables desde el front-end
+            wave_form = 'sine'
+            Rs=1000
+            fm=125000000
+            numero_pulsos=10
+            ciclos=5
+            R_shunt_k = self.sd.def_cfg['shunt']['value'] #elijo 1000 
+            
+            # Postprocesamiento=self.sd.def_cfg['postprocesamiento']['value']
+            tipo_Postprocesamiento=self.sd.def_cfg['post_procesado']['value']
+            # print(R_shunt_k)
+            # # borra cuando quite la SOURCE 2
+            # amplreference=np.linspace(10,1,numero_valores)
+            # ampl2=1/amplreference
+            # phases=np.linspace(180,0,numero_valores)
+            shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
 
 
+            #configuro via i2c la resistencia de shunt
+            
+            # veamos = SshMachine(self.host, user = "root")
+            veamos = ParamikoMachine(self.host, user = "root", password="root")
+            veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
+            veamos.cwd.chdir("/opt/redpitaya/bin")
+            comando="./i2c_shunt " + str(R_shunt_k)
+            # print (comando)
+            r_back = veamos[comando]
+            r_back()
+            # sizeh1=str('-sizeh1={0}'.format(individual[0]))
+            # sizeh2=str('-sizeh2={0}'.format(individual[1]))
+            # epochs=str('-epochs={0}'.format(epochs))
+            # decay=str('-decay={0}'.format(decay_value))
+            # step=str('-step={0}'.format(learning_step))
+            # minibatch=str('-batchsize={0}'.format(batchsize))
+            # idea=str(r_back[epochs, sizeh1,sizeh2, minibatch,decay,step]())
+            # for line in idea.split("\n"):
+            #     if "error_val" in line:
+            #     #print (line.strip())
+            #        error_rate_float=[float(s) for s in re.findall('\d+\.\d+',line)]
+            #        error_rate=error_rate_float[0]
+            veamos.close()
 
-        self.dv.append_plus("Midiendo Z=R+iX")
-        iteracion=1
-        configuracion=0
-        adquisicion=0
-        postprocesamiento=0
-        espera_trigger=0
-        Z=np.zeros(numero_valores)
-        PHASE=np.zeros(numero_valores)
-        for freq in (self.sd.freq):
+
+
+            self.dv.append_plus("Midiendo Z=R+iX")
+            iteracion=1
+            configuracion=0
+            adquisicion=0
+            postprocesamiento=0
+            espera_trigger=0
+            Z=np.zeros(numero_valores)
+            PHASE=np.zeros(numero_valores)
+            for freq in (self.sd.freq):
+                t1=pc()
+                self.tx_txt('GEN:RST')
+                self.tx_txt('ACQ:RST')
+                self.tx_txt('ACQ:DATA:UNITS VOLTS')
+                self.tx_txt('SOUR1:BURS:STAT BURST') # % Set burst mode to ON
+                self.tx_txt('SOUR1:BURS:NCYC 10') # Set 10 pulses of sine wave
+            
+                self.tx_txt('SOUR1:FUNC ' + str(wave_form).upper())
+                self.tx_txt('SOUR1:VOLT ' + str(ampl))
+                self.tx_txt('SOUR1:FREQ:FIX ' + str(freq))
+                #rp_s.tx_txt('SOUR1:TRIG:SOUR INT')
+                #rp_s.tx_txt('SOUR1:TRIG:IMM')
+    # esto habrá que borrarlo !!
+                # self.tx_txt('SOUR2:FUNC ' + str(wave_form).upper())
+                # self.tx_txt('SOUR2:VOLT ' + str(ampl2[iteracion-1]))
+                # self.tx_txt('SOUR2:FREQ:FIX ' + str(freq))
+                # self.tx_txt('SOUR2:BURS:STAT BURST') # % Set burst mode to ON
+                # self.tx_txt('SOUR2:BURS:NCYC 10') # Set 10 pulses of sine wave     
+                # self.tx_txt('SOUR2:PHAS ' + str(phases[iteracion-1]))    
+    # hay que borrarlo
+
+                self.tx_txt('ACQ:DEC ' + str(decimation[iteracion-1]))
+                self.tx_txt('ACQ:START')
+                self.tx_txt('ACQ:TRIG CH1_PE')
+
+                self.tx_txt('OUTPUT:STATE ON')  #cuidado con cambiar esto
+                t2=pc()
+            # ESPERAMOS EL TRIGGER
+                # sleep(1)
+                while freq<100:
+                    self.tx_txt('ACQ:TRIG:STAT?')
+                    if self.rx_txt() == 'TD':
+                        break
+                t2t=pc()
+                # self.dv.append_plus('iteracion:'+ str(iteracion))
+                # self.dv.append_plus('frecuencia:'+ str(freq))
+                print (iteracion)
+                print(freq)
+                sleep(0.2)
+                self.tx_txt('ACQ:TPOS?')
+                veamos= self.rx_txt()
+                posicion_trigger=int(veamos)
+                # self.dv.append_plus("posicion trigger:" + str(posicion_trigger))
+                print('posicion trigger:',veamos)
+                length=fm*(ciclos)/(freq*decimation[iteracion-1])
+                # print('decimation:',decimation[iteracion-1])
+                # LEEMOS Y REPRESENTAMOS 1
+                
+
+                self.tx_txt('ACQ:SOUR1:DATA:STA:N? ' + str(posicion_trigger)+','+ str(length))
+                
+                t3=pc()
+
+                buff_string = self.rx_txt()
+                buff_string = buff_string.strip('{}\n\r').replace("  ", "").split(',')
+                buff = list(map(float, buff_string))
+                t4=pc()
+                my_array = np.asarray(buff)
+                # super_buffer.append(buff)
+                # super_buffer_flat=sum(super_buffer, [])
+
+                t5=pc()
+
+
+
+                # LEEMOS Y REPRESENTAMOS2
+                self.tx_txt('ACQ:SOUR2:DATA:STA:N? ' + str(posicion_trigger)+','+ str(length))
+                t6=pc()
+                buff_string = self.rx_txt()
+                buff_string = buff_string.strip('{}\n\r').replace("  ", "").split(',')
+                buff = list(map(float, buff_string))
+                t7=pc()
+
+                my_array2 = np.asarray(buff)
+                dif=my_array-my_array2
+                #super_buffer2.append(buff)
+                #super_buffer_flat2=sum(super_buffer2, [])
+                if tipo_Postprocesamiento==0:
+                    yf = fft(my_array)
+                    yf2 = fft(my_array2)
+                    yf3=fft(dif)
+                    indice1=np.argmax(np.abs(yf))
+                    indice2=np.argmax(np.abs(yf2))
+                    indice3=np.argmax(np.abs(yf3))
+                    # Zq=np.max(np.abs(yf))
+                    # Zr=np.max(np.abs(yf2))
+                    # Z[iteracion-1]=np.max(np.abs(yf))/np.max(np.abs(yf2)) #  primera opcion
+                    #yf_dif=(yf2-yf)
+                    # indice3=np.argmax(np.abs(yf_dif))            
+                    ## Z[iteracion-1]=np.max(np.abs(yf_dif))*1000/np.max(np.abs(yf2)) # segunda opcion
+                    Z[iteracion-1]=np.max(np.abs(yf3))*shunt[R_shunt_k]/np.max(np.abs(yf2))    #tercera opcion         
+                    PHASE[iteracion-1]=((np.angle(yf2[indice2]/yf[indice1])))*180/np.pi   
+                else :                             
+                    # metodo alternativo
+                    T=(1/125e6)*decimation[iteracion-1];           # Sampling time [seconds]                                 # time increment
+                    w_out=freq*2*np.pi
+
+                    U_dut=dif
+                    I_dut=my_array2/shunt[R_shunt_k]
+                    
+                    N=int(length)
+                    U_dut_sampled_X=np.zeros(N)
+                    U_dut_sampled_Y=np.zeros(N)
+                    I_dut_sampled_X=np.zeros(N)
+                    I_dut_sampled_Y=np.zeros(N)
+                    dT=np.zeros(N)
+                    # Accurie  signals  U_in_1 and U_in_2 from RedPitaya for N-sampels time and Calculate for Lock in and save in vectors for sampels
+                    for t in range(N):
+                        U_dut_sampled_X[t]=U_dut[t]*np.sin(t*T*w_out)
+                        U_dut_sampled_Y[t]=U_dut[t]*np.sin(t*T*w_out-np.pi/2)
+
+                        I_dut_sampled_X[t]=I_dut[t]*np.sin(t*T*w_out)
+                        I_dut_sampled_Y[t]=I_dut[t]*np.sin(t*T*w_out-np.pi/2)
+                        dT[t]=t*T
+                    # Calculate two components of lock-in for both mesured voltage signals
+
+                    X_component_lock_in_1=np.trapz(U_dut_sampled_X,x=dT)
+                    Y_component_lock_in_1=np.trapz(U_dut_sampled_Y,dT)
+
+                    X_component_lock_in_2=np.trapz(I_dut_sampled_X,dT)
+                    Y_component_lock_in_2=np.trapz(I_dut_sampled_Y,dT)
+
+                    U_dut_amp=(np.sqrt((X_component_lock_in_1)**2+(Y_component_lock_in_1)**2))*2
+                    Phase_U_dut=np.arctan2(Y_component_lock_in_1,X_component_lock_in_1)
+
+                    # Calculate amplitude and angle of I_dut
+
+                    I_dut_amp=(np.sqrt((X_component_lock_in_2)**2+(Y_component_lock_in_2)**2))*2
+                    Phase_I_dut=np.arctan2(Y_component_lock_in_2,X_component_lock_in_2)
+                    # Calculate amplitude of current trough impedance and amplitude of impedance
+
+                    Z_amp=(U_dut_amp/I_dut_amp);            # Amplitude of impedance
+
+                    Z[iteracion-1]=Z_amp
+
+                    Phase_Z_rad=(Phase_U_dut-Phase_I_dut)
+                    Phase_check=(Phase_U_dut-Phase_I_dut)*(180/np.pi)
+                    if (Phase_check<=-180):
+                        Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)+360
+                    else:
+                        if (Phase_check>=180):
+                            Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)-360
+                        else:
+                            Phase_Z=Phase_check
+                    PHASE[iteracion-1]=Phase_Z
+
+                t8=pc()
+                # N2=my_array2.shape[0]
+                # T=1/fm
+                # idea=N//2
+                # xf2 = fftfreq(N2, T)[:N2//2]
+                # plot2=plt.figure(2*(iteracion-1)+2)
+                # plt.plot(xf2, 2.0/N * np.abs(yf2[0:N2//2]))
+                # plt.plot(xf2, p[0:N2//2])    
+                # plt.xlabel('Frecuencia')
+                # plt.grid()
+                
+
+
+
+
+                iteracion=iteracion+1
+                self.tx_txt('OUTPUT:STATE OFF')
+                self.tx_txt('ACQ:STOP')
+                t9=pc()
+                postprocesamiento=postprocesamiento+(t5-t4)+(t8-t7)
+                configuracion=configuracion+(t2-t1)+(t9-t8)+(t6-t5)+(t3-t2t)
+                adquisicion=adquisicion+(t4-t3)+(t7-t6)  
+                espera_trigger=espera_trigger+ (t2t-t2)  
+
+
+            # # Service Request instead of using pulling
+            # event_type = visa.constants.EventType.service_request
+            # # Mechanism by which we want to be notified
+            # event_mech = visa.constants.EventMechanism.queue
+
+            # self.inst.write('TRGS INT')          # Internal Trigger Source
+            # self.inst.write('ESNB 1')            # Event_Status_Register[0]=1 // Enables Sweep Completion bit
+            # self.inst.write('*SRE 4')            # Service Request Enable = 1
+            # self.inst.write('*CLS')              # Clears Error queue
+
+
+            # self.inst.write('MEAS IRIM')         # Medida de R y X
+            # self.inst.write('HIDI OFF')          # Muestras la traza inactiva
+            # self.inst.write('SING')              # Iniciar un barrido único.
+
+            # self.dv.append_plus("ACK Instrumento = %s" % self.inst.query('*OPC?'))
+
+            # self.inst.enable_event(event_type, event_mech)
+            #
+            # #self.dv.append_plus(self.inst.query('*OPC?'))
+            # # Wait for the event to occur
+            # response = self.inst.wait_on_event(event_type, 10000)
+            #
+            # #if (response.event.event_type == event_type):
+            #     # response.timed_out = False
+            # self.inst.disable_event(event_type, event_mech)
+            # response.timed_out = False
+
+            # Recover Measured Data
+            # self.inst.write('TRAC A')           # Selecciona traza A
+            # self.inst.write('AUTO')             # Autoescala
+            # aux_R = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
+
+            # self.inst.write('TRAC B')           # Selecciona traza A
+            # self.inst.write('AUTO')             # Autoescala
+            # aux_X = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
+            t10=pc()
+            self.sd.R_data = Z*np.cos(PHASE*np.pi/180)
+            self.sd.X_data = Z*np.sin(PHASE*np.pi/180)
+
+            # Compute Err, Eri, Er_mod, Er_fase_data
+            # First create frequency array based on actual gui conditions
+            # The freq array will not be changed until next data acquisition even if GUI changes
+
+
+            complex_aux         = self.sd.R_data + self.sd.X_data*1j
+            self.sd.Z_mod_data  = Z
+            self.sd.Z_fase_data = PHASE
+
+            admitance_aux       = 1./complex_aux
+            G_data              = np.real(admitance_aux)
+            Cp_data             = np.imag(admitance_aux)/(2*np.pi*self.sd.freq)
+            self.sd.Err_data    = Cp_data/self.sd.Co
+            self.sd.Eri_data    = G_data/(self.sd.Co*(2*np.pi*self.sd.freq));
+            E_data              = self.sd.Err_data + -1*self.sd.Eri_data*1j;
+
+            self.sd.Er_mod_data  = np.abs(E_data);
+            self.sd.Er_fase_data = np.angle(E_data);
+            t11=pc()
+            # # Deactivate BIAS for security reasons
+            # self.inst.write('DCO OFF')
+            # self.inst.write('DCRNG M1')
+            postprocesamiento=postprocesamiento+(t11-t10)
+            print('espera_trigger:',espera_trigger)
+            print('configuracion:',configuracion)
+            print('adquisicion:',adquisicion)
+            print('postprocesamiento:',postprocesamiento)
+            total=t11-t0
+            print ('total:',total)
+            absolute_val_array = np.abs(self.sd.freq - 1000)
+            smallest_difference_index = absolute_val_array.argmin()
+            print ('R_data =', self.sd.R_data[smallest_difference_index])        
+            print ('X_data=', self.sd.X_data[smallest_difference_index])
+            print ('resistencia shunt=', shunt[R_shunt_k])
+            # self.inst.wait_for_srq(self.sd.def_cfg['GPIB_timeout'])
+            self.dv.append_plus("He finalizado de medir")
+            self.dv.append_plus("tiempo transcurrido:" + str(total))
+        elif (self.sd.def_cfg['post_procesado']['value']==0):
+            # configuramos la FPGA con diseño verilog propio de DSD
+            self.tx_txt('RP:FPGABITREAM_DSD 0.94')
+            t0=pc()
+
+            # en versiones futuras crearemos los valores frecuenciales pero ahora es fijo
+            frecuencia_min = 1
+            frecuencia_max=6
+            puntos_decada=10
+
+
+            numero_valores=(frecuencia_max-frecuencia_min)*puntos_decada
+            #frecuencias =np.geomspace(frecuencia_min,frecuencia_max,numero_valores)
+            frecuencias_TOTAL =np.logspace(frecuencia_min,frecuencia_max,256,base=10)
+
+            frecuencias=frecuencias_TOTAL[frecuencias_TOTAL>40]
+
+            shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
+            muestras=225
+            decimation=1
+
+
+
+            #configuramos el shunt
+            R_shunt_k = self.sd.def_cfg['shunt']['value'] #elijo 1000 
+            veamos = ParamikoMachine('158.42.32.24', user = "root", password="root")
+            veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
+            veamos.cwd.chdir("/opt/redpitaya/bin")
+            comando="./i2c_shunt " + str(R_shunt_k)
+            r_back = veamos[comando]
+            r_back()
+            veamos.close()
+
+
+            # configuraciones  varias
+            self.tx_txt('SOUR1:VOLT 1')
+            self.tx_txt('SOUR1:VOLT:OFFS 0.00') # esto lo utilizo para cambiar el offset de canal b
+            self.tx_txt('SOUR2:VOLT:OFFS 0.016') # esto lo utilizo para cambiar el offset de canal b
+            self.tx_txt('SOUR1:BURS:NCYC 1')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
+            self.tx_txt('SOUR1:BURS:NOR ' +str(muestras)) # solo funciona si led3 esta activado, numero de frecuencias
+            # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
+            self.tx_txt('SOUR2:BURS:NOR ' +str(decimation))
+            self.tx_txt('SOUR2:BURS:NCYC 255')  #controlo el numero de ciclos de ancho del deteccor de cero
+
+            self.tx_txt('DIG:PIN LED'+str(1)+','+str(0))  # 1->state2  0->state1
+            self.tx_txt('DIG:PIN LED'+str(2)+','+str(0))  # desbloqueo finalizacion state1, tambien genera inicio
+            self.tx_txt('DIG:PIN LED'+str(3)+','+str(1))  #activacion del led3
+
+
+            self.dv.append_plus("Midiendo Z=R+iX")
             t1=pc()
-            self.tx_txt('GEN:RST')
-            self.tx_txt('ACQ:RST')
-            self.tx_txt('ACQ:DATA:UNITS VOLTS')
-            self.tx_txt('SOUR1:BURS:STAT BURST') # % Set burst mode to ON
-            self.tx_txt('SOUR1:BURS:NCYC 10') # Set 10 pulses of sine wave
-        
-            self.tx_txt('SOUR1:FUNC ' + str(wave_form).upper())
-            self.tx_txt('SOUR1:VOLT ' + str(ampl))
-            self.tx_txt('SOUR1:FREQ:FIX ' + str(freq))
-            #rp_s.tx_txt('SOUR1:TRIG:SOUR INT')
-            #rp_s.tx_txt('SOUR1:TRIG:IMM')
-# esto habrá que borrarlo !!
-            # self.tx_txt('SOUR2:FUNC ' + str(wave_form).upper())
-            # self.tx_txt('SOUR2:VOLT ' + str(ampl2[iteracion-1]))
-            # self.tx_txt('SOUR2:FREQ:FIX ' + str(freq))
-            # self.tx_txt('SOUR2:BURS:STAT BURST') # % Set burst mode to ON
-            # self.tx_txt('SOUR2:BURS:NCYC 10') # Set 10 pulses of sine wave     
-            # self.tx_txt('SOUR2:PHAS ' + str(phases[iteracion-1]))    
-# hay que borrarlo
-
-            self.tx_txt('ACQ:DEC ' + str(decimation[iteracion-1]))
-            self.tx_txt('ACQ:START')
-            self.tx_txt('ACQ:TRIG CH1_PE')
-
-            self.tx_txt('OUTPUT:STATE ON')  #cuidado con cambiar esto
-            t2=pc()
-        # ESPERAMOS EL TRIGGER
-            # sleep(1)
-            while freq<100:
-                self.tx_txt('ACQ:TRIG:STAT?')
-                if self.rx_txt() == 'TD':
+            self.tx_txt('CHIRP ON')
+            while 1 :
+            #    rp_s.tx_txt('FIN:RAF:STAT? 1')
+                self.tx_txt('DIG:PIN? DIO'+str(7)+'_N')
+                state = self.rx_txt()
+                if state == '1':
                     break
-            t2t=pc()
-            # self.dv.append_plus('iteracion:'+ str(iteracion))
-            # self.dv.append_plus('frecuencia:'+ str(freq))
-            print (iteracion)
-            print(freq)
-            sleep(0.2)
-            self.tx_txt('ACQ:TPOS?')
-            veamos= self.rx_txt()
-            posicion_trigger=int(veamos)
-            # self.dv.append_plus("posicion trigger:" + str(posicion_trigger))
-            print('posicion trigger:',veamos)
-            length=fm*(ciclos)/(freq*decimation[iteracion-1])
-            # print('decimation:',decimation[iteracion-1])
-            # LEEMOS Y REPRESENTAMOS 1
-            
+            #    # print(rp_s.rx_txt())
+            # rp_s.tx_txt('DIG:PIN? DIO'+str(7)+'_N')
+            # state = rp_s.rx_txt()
+            print(state)
+            # EMPEZAMOS CON LA ADQUISION
 
-            self.tx_txt('ACQ:SOUR1:DATA:STA:N? ' + str(posicion_trigger)+','+ str(length))
-            
+            self.tx_txt('CHIRP OFF')
+            self.tx_txt('ACQ:RESULT1:DATA?')
             t3=pc()
 
             buff_string = self.rx_txt()
@@ -394,197 +666,82 @@ class VISA(object):
             buff = list(map(float, buff_string))
             t4=pc()
             my_array = np.asarray(buff)
+            my_array =my_array[:-decimation:decimation]
             # super_buffer.append(buff)
             # super_buffer_flat=sum(super_buffer, [])
-
+            self.tx_txt('ACQ:RESULT2:DATA?')
+            buff_string2 = self.rx_txt()
+            buff_string2 = buff_string2.strip('{}\n\r').replace("  ", "").split(',')
+            buff2 = list(map(float, buff_string2))
+            my_array2 = np.asarray(buff2)
+            my_array2 =my_array2[:-decimation:decimation]
+            muestras=round(muestras/decimation)
             t5=pc()
+            print('t5-t1:',t5-t1)
+            #Enable output
+            iteracion=1
+            # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
+            # ZB=interp1d(frecuencias,my_array[256: 256+225])
+            # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
+            Z_sin_comprimir=my_array[0:muestras]*shunt[R_shunt_k]/1000
+            # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
 
-
-            # LEEMOS Y REPRESENTAMOS2
-            self.tx_txt('ACQ:SOUR2:DATA:STA:N? ' + str(posicion_trigger)+','+ str(length))
-            t6=pc()
-            buff_string = self.rx_txt()
-            buff_string = buff_string.strip('{}\n\r').replace("  ", "").split(',')
-            buff = list(map(float, buff_string))
-            t7=pc()
-
-            my_array2 = np.asarray(buff)
-            dif=my_array-my_array2
-            #super_buffer2.append(buff)
-            #super_buffer_flat2=sum(super_buffer2, [])
-            if tipo_Postprocesamiento==0:
-                yf = fft(my_array)
-                yf2 = fft(my_array2)
-                yf3=fft(dif)
-                indice1=np.argmax(np.abs(yf))
-                indice2=np.argmax(np.abs(yf2))
-                indice3=np.argmax(np.abs(yf3))
-                # Zq=np.max(np.abs(yf))
-                # Zr=np.max(np.abs(yf2))
-                # Z[iteracion-1]=np.max(np.abs(yf))/np.max(np.abs(yf2)) #  primera opcion
-                #yf_dif=(yf2-yf)
-                # indice3=np.argmax(np.abs(yf_dif))            
-                ## Z[iteracion-1]=np.max(np.abs(yf_dif))*1000/np.max(np.abs(yf2)) # segunda opcion
-                Z[iteracion-1]=np.max(np.abs(yf3))*shunt[R_shunt_k]/np.max(np.abs(yf2))    #tercera opcion         
-                PHASE[iteracion-1]=((np.angle(yf2[indice2]/yf[indice1])))*180/np.pi   
-            else :                             
-                # metodo alternativo
-                T=(1/125e6)*decimation[iteracion-1];           # Sampling time [seconds]                                 # time increment
-                w_out=freq*2*np.pi
-
-                U_dut=dif
-                I_dut=my_array2/shunt[R_shunt_k]
-                
-                N=int(length)
-                U_dut_sampled_X=np.zeros(N)
-                U_dut_sampled_Y=np.zeros(N)
-                I_dut_sampled_X=np.zeros(N)
-                I_dut_sampled_Y=np.zeros(N)
-                dT=np.zeros(N)
-                # Accurie  signals  U_in_1 and U_in_2 from RedPitaya for N-sampels time and Calculate for Lock in and save in vectors for sampels
-                for t in range(N):
-                    U_dut_sampled_X[t]=U_dut[t]*np.sin(t*T*w_out)
-                    U_dut_sampled_Y[t]=U_dut[t]*np.sin(t*T*w_out-np.pi/2)
-
-                    I_dut_sampled_X[t]=I_dut[t]*np.sin(t*T*w_out)
-                    I_dut_sampled_Y[t]=I_dut[t]*np.sin(t*T*w_out-np.pi/2)
-                    dT[t]=t*T
-                # Calculate two components of lock-in for both mesured voltage signals
-
-                X_component_lock_in_1=np.trapz(U_dut_sampled_X,x=dT)
-                Y_component_lock_in_1=np.trapz(U_dut_sampled_Y,dT)
-
-                X_component_lock_in_2=np.trapz(I_dut_sampled_X,dT)
-                Y_component_lock_in_2=np.trapz(I_dut_sampled_Y,dT)
-
-                U_dut_amp=(np.sqrt((X_component_lock_in_1)**2+(Y_component_lock_in_1)**2))*2
-                Phase_U_dut=np.arctan2(Y_component_lock_in_1,X_component_lock_in_1)
-
-                # Calculate amplitude and angle of I_dut
-
-                I_dut_amp=(np.sqrt((X_component_lock_in_2)**2+(Y_component_lock_in_2)**2))*2
-                Phase_I_dut=np.arctan2(Y_component_lock_in_2,X_component_lock_in_2)
-                # Calculate amplitude of current trough impedance and amplitude of impedance
-
-                Z_amp=(U_dut_amp/I_dut_amp);            # Amplitude of impedance
-
-                Z[iteracion-1]=Z_amp
-
-                Phase_Z_rad=(Phase_U_dut-Phase_I_dut)
-                Phase_check=(Phase_U_dut-Phase_I_dut)*(180/np.pi)
-                if (Phase_check<=-180):
-                    Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)+360
+            # PhaseA=interp1d(frecuencias[0:muestras],my_array2[0:muestras])
+            # Phase_check=PhaseA(frecuencias)*frecuencias*360/125e6
+            # Phase_radianes=PhaseA(frecuencias)*frecuencias*2*np.pi/125e6
+            Phase_check=-my_array2[0:muestras]*frecuencias[0:muestras]*360/125e6
+            Phase_radianes=-my_array2[0:muestras]*frecuencias[0:muestras]*2*np.pi/125e6
+            Phase_Z=np.zeros(muestras)
+            PHASE_sin_comprimir=np.zeros(muestras)
+            for fases in range(len(Phase_check)):
+                if (Phase_check[fases]<=-180):
+                    PHASE_sin_comprimir[fases]=Phase_radianes[fases]*(180/np.pi)+360
                 else:
-                    if (Phase_check>=180):
-                        Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)-360
+                    if (Phase_check[fases] >=180):
+                        PHASE_sin_comprimir[fases]=Phase_radianes[fases]*(180/np.pi)-360
                     else:
-                        Phase_Z=Phase_check
-                PHASE[iteracion-1]=Phase_Z
+                        PHASE_sin_comprimir[fases]=Phase_check[fases]
+            # PHASE=my_array[256: 256+225]*frecuencias*360/125e6
+            # PHASE= Phase_check
 
-            t8=pc()
-            # N2=my_array2.shape[0]
-            # T=1/fm
-            # idea=N//2
-            # xf2 = fftfreq(N2, T)[:N2//2]
-            # plot2=plt.figure(2*(iteracion-1)+2)
-            # plt.plot(xf2, 2.0/N * np.abs(yf2[0:N2//2]))
-            # plt.plot(xf2, p[0:N2//2])    
-            # plt.xlabel('Frecuencia')
-            # plt.grid()
-            
+            PHASE=np.ma.masked_where((Z_sin_comprimir==0),PHASE_sin_comprimir) 
+            self.sd.freq=np.ma.masked_where((Z_sin_comprimir==0),frecuencias) 
+            Z = np.ma.masked_where((Z_sin_comprimir==0),Z_sin_comprimir) 
 
+            PHASE=PHASE.compressed()
+            self.sd.freq=self.sd.freq.compressed()
+            Z = Z.compressed()
 
+            t10=pc()
+            self.sd.R_data = Z*np.cos(PHASE*np.pi/180)
+            self.sd.X_data = Z*np.sin(PHASE*np.pi/180)
 
-
-            iteracion=iteracion+1
-            self.tx_txt('OUTPUT:STATE OFF')
-            self.tx_txt('ACQ:STOP')
-            t9=pc()
-            postprocesamiento=postprocesamiento+(t5-t4)+(t8-t7)
-            configuracion=configuracion+(t2-t1)+(t9-t8)+(t6-t5)+(t3-t2t)
-            adquisicion=adquisicion+(t4-t3)+(t7-t6)  
-            espera_trigger=espera_trigger+ (t2t-t2)  
+            # Compute Err, Eri, Er_mod, Er_fase_data
+            # First create frequency array based on actual gui conditions
+            # The freq array will not be changed until next data acquisition even if GUI changes
 
 
-        # # Service Request instead of using pulling
-        # event_type = visa.constants.EventType.service_request
-        # # Mechanism by which we want to be notified
-        # event_mech = visa.constants.EventMechanism.queue
+            complex_aux         = self.sd.R_data + self.sd.X_data*1j
+            self.sd.Z_mod_data  = Z
+            self.sd.Z_fase_data = PHASE
+            # las proximas lineas deben de descomentarse cuando haya eliminado los outliers
+            # admitance_aux       = 1./complex_aux
+            # G_data              = np.real(admitance_aux)
+            # Cp_data             = np.imag(admitance_aux)/(2*np.pi*self.sd.freq)
+            # self.sd.Err_data    = Cp_data/self.sd.Co
+            # self.sd.Eri_data    = G_data/(self.sd.Co*(2*np.pi*self.sd.freq));
+            # E_data              = self.sd.Err_data + -1*self.sd.Eri_data*1j;
 
-        # self.inst.write('TRGS INT')          # Internal Trigger Source
-        # self.inst.write('ESNB 1')            # Event_Status_Register[0]=1 // Enables Sweep Completion bit
-        # self.inst.write('*SRE 4')            # Service Request Enable = 1
-        # self.inst.write('*CLS')              # Clears Error queue
+            # self.sd.Er_mod_data  = np.abs(E_data);
+            # self.sd.Er_fase_data = np.angle(E_data);
+            t11=pc()
 
+            total=t11-t1
+            print ('total:',total)
 
-        # self.inst.write('MEAS IRIM')         # Medida de R y X
-        # self.inst.write('HIDI OFF')          # Muestras la traza inactiva
-        # self.inst.write('SING')              # Iniciar un barrido único.
-
-        # self.dv.append_plus("ACK Instrumento = %s" % self.inst.query('*OPC?'))
-
-        # self.inst.enable_event(event_type, event_mech)
-        #
-        # #self.dv.append_plus(self.inst.query('*OPC?'))
-        # # Wait for the event to occur
-        # response = self.inst.wait_on_event(event_type, 10000)
-        #
-        # #if (response.event.event_type == event_type):
-        #     # response.timed_out = False
-        # self.inst.disable_event(event_type, event_mech)
-        # response.timed_out = False
-
-        # Recover Measured Data
-        # self.inst.write('TRAC A')           # Selecciona traza A
-        # self.inst.write('AUTO')             # Autoescala
-        # aux_R = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
-
-        # self.inst.write('TRAC B')           # Selecciona traza A
-        # self.inst.write('AUTO')             # Autoescala
-        # aux_X = np.fromstring(self.inst.query('OUTPDTRC?'), dtype=float, sep=',')
-        t10=pc()
-        self.sd.R_data = Z*np.cos(PHASE*np.pi/180)
-        self.sd.X_data = Z*np.sin(PHASE*np.pi/180)
-
-        # Compute Err, Eri, Er_mod, Er_fase_data
-        # First create frequency array based on actual gui conditions
-        # The freq array will not be changed until next data acquisition even if GUI changes
-
-
-        complex_aux         = self.sd.R_data + self.sd.X_data*1j
-        self.sd.Z_mod_data  = Z
-        self.sd.Z_fase_data = PHASE
-
-        admitance_aux       = 1./complex_aux
-        G_data              = np.real(admitance_aux)
-        Cp_data             = np.imag(admitance_aux)/(2*np.pi*self.sd.freq)
-        self.sd.Err_data    = Cp_data/self.sd.Co
-        self.sd.Eri_data    = G_data/(self.sd.Co*(2*np.pi*self.sd.freq));
-        E_data              = self.sd.Err_data + -1*self.sd.Eri_data*1j;
-
-        self.sd.Er_mod_data  = np.abs(E_data);
-        self.sd.Er_fase_data = np.angle(E_data);
-        t11=pc()
-        # # Deactivate BIAS for security reasons
-        # self.inst.write('DCO OFF')
-        # self.inst.write('DCRNG M1')
-        postprocesamiento=postprocesamiento+(t11-t10)
-        print('espera_trigger:',espera_trigger)
-        print('configuracion:',configuracion)
-        print('adquisicion:',adquisicion)
-        print('postprocesamiento:',postprocesamiento)
-        total=t11-t0
-        print ('total:',total)
-        absolute_val_array = np.abs(self.sd.freq - 1000)
-        smallest_difference_index = absolute_val_array.argmin()
-        print ('R_data =', self.sd.R_data[smallest_difference_index])        
-        print ('X_data=', self.sd.X_data[smallest_difference_index])
-        print ('resistencia shunt=', shunt[R_shunt_k])
-        # self.inst.wait_for_srq(self.sd.def_cfg['GPIB_timeout'])
-        self.dv.append_plus("He finalizado de medir")
-        self.dv.append_plus("tiempo transcurrido:" + str(total))
-
+            self.dv.append_plus("He finalizado de medir")
+            self.dv.append_plus("tiempo transcurrido:" + str(total))
 
     def config_calibration(self):
         # Configuración de los valores para la calibración en abierto, corto y carga
