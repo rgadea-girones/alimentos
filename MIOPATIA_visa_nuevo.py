@@ -4,7 +4,6 @@ import numpy as np
 from time import perf_counter as pc
 from time import sleep
 from scipy.fft import fft, fftfreq, fftshift
-from scipy.interpolate import interp1d, make_interp_spline
 from PyQt5.QtWidgets import QMessageBox
 import fit_library as fit
 import pandas as pd
@@ -615,8 +614,7 @@ class VISA(object):
             shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
             muestras=225
             decimation=1
-            umbral_horizontal_detector_cero=150
-            umbral_vertical_detector_cero=750
+
             procedimiento_fase=1
 
             #configuramos el shunt
@@ -634,11 +632,11 @@ class VISA(object):
             self.tx_txt('SOUR1:VOLT 1')
             self.tx_txt('SOUR1:VOLT:OFFS 0.00') # esto lo utilizo para cambiar el offset de canal b
             self.tx_txt('SOUR2:VOLT:OFFS 0.016') # esto lo utilizo para cambiar el offset de canal b
-            self.tx_txt('SOUR1:BURS:NCYC 1')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
+            self.tx_txt('SOUR1:BURS:NCYC 2')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
             self.tx_txt('SOUR1:BURS:NOR ' +str(muestras)) # solo funciona si led3 esta activado, numero de frecuencias
             # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
-            self.tx_txt('SOUR2:BURS:NOR ' +str(umbral_horizontal_detector_cero))
-            self.tx_txt('SOUR2:BURS:NCYC ' +str(umbral_vertical_detector_cero)) #controlo el numero de ciclos de ancho del deteccor de cero
+            self.tx_txt('SOUR2:BURS:NOR ' +str(decimation))
+            self.tx_txt('SOUR2:BURS:NCYC 240')  #controlo el numero de ciclos de ancho del deteccor de cero
 
             self.tx_txt('DIG:PIN LED'+str(1)+','+str(0))  # 1->state2  0->state1
             self.tx_txt('DIG:PIN LED'+str(2)+','+str(procedimiento_fase))  # desbloqueo finalizacion state1, tambien genera inicio
@@ -693,43 +691,25 @@ class VISA(object):
             # PhaseA=interp1d(frecuencias[0:muestras],my_array2[0:muestras])
             # Phase_check=PhaseA(frecuencias)*frecuencias*360/125e6
             # Phase_radianes=PhaseA(frecuencias)*frecuencias*2*np.pi/125e6
-            # my_array2=interp1d(frecuencias[0:muestras],my_array2[0:muestras])
-            #funcion_interpolacion = make_interp_spline(frecuencias[0:muestras],my_array2[0:muestras], k=7)
-            # my_array2=funcion_interpolacion(frecuencias[0:muestras])
-            k=5
-
-
             Phase_check=-my_array2[0:muestras]*frecuencias[0:muestras]*360/125e6
             Phase_radianes=-my_array2[0:muestras]*frecuencias[0:muestras]*2*np.pi/125e6
             Phase_Z=np.zeros(muestras)
-            PHASE_sin_comprimir_pre=np.zeros(muestras)
-            PHASE_sin_comprimir=np.zeros(muestras)            
+            PHASE_sin_comprimir=np.zeros(muestras)
             for fases in range(len(Phase_check)):
                 if (Phase_check[fases]<=-180):
-                    PHASE_sin_comprimir_pre[fases]=Phase_radianes[fases]*(180/np.pi)+360
+                    PHASE_sin_comprimir[fases]=Phase_radianes[fases]*(180/np.pi)+360
                 else:
                     if (Phase_check[fases] >=180):
-                        PHASE_sin_comprimir_pre[fases]=Phase_radianes[fases]*(180/np.pi)-360
+                        PHASE_sin_comprimir[fases]=Phase_radianes[fases]*(180/np.pi)-360
                     else:
-                        PHASE_sin_comprimir_pre[fases]=Phase_check[fases]
-                if (PHASE_sin_comprimir_pre[fases]<=-90):
-                    PHASE_sin_comprimir[fases]= PHASE_sin_comprimir_pre[fases]+180
-                else:
-                    if (PHASE_sin_comprimir_pre[fases]>=90):
-                        PHASE_sin_comprimir[fases]= PHASE_sin_comprimir_pre[fases]-180
-                    else:
-                        PHASE_sin_comprimir[fases]=PHASE_sin_comprimir_pre[fases]
+                        PHASE_sin_comprimir[fases]=Phase_check[fases]
             PHASE=np.ma.masked_where((Z_sin_comprimir==0),PHASE_sin_comprimir) 
             self.sd.freq=np.ma.masked_where((Z_sin_comprimir==0),frecuencias) 
             Z = np.ma.masked_where((Z_sin_comprimir==0),Z_sin_comprimir) 
 
-            prePHASE=PHASE.compressed()
-            # ahora aplico una forma de smooth
-            PHASE = np.cumsum(prePHASE, dtype=float)
-            PHASE[k:] = PHASE[k:] - PHASE[:-k]
-            PHASE=PHASE[k - 1:] / k
-            self.sd.freq=self.sd.freq.compressed()[k-1:]
-            Z = Z.compressed()[k-1:]
+            PHASE=PHASE.compressed()
+            self.sd.freq=self.sd.freq.compressed()
+            Z = Z.compressed()
 
             # PHASE=PHASE_sin_comprimir
             # self.sd.freq=frecuencias
@@ -784,8 +764,7 @@ class VISA(object):
             shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
             muestras=225
             decimation=1
-            umbral_horizontal_detector_cero=150
-            umbral_vertical_detector_cero=750
+
             procedimiento_fase=0
 
             #configuramos el shunt
@@ -806,8 +785,8 @@ class VISA(object):
             self.tx_txt('SOUR1:BURS:NCYC 2')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
             self.tx_txt('SOUR1:BURS:NOR ' +str(muestras)) # solo funciona si led3 esta activado, numero de frecuencias
             # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
-            self.tx_txt('SOUR2:BURS:NOR ' +str(umbral_horizontal_detector_cero))
-            self.tx_txt('SOUR2:BURS:NCYC ' +str(umbral_vertical_detector_cero))   #controlo el numero de ciclos de ancho del deteccor de cero
+            self.tx_txt('SOUR2:BURS:NOR ' +str(decimation))
+            self.tx_txt('SOUR2:BURS:NCYC 240')  #controlo el numero de ciclos de ancho del deteccor de cero
 
             self.tx_txt('DIG:PIN LED'+str(1)+','+str(0))  # 1->state2  0->state1
             self.tx_txt('DIG:PIN LED'+str(2)+','+str(procedimiento_fase))  # desbloqueo finalizacion state1, tambien genera inicio

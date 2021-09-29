@@ -1,4 +1,6 @@
 import sys
+import warnings
+
 from PyQt5 import QtCore, QtWidgets, uic, QtGui
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
@@ -20,6 +22,7 @@ qtCreatorFile = "MIOPATIA.ui"
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
+warnings.filterwarnings("ignore", message="Attempted to set non-positive left xlim on a log-scaled axis.\nInvalid limit will be ignored.")
 
 
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -60,8 +63,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_xaxis_2    = Rbutton_group([self.radioButton_lineal_2, self.radioButton_log_2])
         self.bg_DC         = Rbutton_group([self.radioButton_DC_ON, self.radioButton_DC_OFF])
         self.bg_DC_2       = Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
-        self.post_pro      = Rbutton_group([self.radioButton_FFT, self.radioButton_Corre])   
-        self.post_pro_2    = Rbutton_group([self.radioButton_FFT_2, self.radioButton_Corre_2])      
+        self.post_pro      = Rbutton_group([self.radioButton_Corre, self.radioButton_F_Count,self.radioButton_F_Corre ])   
+        self.post_pro_2    = Rbutton_group([self.radioButton_Corre_2, self.radioButton_F_Count_2,self.radioButton_F_Corre_2 ])  
         self.bg_config_cal = Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
         self.bg_pto_cal    = Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
 
