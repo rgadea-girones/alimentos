@@ -6,24 +6,24 @@ Instrucciones:
 
 1) Hay que hacer los siguientes cambios:
 
-a) Cambiar el servidor scpi-server
-  
-Mirar en utilidades y copiar el fichero scpi-server allí existente en
+        a) Cambiar el servidor scpi-server
+        
+        Mirar en utilidades y copiar el fichero scpi-server allí existente en
 
-/opt/redpitaya/bin
+        /opt/redpitaya/bin
 
 
-b) Cambiar la librería asociada de la api.
+        b) Cambiar la librería asociada de la api.
 
-Mirar en utilidades y copiar los ficheros librp.so e librp.a en
+        Mirar en utilidades y copiar los ficheros librp.so e librp.a en
 
-/opt/redpitaya/lib
+        /opt/redpitaya/lib
 
-c) Añadir un fichero de configuración de FPGA a los existentes por defecto
+        c) Añadir un fichero de configuración de FPGA a los existentes por defecto
 
-Mirar en utilidades y copiar el fichero fpga_DSD_0.94.bit en
+        Mirar en utilidades y copiar el fichero fpga_DSD_0.94.bit en
 
-/opt/redpitaya/fpga
+        /opt/redpitaya/fpga
 
 2) Acordarse de que el spi server esté funcionando en la redpitaya. Se puede hacer a través del aaplicación web->development->scpi server->run o manualmente con el comando
 
