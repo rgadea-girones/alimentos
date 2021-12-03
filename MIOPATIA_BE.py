@@ -352,6 +352,8 @@ class BACK_END(object):
                 if def_data != new_data:
                     self.sd.def_cfg[i]['value'] = new_data
                     break
+        # no lo tengo claro
+        # self.vi.config_measurement() 
 
         for i in self.pw.paths.keys():
             new_data = eval("self.pw."+self.pw.paths[i]).text()

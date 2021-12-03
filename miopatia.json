@@ -32,10 +32,10 @@
         "type": "int"
     },
     "vosc": {
-        "value": 0.5,
+        "value": 1,
         "limits": [
             0.0,
-            1.0
+            2.0
         ],
         "type": "float"
     },
@@ -56,7 +56,7 @@
         "type": "int"
     },
     "nivel_DC": {
-        "value": 0,
+        "value": 0.016,
         "limits": [
             -40.0,
             40.0

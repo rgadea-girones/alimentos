@@ -1,6 +1,5 @@
 import pyvisa as visa
 import socket
-import io
 import numpy as np
 from time import perf_counter as pc
 from time import sleep
@@ -169,91 +168,23 @@ class VISA(object):
 
 
     def config_measurement(self):
-
-        frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
-        frecuencia_max= np.log10(self.sd.def_cfg['f_final']['value'])
+        self.tx_txt('RP:FPGABITREAM 0.94')
+        frecuencia_min = self.sd.def_cfg['f_inicial']['value']
+        frecuencia_max= self.sd.def_cfg['f_inicial']['value']
         puntos_decada= self.sd.def_cfg['n_puntos']['value']
         ampl =self.sd.def_cfg['vosc']['value']
         decimation=1*puntos_decada*[8192]+2*puntos_decada*[1024]+1*puntos_decada*[64]+2*puntos_decada*[1]
-        numero_valores=int((frecuencia_max-frecuencia_min)*puntos_decada)
-
-        if (self.sd.def_cfg['tipo_barrido']['value']==0):
-            self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
-                                    self.sd.def_cfg['f_final']['value'],
-                                    self.sd.def_cfg['n_puntos']['value'])
-        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-            self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
-                                    np.log10(self.sd.def_cfg['f_final']['value']),
-                                    numero_valores,base=10)
-
-        #recortamos a 40 Hz
-
-        self.sd.freq=self.sd.freq[self.sd.freq>40]
-        numero_valores=len(self.sd.freq)
-        incrementos= (self.sd.freq*(2**32))/125e6;
-        #print(str(incrementos))
-        s = io.BytesIO()
-        np.savetxt(s, [incrementos], fmt='%d', delimiter=',')
-        outStr = s.getvalue().decode('UTF-8')
-        print(outStr)
-        self.tx_txt('SOUR2:TRAC:DATA:DATA ' + outStr)
-
-        if (self.sd.def_cfg['post_procesado']['value']==0):
-            self.tx_txt('RP:FPGABITREAM 0.94')
-        else:
-            self.tx_txt('RP:FPGABITREAM_DSD 0.94')
-
+        numero_valores=(frecuencia_max-frecuencia_min)*puntos_decada
         # valores no configurables desde el front-end
         wave_form = 'sine'
         Rs=1000
         fm=125000000
         numero_pulsos=10
         ciclos=5
-
-        R_shunt_k = self.sd.def_cfg['shunt']['value'] #elijo 1000 
-        
-        # Postprocesamiento=self.sd.def_cfg['postprocesamiento']['value']
-        tipo_Postprocesamiento=self.sd.def_cfg['post_procesado']['value']
-        # print(R_shunt_k)
-        # # borra cuando quite la SOURCE 2
-        # amplreference=np.linspace(10,1,numero_valores)
-        # ampl2=1/amplreference
-        # phases=np.linspace(180,0,numero_valores)
-        shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
-
-
-        #configuro via i2c la resistencia de shunt
-        
-        # veamos = SshMachine(self.host, user = "root")
-        veamos = ParamikoMachine(self.host, user = "root", password="root")
-        veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
-        veamos.cwd.chdir("/opt/redpitaya/bin")
-        comando="./i2c_shunt " + str(R_shunt_k)
-        # print (comando)
-        r_back = veamos[comando]
-        r_back()
-        # sizeh1=str('-sizeh1={0}'.format(individual[0]))
-        # sizeh2=str('-sizeh2={0}'.format(individual[1]))
-        # epochs=str('-epochs={0}'.format(epochs))
-        # decay=str('-decay={0}'.format(decay_value))
-        # step=str('-step={0}'.format(learning_step))
-        # minibatch=str('-batchsize={0}'.format(batchsize))
-        # idea=str(r_back[epochs, sizeh1,sizeh2, minibatch,decay,step]())
-        # for line in idea.split("\n"):
-        #     if "error_val" in line:
-        #     #print (line.strip())
-        #        error_rate_float=[float(s) for s in re.findall('\d+\.\d+',line)]
-        #        error_rate=error_rate_float[0]
-        veamos.close()
-
-        # vamos a guardar valores en la memoria de frecuencias
-
-
-
-        ## borra cuando quite la SOURCE 2
-        # amplreference=np.linspace(10,1,numero_valores)
-        # ampl2=1/amplreference
-        # phases=np.linspace(180,0,numero_valores)
+        # borra cuando quite la SOURCE 2
+        amplreference=np.linspace(10,1,numero_valores)
+        ampl2=1/amplreference
+        phases=np.linspace(180,0,numero_valores)
         # prueba de conexion
         # self.tx_txt('SOUR2:BURS:STAT?')
         # veamosburst= self.rx_txt() 
@@ -362,13 +293,6 @@ class VISA(object):
 
             self.sd.freq=self.sd.freq[self.sd.freq>40]
             numero_valores=len(self.sd.freq)
-            incrementos= (self.sd.freq*(2**32))/125e6;
-            print(str(incrementos))
-            s = io.BytesIO()
-            np.savetxt(s, [incrementos], fmt='%d', delimiter=',')
-            print(str(s))
-            outStr = s.getvalue().decode('UTF-8')
-            print(outStr)
             # valores no configurables desde el front-end
             wave_form = 'sine'
             Rs=1000
@@ -432,8 +356,6 @@ class VISA(object):
                 self.tx_txt('SOUR1:FUNC ' + str(wave_form).upper())
                 self.tx_txt('SOUR1:VOLT ' + str(ampl))
                 self.tx_txt('SOUR1:FREQ:FIX ' + str(freq))
-                ## esta siguiente linea hace que se cuelgue
-                # self.tx_txt('SOUR1:VOLT:OFFS ' + str(self.sd.def_cfg['nivel_DC']['value'])) # esto lo utilizo para cambiar el offset de canal a
                 #rp_s.tx_txt('SOUR1:TRIG:SOUR INT')
                 #rp_s.tx_txt('SOUR1:TRIG:IMM')
     # esto habrá que borrarlo !!
@@ -678,58 +600,26 @@ class VISA(object):
             self.tx_txt('RP:FPGABITREAM_DSD 0.94')
             t0=pc()
 
-            frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
-            frecuencia_max= np.log10(self.sd.def_cfg['f_final']['value'])
-            puntos_decada= self.sd.def_cfg['n_puntos']['value']
-            numero_valores=int((frecuencia_max-frecuencia_min)*puntos_decada)
-            # numero_valores=256
-            ##configuramos las frecuencias y enviamos un listado de incrementos a la memoria de incrementos de la FPGA
-            if (self.sd.def_cfg['tipo_barrido']['value']==0):
-                self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
-                                        self.sd.def_cfg['f_final']['value'],
-                                        self.sd.def_cfg['n_puntos']['value'])
-            elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-                self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
-                                        np.log10(self.sd.def_cfg['f_final']['value']),
-                                        numero_valores,base=10)
-            self.tx_txt('DIG:PIN LED'+str(1)+','+str(0))  # 1->state2  0->state1
-            #recortamos a 40 Hz
+            # en versiones futuras crearemos los valores frecuenciales pero ahora es fijo
+            frecuencia_min = 1
+            frecuencia_max=6
+            puntos_decada=10
 
-            frecuencias=self.sd.freq[self.sd.freq>40]
-            numero_valores=len(frecuencias)
-            
-            print(numero_valores)
-            incrementos2=np.ones(256-numero_valores)*1407.0
-            incrementos1= (frecuencias*(2**32))/125e6
-            incrementos=np.concatenate((incrementos1, incrementos2), axis=None)
-            #print(str(incrementos))
-            s = io.BytesIO()
-            np.savetxt(s, [incrementos], fmt='%1.1f', delimiter=', ')
-            outStr = s.getvalue().decode('UTF-8')
-            # print(outStr)
-            #self.tx_txt('SOUR1:TRAC:DATA:DATA ' + outStr)
-            self.tx_txt('SOUR1:FUNC ARBITRARY')
-            self.tx_txt('SOUR1:TRAC:DATA:DATA_rafa ' + outStr)
-            #self.tx_txt('OUTPUT:STATE ON') 
-            #  quitar estas 5 lineas al terminar de debugear 
-           # self.tx_txt('ACQ:RESULT2:DATA?')
-           # buff_string3 = self.rx_txt()
-           # buff_string3 = buff_string3.strip('{}\n\r').replace("  ", "").split(',')
-           # buff3 = list(map(float, buff_string3))
-           # my_array3 = np.asarray(buff3)
 
-            ## 
-            # self.tx_txt('SOUR1:TRAC:DATA:DATA 2, 0.1, 0.1, 0.1, 0.2, 0.3, 0.3, 0.3,-0.2')
-            muestras=numero_valores
+            numero_valores=(frecuencia_max-frecuencia_min)*puntos_decada
+            #frecuencias =np.geomspace(frecuencia_min,frecuencia_max,numero_valores)
+            frecuencias_TOTAL =np.logspace(frecuencia_min,frecuencia_max,256,base=10)
 
+            frecuencias=frecuencias_TOTAL[frecuencias_TOTAL>40]
+
+            shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
+            muestras=225
             decimation=1
-            umbral_horizontal_detector_cero=150*puntos_decada/50
-            # umbral_vertical_detector_cero=750
-            umbral_vertical_detector_cero=200*puntos_decada/50            
+            umbral_horizontal_detector_cero=150
+            umbral_vertical_detector_cero=750
             procedimiento_fase=1
 
             #configuramos el shunt
-            shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
             R_shunt_k = self.sd.def_cfg['shunt']['value'] #elijo 1000 
             veamos = ParamikoMachine(self.host, user = "root", password="root")
             veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
@@ -739,21 +629,20 @@ class VISA(object):
             r_back()
             veamos.close()
 
-            # muestras=10
-            frecuencias=frecuencias[0:muestras]
+
             # configuraciones  varias
-            self.tx_txt('SOUR1:VOLT ' +str(self.sd.def_cfg['vosc']['value']))
+            self.tx_txt('SOUR1:VOLT 1')
             self.tx_txt('SOUR1:VOLT:OFFS 0.00') # esto lo utilizo para cambiar el offset de canal b
-            self.tx_txt('SOUR2:VOLT:OFFS ' + str(self.sd.def_cfg['nivel_DC']['value'])) # esto lo utilizo para cambiar el offset de canal b
+            self.tx_txt('SOUR2:VOLT:OFFS 0.016') # esto lo utilizo para cambiar el offset de canal b
             self.tx_txt('SOUR1:BURS:NCYC 1')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
             self.tx_txt('SOUR1:BURS:NOR ' +str(muestras)) # solo funciona si led3 esta activado, numero de frecuencias
             # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
             self.tx_txt('SOUR2:BURS:NOR ' +str(umbral_horizontal_detector_cero))
             self.tx_txt('SOUR2:BURS:NCYC ' +str(umbral_vertical_detector_cero)) #controlo el numero de ciclos de ancho del deteccor de cero
 
-
+            self.tx_txt('DIG:PIN LED'+str(1)+','+str(0))  # 1->state2  0->state1
             self.tx_txt('DIG:PIN LED'+str(2)+','+str(procedimiento_fase))  # desbloqueo finalizacion state1, tambien genera inicio
-            self.tx_txt('DIG:PIN LED'+str(3)+','+str(1))  #activacion del led3 absolutamente necesario para que el numero de ciclos sea configurable y el numero de frecuencias y los umbrales
+            self.tx_txt('DIG:PIN LED'+str(3)+','+str(1))  #activacion del led3
 
 
             self.dv.append_plus("Midiendo Z=R+iX")
@@ -807,9 +696,7 @@ class VISA(object):
             # my_array2=interp1d(frecuencias[0:muestras],my_array2[0:muestras])
             #funcion_interpolacion = make_interp_spline(frecuencias[0:muestras],my_array2[0:muestras], k=7)
             # my_array2=funcion_interpolacion(frecuencias[0:muestras])
-            
-            smooth=1
-            k=9
+            k=5
 
 
             Phase_check=-my_array2[0:muestras]*frecuencias[0:muestras]*360/125e6
@@ -837,28 +724,12 @@ class VISA(object):
             Z = np.ma.masked_where((Z_sin_comprimir==0),Z_sin_comprimir) 
 
             prePHASE=PHASE.compressed()
-            preZ = Z.compressed()
-            self.sd.freq=self.sd.freq.compressed()
             # ahora aplico una forma de smooth
-            if (smooth==1):
-                PHASE = np.cumsum(prePHASE, dtype=float)
-                Z=np.cumsum(preZ, dtype=float)
-                PHASE[k:] = PHASE[k:] - PHASE[:-k]
-                Z[k:] = Z[k:] - Z[:-k]
-                PHASE=PHASE[k - 1:] / k
-                Z=Z[k - 1:] / k
-                self.sd.freq=self.sd.freq[k-1:]
-            else:
-                PHASE=prePHASE
-            # self.sd.freq=frecuencias
-                Z = preZ
-            # Z = Z.compressed()[k-1:]
-
-            #PHASE=PHASE.compressed()
-            #self.sd.freq=self.sd.freq.compressed()
-            #Z = Z.compressed()
-            # self.sd.freq=frecuencias
-
+            PHASE = np.cumsum(prePHASE, dtype=float)
+            PHASE[k:] = PHASE[k:] - PHASE[:-k]
+            PHASE=PHASE[k - 1:] / k
+            self.sd.freq=self.sd.freq.compressed()[k-1:]
+            Z = Z.compressed()[k-1:]
 
             # PHASE=PHASE_sin_comprimir
             # self.sd.freq=frecuencias
@@ -898,60 +769,28 @@ class VISA(object):
             self.tx_txt('RP:FPGABITREAM_DSD 0.94')
             t0=pc()
 
-            frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
-            frecuencia_max= np.log10(self.sd.def_cfg['f_final']['value'])
-            puntos_decada= self.sd.def_cfg['n_puntos']['value']
-            numero_valores=int((frecuencia_max-frecuencia_min)*puntos_decada)
-            # numero_valores=256
-            ##configuramos las frecuencias y enviamos un listado de incrementos a la memoria de incrementos de la FPGA
-            if (self.sd.def_cfg['tipo_barrido']['value']==0):
-                self.sd.freq = np.linspace(self.sd.def_cfg['f_inicial']['value'],
-                                        self.sd.def_cfg['f_final']['value'],
-                                        self.sd.def_cfg['n_puntos']['value'])
-            elif(self.sd.def_cfg['tipo_barrido']['value']==1):
-                self.sd.freq = np.logspace(np.log10(self.sd.def_cfg['f_inicial']['value']),
-                                        np.log10(self.sd.def_cfg['f_final']['value']),
-                                        numero_valores,base=10)
-            self.tx_txt('DIG:PIN LED'+str(1)+','+str(0))  # 1->state2  0->state1
-            #recortamos a 40 Hz
+            # en versiones futuras crearemos los valores frecuenciales pero ahora es fijo
+            frecuencia_min = 1
+            frecuencia_max=6
+            puntos_decada=10
 
-            frecuencias=self.sd.freq[self.sd.freq>40]
-            numero_valores=len(frecuencias)
-            
-            print(numero_valores)
-            incrementos2=np.ones(256-numero_valores)*1407.0
-            incrementos1= (frecuencias*(2**32))/125e6
-            incrementos=np.concatenate((incrementos1, incrementos2), axis=None)
-            #print(str(incrementos))
-            s = io.BytesIO()
-            np.savetxt(s, [incrementos], fmt='%1.1f', delimiter=', ')
-            outStr = s.getvalue().decode('UTF-8')
-            # print(outStr)
-            self.tx_txt('SOUR1:TRAC:DATA:DATA ' + outStr)
-            self.tx_txt('SOUR1:FUNC ARBITRARY')
-            self.tx_txt('SOUR1:TRAC:DATA:DATA_rafa ' + outStr)
-            self.tx_txt('OUTPUT:STATE ON') 
-            #  quitar estas 5 lineas al terminar de debugear 
-           # self.tx_txt('ACQ:RESULT2:DATA?')
-           # buff_string3 = self.rx_txt()
-           # buff_string3 = buff_string3.strip('{}\n\r').replace("  ", "").split(',')
-           # buff3 = list(map(float, buff_string3))
-           # my_array3 = np.asarray(buff3)
 
-            ## 
-            # self.tx_txt('SOUR1:TRAC:DATA:DATA 2, 0.1, 0.1, 0.1, 0.2, 0.3, 0.3, 0.3,-0.2')
-            muestras=numero_valores
+            numero_valores=(frecuencia_max-frecuencia_min)*puntos_decada
+            #frecuencias =np.geomspace(frecuencia_min,frecuencia_max,numero_valores)
+            frecuencias_TOTAL =np.logspace(frecuencia_min,frecuencia_max,256,base=10)
 
+            frecuencias=frecuencias_TOTAL[frecuencias_TOTAL>40]
+
+            shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
+            muestras=225
             decimation=1
-            umbral_horizontal_detector_cero=150*puntos_decada/50
-            # umbral_vertical_detector_cero=750
-            umbral_vertical_detector_cero=200*puntos_decada/50            
-            procedimiento_fase=2
+            umbral_horizontal_detector_cero=150
+            umbral_vertical_detector_cero=750
+            procedimiento_fase=0
 
             #configuramos el shunt
-            shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
             R_shunt_k = self.sd.def_cfg['shunt']['value'] #elijo 1000 
-            veamos = ParamikoMachine(self.host, user = "root", password="root")
+            veamos = ParamikoMachine('158.42.32.24', user = "root", password="root")
             veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
             veamos.cwd.chdir("/opt/redpitaya/bin")
             comando="./i2c_shunt " + str(R_shunt_k)
@@ -959,21 +798,20 @@ class VISA(object):
             r_back()
             veamos.close()
 
-            # muestras=10
-            frecuencias=frecuencias[0:muestras]
+
             # configuraciones  varias
-            self.tx_txt('SOUR1:VOLT ' +str(self.sd.def_cfg['vosc']['value']))
+            self.tx_txt('SOUR1:VOLT 1')
             self.tx_txt('SOUR1:VOLT:OFFS 0.00') # esto lo utilizo para cambiar el offset de canal b
-            self.tx_txt('SOUR2:VOLT:OFFS ' + str(self.sd.def_cfg['nivel_DC']['value'])) # esto lo utilizo para cambiar el offset de canal b
-            self.tx_txt('SOUR1:BURS:NCYC 1')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
+            self.tx_txt('SOUR2:VOLT:OFFS 0.016') # esto lo utilizo para cambiar el offset de canal b
+            self.tx_txt('SOUR1:BURS:NCYC 2')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
             self.tx_txt('SOUR1:BURS:NOR ' +str(muestras)) # solo funciona si led3 esta activado, numero de frecuencias
             # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
             self.tx_txt('SOUR2:BURS:NOR ' +str(umbral_horizontal_detector_cero))
-            self.tx_txt('SOUR2:BURS:NCYC ' +str(umbral_vertical_detector_cero)) #controlo el numero de ciclos de ancho del deteccor de cero
+            self.tx_txt('SOUR2:BURS:NCYC ' +str(umbral_vertical_detector_cero))   #controlo el numero de ciclos de ancho del deteccor de cero
 
-
+            self.tx_txt('DIG:PIN LED'+str(1)+','+str(0))  # 1->state2  0->state1
             self.tx_txt('DIG:PIN LED'+str(2)+','+str(procedimiento_fase))  # desbloqueo finalizacion state1, tambien genera inicio
-            self.tx_txt('DIG:PIN LED'+str(3)+','+str(1))  #activacion del led3 absolutamente necesario para que el numero de ciclos sea configurable y el numero de frecuencias y los umbrales
+            self.tx_txt('DIG:PIN LED'+str(3)+','+str(1))  #activacion del led3
 
 
             self.dv.append_plus("Midiendo Z=R+iX")
@@ -1012,18 +850,12 @@ class VISA(object):
             muestras=round(muestras/decimation)
             t5=pc()
             print('t5-t1:',t5-t1)
-
-
-            smooth=1
-            k=9
-
-
             #Enable output
             iteracion=1
             # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
             # ZB=interp1d(frecuencias,my_array[256: 256+225])
             # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
-            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k]/1000)
+            Z_sin_comprimir=my_array[0:muestras]*shunt[R_shunt_k]/1000
             # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
 
@@ -1036,12 +868,9 @@ class VISA(object):
                 # arcoa=np.arctan(tangentea) 
                 # arcob=np.arctan(tangenteb) 
                 # Phase_radianes=(arcoa-arcob)
-            # Phase_escalada=-my_array2[0:muestras]/(2**29) 
-            Phase_escalada=-my_array2[0:muestras] 
-            #Phase_radianes=Phase_escalada*np.pi           
-            #Phase_check=Phase_radianes*360/(2*np.pi)
-            Phase_radianes=Phase_escalada*np.pi/180           
-            Phase_check=Phase_escalada            
+            Phase_escalada=-my_array2[0:muestras]/(2**29) 
+            Phase_radianes=Phase_escalada*np.pi           
+            Phase_check=Phase_radianes*360/(2*np.pi)
             PHASE_sin_comprimir=np.zeros(muestras)
             for fases in range(len(Phase_check)):
                 if (Phase_check[fases]<=-180):
@@ -1058,24 +887,13 @@ class VISA(object):
             self.sd.freq=np.ma.masked_where((Z_sin_comprimir==0),frecuencias) 
             Z = np.ma.masked_where((Z_sin_comprimir==0),Z_sin_comprimir) 
 
-            prePHASE=PHASE.compressed()
+            PHASE=PHASE.compressed()
             self.sd.freq=self.sd.freq.compressed()
-            preZ = Z.compressed()
+            Z = Z.compressed()
 
-                        # ahora aplico una forma de smooth
-            if (smooth==1):
-                PHASE = np.cumsum(prePHASE, dtype=float)
-                Z=np.cumsum(preZ, dtype=float)
-                PHASE[k:] = PHASE[k:] - PHASE[:-k]
-                Z[k:] = Z[k:] - Z[:-k]
-                PHASE=PHASE[k - 1:] / k
-
-                Z=Z[k - 1:] / k
-                self.sd.freq=self.sd.freq[k-1:]
-            else:
-                PHASE=prePHASE
+            # PHASE=PHASE_sin_comprimir
             # self.sd.freq=frecuencias
-                Z = preZ
+            # Z = Z_sin_comprimir
 
             t10=pc()
             self.sd.R_data = Z*np.cos(PHASE*np.pi/180)
