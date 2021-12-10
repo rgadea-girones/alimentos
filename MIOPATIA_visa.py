@@ -797,7 +797,8 @@ class VISA(object):
             # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
             # ZB=interp1d(frecuencias,my_array[256: 256+225])
             # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
-            Z_sin_comprimir=my_array[0:muestras]*shunt[R_shunt_k]/1000
+            Z_sin_comprimir=my_array[0:muestras]*shunt[R_shunt_k]/1024
+
             # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
 
@@ -1023,7 +1024,7 @@ class VISA(object):
             # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
             # ZB=interp1d(frecuencias,my_array[256: 256+225])
             # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
-            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k]/1000)
+            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])
             # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
 
@@ -1037,7 +1038,7 @@ class VISA(object):
                 # arcob=np.arctan(tangenteb) 
                 # Phase_radianes=(arcoa-arcob)
             # Phase_escalada=-my_array2[0:muestras]/(2**29) 
-            Phase_escalada=-my_array2[0:muestras] 
+            Phase_escalada=-my_array2[0:muestras] /2  # porque las fases las calculo multiplicads por 2
             #Phase_radianes=Phase_escalada*np.pi           
             #Phase_check=Phase_radianes*360/(2*np.pi)
             Phase_radianes=Phase_escalada*np.pi/180           
