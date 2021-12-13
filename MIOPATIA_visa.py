@@ -797,7 +797,7 @@ class VISA(object):
             # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
             # ZB=interp1d(frecuencias,my_array[256: 256+225])
             # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
-            Z_sin_comprimir=my_array[0:muestras]*shunt[R_shunt_k]/1024
+            Z_sin_comprimir=my_array[0:muestras]*shunt[R_shunt_k]/1000
 
             # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
@@ -920,7 +920,7 @@ class VISA(object):
             numero_valores=len(frecuencias)
             
             print(numero_valores)
-            incrementos2=np.ones(256-numero_valores)*1407.0
+            incrementos2=np.ones(256-numero_valores)*34360000.0
             incrementos1= (frecuencias*(2**32))/125e6
             incrementos=np.concatenate((incrementos1, incrementos2), axis=None)
             #print(str(incrementos))
@@ -962,12 +962,13 @@ class VISA(object):
 
             # muestras=10
             frecuencias=frecuencias[0:muestras]
+            muestras_incrementadas=muestras+4
             # configuraciones  varias
             self.tx_txt('SOUR1:VOLT ' +str(self.sd.def_cfg['vosc']['value']))
             self.tx_txt('SOUR1:VOLT:OFFS 0.00') # esto lo utilizo para cambiar el offset de canal b
             self.tx_txt('SOUR2:VOLT:OFFS ' + str(self.sd.def_cfg['nivel_DC']['value'])) # esto lo utilizo para cambiar el offset de canal b
             self.tx_txt('SOUR1:BURS:NCYC 1')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
-            self.tx_txt('SOUR1:BURS:NOR ' +str(muestras)) # solo funciona si led3 esta activado, numero de frecuencias
+            self.tx_txt('SOUR1:BURS:NOR ' +str(muestras_incrementadas)) # solo funciona si led3 esta activado, numero de frecuencias
             # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
             self.tx_txt('SOUR2:BURS:NOR ' +str(umbral_horizontal_detector_cero))
             self.tx_txt('SOUR2:BURS:NCYC ' +str(umbral_vertical_detector_cero)) #controlo el numero de ciclos de ancho del deteccor de cero
@@ -1015,7 +1016,7 @@ class VISA(object):
             print('t5-t1:',t5-t1)
 
 
-            smooth=1
+            smooth=0
             k=9
 
 
@@ -1024,7 +1025,7 @@ class VISA(object):
             # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
             # ZB=interp1d(frecuencias,my_array[256: 256+225])
             # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
-            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])
+            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])/1000
             # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
 
@@ -1038,7 +1039,7 @@ class VISA(object):
                 # arcob=np.arctan(tangenteb) 
                 # Phase_radianes=(arcoa-arcob)
             # Phase_escalada=-my_array2[0:muestras]/(2**29) 
-            Phase_escalada=-my_array2[0:muestras] /2  # porque las fases las calculo multiplicads por 2
+            Phase_escalada=-my_array2[0:muestras]  # porque las fases las calculo multiplicads por 2
             #Phase_radianes=Phase_escalada*np.pi           
             #Phase_check=Phase_radianes*360/(2*np.pi)
             Phase_radianes=Phase_escalada*np.pi/180           
@@ -1054,7 +1055,7 @@ class VISA(object):
                         PHASE_sin_comprimir[fases]=Phase_check[fases]                
             # PHASE=my_array[256: 256+225]*frecuencias*360/125e6
             # PHASE= Phase_check
-
+            PHASE_sin_comprimir=PHASE_sin_comprimir/2
             PHASE=np.ma.masked_where((Z_sin_comprimir==0),PHASE_sin_comprimir) 
             self.sd.freq=np.ma.masked_where((Z_sin_comprimir==0),frecuencias) 
             Z = np.ma.masked_where((Z_sin_comprimir==0),Z_sin_comprimir) 
