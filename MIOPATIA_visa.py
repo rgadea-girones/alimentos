@@ -1024,7 +1024,7 @@ class VISA(object):
             # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
             # ZB=interp1d(frecuencias,my_array[256: 256+225])
             # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
-            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])
+            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])/1000
             # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
 
