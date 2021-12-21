@@ -421,6 +421,9 @@ class VISA(object):
             espera_trigger=0
             Z=np.zeros(numero_valores)
             PHASE=np.zeros(numero_valores)
+            Phase_Z_rad=np.zeros(numero_valores)
+            Phase_U_rad=np.zeros(numero_valores)
+            Phase_I_rad=np.zeros(numero_valores)
             for freq in (self.sd.freq):
                 t1=pc()
                 self.tx_txt('GEN:RST')
@@ -549,28 +552,29 @@ class VISA(object):
 
                 U_dut_amp=(np.sqrt((X_component_lock_in_1)**2+(Y_component_lock_in_1)**2))*2
                 Phase_U_dut=np.arctan2(Y_component_lock_in_1,X_component_lock_in_1)
-
+                Phase_U_rad[iteracion-1]=Phase_U_dut
                 # Calculate amplitude and angle of I_dut
 
                 I_dut_amp=(np.sqrt((X_component_lock_in_2)**2+(Y_component_lock_in_2)**2))*2
                 Phase_I_dut=np.arctan2(Y_component_lock_in_2,X_component_lock_in_2)
+                Phase_I_rad[iteracion-1]=Phase_I_dut                
                 # Calculate amplitude of current trough impedance and amplitude of impedance
 
                 Z_amp=(U_dut_amp/I_dut_amp);            # Amplitude of impedance
 
                 Z[iteracion-1]=Z_amp
 
-                Phase_Z_rad=(Phase_U_dut-Phase_I_dut)
-                Phase_check=(Phase_U_dut-Phase_I_dut)*(180/np.pi)
-                if (Phase_check<=-180):
-                    Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)+360
+                Phase_Z_rad[iteracion-1]=-(Phase_U_dut-Phase_I_dut)
+                Phase_check=-(Phase_U_dut-Phase_I_dut)*(180/np.pi)
+                if (Phase_check<=-90):
+                    Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)+180
                 else:
-                    if (Phase_check>=180):
-                        Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)-360
+                    if (Phase_check>=90):
+                        Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)-180
                     else:
                         Phase_Z=Phase_check
-                PHASE[iteracion-1]=Phase_Z
-
+                PHASE[iteracion-1]=Phase_Z*(np.pi)/180
+                #PHASE[iteracion-1]=Phase_Z_rad[iteracion-1]
                 t8=pc()
                 # N2=my_array2.shape[0]
                 # T=1/fm
@@ -673,9 +677,10 @@ class VISA(object):
             # self.inst.wait_for_srq(self.sd.def_cfg['GPIB_timeout'])
             self.dv.append_plus("He finalizado de medir")
             self.dv.append_plus("tiempo transcurrido:" + str(total))
-        elif (self.sd.def_cfg['post_procesado']['value']==1):
+            #metodo aproximado por contadores, poco estable y un poco mas lento
+        elif (self.sd.def_cfg['post_procesado']['value']==2):
             # configuramos la FPGA con diseño verilog propio de DSD
-            self.tx_txt('RP:FPGABITREAM_DSD 0.94')
+            self.tx_txt('RP:FPGABITREAM 0.94')
             t0=pc()
 
             frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
@@ -813,8 +818,8 @@ class VISA(object):
             k=9
 
 
-            Phase_check=-my_array2[0:muestras]*frecuencias[0:muestras]*360/125e6
-            Phase_radianes=-my_array2[0:muestras]*frecuencias[0:muestras]*2*np.pi/125e6
+            Phase_check=my_array2[0:muestras]*frecuencias[0:muestras]*360/125e6
+            Phase_radianes=my_array2[0:muestras]*frecuencias[0:muestras]*2*np.pi/125e6
             Phase_Z=np.zeros(muestras)
             PHASE_sin_comprimir_pre=np.zeros(muestras)
             PHASE_sin_comprimir=np.zeros(muestras)            
@@ -833,6 +838,7 @@ class VISA(object):
                         PHASE_sin_comprimir[fases]= PHASE_sin_comprimir_pre[fases]-180
                     else:
                         PHASE_sin_comprimir[fases]=PHASE_sin_comprimir_pre[fases]
+            PHASE_sin_comprimir=PHASE_sin_comprimir*np.pi/180
             PHASE=np.ma.masked_where((Z_sin_comprimir==0),PHASE_sin_comprimir) 
             self.sd.freq=np.ma.masked_where((Z_sin_comprimir==0),frecuencias) 
             Z = np.ma.masked_where((Z_sin_comprimir==0),Z_sin_comprimir) 
@@ -894,7 +900,7 @@ class VISA(object):
 
             self.dv.append_plus("He finalizado de medir")
             self.dv.append_plus("tiempo transcurrido:" + str(total))
-        elif (self.sd.def_cfg['post_procesado']['value']==2):
+        elif (self.sd.def_cfg['post_procesado']['value']==1):
             # configuramos la FPGA con diseño verilog propio de DSD
             self.tx_txt('RP:FPGABITREAM_DSD 0.94')
             t0=pc()
@@ -920,7 +926,7 @@ class VISA(object):
             numero_valores=len(frecuencias)
             
             print(numero_valores)
-            incrementos2=np.ones(256-numero_valores)*1407.0
+            incrementos2=np.ones(256-numero_valores)*34360000.0
             incrementos1= (frecuencias*(2**32))/125e6
             incrementos=np.concatenate((incrementos1, incrementos2), axis=None)
             #print(str(incrementos))
@@ -944,9 +950,12 @@ class VISA(object):
             muestras=numero_valores
 
             decimation=1
-            umbral_horizontal_detector_cero=150*puntos_decada/50
-            # umbral_vertical_detector_cero=750
-            umbral_vertical_detector_cero=200*puntos_decada/50            
+            #umbral_horizontal_detector_cero=150*puntos_decada/50
+
+            #umbral_vertical_detector_cero=200*puntos_decada/50     
+            umbral_horizontal_detector_cero=0
+
+            umbral_vertical_detector_cero=0        
             procedimiento_fase=2
 
             #configuramos el shunt
@@ -962,12 +971,13 @@ class VISA(object):
 
             # muestras=10
             frecuencias=frecuencias[0:muestras]
+            muestras_ampliadas=muestras+1
             # configuraciones  varias
             self.tx_txt('SOUR1:VOLT ' +str(self.sd.def_cfg['vosc']['value']))
             self.tx_txt('SOUR1:VOLT:OFFS 0.00') # esto lo utilizo para cambiar el offset de canal b
             self.tx_txt('SOUR2:VOLT:OFFS ' + str(self.sd.def_cfg['nivel_DC']['value'])) # esto lo utilizo para cambiar el offset de canal b
-            self.tx_txt('SOUR1:BURS:NCYC 1')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
-            self.tx_txt('SOUR1:BURS:NOR ' +str(muestras)) # solo funciona si led3 esta activado, numero de frecuencias
+            self.tx_txt('SOUR1:BURS:NCYC 0')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
+            self.tx_txt('SOUR1:BURS:NOR ' +str(muestras_ampliadas)) # solo funciona si led3 esta activado, numero de frecuencias
             # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
             self.tx_txt('SOUR2:BURS:NOR ' +str(umbral_horizontal_detector_cero))
             self.tx_txt('SOUR2:BURS:NCYC ' +str(umbral_vertical_detector_cero)) #controlo el numero de ciclos de ancho del deteccor de cero
@@ -1024,7 +1034,7 @@ class VISA(object):
             # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
             # ZB=interp1d(frecuencias,my_array[256: 256+225])
             # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
-            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])
+            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])/1024
             # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
 
@@ -1038,23 +1048,24 @@ class VISA(object):
                 # arcob=np.arctan(tangenteb) 
                 # Phase_radianes=(arcoa-arcob)
             # Phase_escalada=-my_array2[0:muestras]/(2**29) 
-            Phase_escalada=-my_array2[0:muestras] /2  # porque las fases las calculo multiplicads por 2
+            Phase_escalada=-my_array2[0:muestras]/2 # porque las fases las calculo multiplicads por 2
             #Phase_radianes=Phase_escalada*np.pi           
             #Phase_check=Phase_radianes*360/(2*np.pi)
+
             Phase_radianes=Phase_escalada*np.pi/180           
             Phase_check=Phase_escalada            
-            PHASE_sin_comprimir=np.zeros(muestras)
+            PHASE_sin_comprimir_grados=np.zeros(muestras)
             for fases in range(len(Phase_check)):
-                if (Phase_check[fases]<=-180):
-                    PHASE_sin_comprimir[fases]=Phase_radianes[fases]*(180/np.pi)+360
+                if (Phase_check[fases]<=-90):
+                    PHASE_sin_comprimir_grados[fases]=Phase_check[fases]+180
                 else:
-                    if (Phase_check[fases] >=180):
-                        PHASE_sin_comprimir[fases]=Phase_radianes[fases]*(180/np.pi)-360
+                    if (Phase_check[fases] >=90):
+                        PHASE_sin_comprimir_grados[fases]=Phase_check[fases]-180
                     else:
-                        PHASE_sin_comprimir[fases]=Phase_check[fases]                
+                        PHASE_sin_comprimir_grados[fases]=Phase_check[fases]                
             # PHASE=my_array[256: 256+225]*frecuencias*360/125e6
             # PHASE= Phase_check
-
+            PHASE_sin_comprimir=PHASE_sin_comprimir_grados*np.pi/180
             PHASE=np.ma.masked_where((Z_sin_comprimir==0),PHASE_sin_comprimir) 
             self.sd.freq=np.ma.masked_where((Z_sin_comprimir==0),frecuencias) 
             Z = np.ma.masked_where((Z_sin_comprimir==0),Z_sin_comprimir) 
@@ -1104,7 +1115,11 @@ class VISA(object):
 
             total=t11-t1
             print ('total:',total)
-
+            absolute_val_array = np.abs(self.sd.freq - 1000)
+            smallest_difference_index = absolute_val_array.argmin()
+            print ('R_data =', self.sd.R_data[smallest_difference_index])        
+            print ('X_data=', self.sd.X_data[smallest_difference_index])
+            print ('resistencia shunt=', shunt[R_shunt_k])
             self.dv.append_plus("He finalizado de medir")
             self.dv.append_plus("tiempo transcurrido:" + str(total))            
 

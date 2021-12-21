@@ -35,7 +35,7 @@ class DATA(object):
                             'DC_bias':{'value':0, 'limits':[0,1],'type':'int'},
                             'nivel_DC':{'value':0.016, 'limits':[-40.0,40.0],'type':'float'},
                             #'avg':{'value':0, 'limits':[0,1],'type':'int'},
-                            'post_procesado':{'value':1, 'limits':[0,2],'type':'int'},
+                            'post_procesado':{'value':1, 'limits':[0,1],'type':'int'},
                             'ultimo_pollo':{'value':0, 'limits':[0,99],'type':'int'},
                             'ultima_medida':{'value':0, 'limits':[0,9],'type':'int'},
                             'load_mfile_name':"./medida.csv",

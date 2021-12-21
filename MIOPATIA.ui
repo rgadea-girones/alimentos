@@ -578,21 +578,8 @@
               </rect>
              </property>
              <property name="title">
-              <string>Procedimiento</string>
+              <string>Procedimiento Correlación</string>
              </property>
-             <widget class="QRadioButton" name="radioButton_F_Count">
-              <property name="geometry">
-               <rect>
-                <x>20</x>
-                <y>40</y>
-                <width>151</width>
-                <height>17</height>
-               </rect>
-              </property>
-              <property name="text">
-               <string>Rápido por Contador</string>
-              </property>
-             </widget>
              <widget class="QRadioButton" name="radioButton_Corre">
               <property name="geometry">
                <rect>
@@ -603,7 +590,7 @@
                </rect>
               </property>
               <property name="text">
-               <string>Original</string>
+               <string>Software</string>
               </property>
              </widget>
              <widget class="QRadioButton" name="radioButton_F_Corre">
@@ -616,7 +603,7 @@
                </rect>
               </property>
               <property name="text">
-               <string>Rápido por Correlación</string>
+               <string>Hardware</string>
               </property>
              </widget>
             </widget>
