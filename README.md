@@ -8,20 +8,26 @@ Instrucciones:
 
         a) Cambiar el servidor scpi-server
         
-        Mirar en utilidades/nuevas_utilidades y copiar el fichero scpi-server allí existente en
+        Mirar en utilidades/super_nuevas_utilidades y copiar el fichero scpi-server allí existente en
 
         /opt/redpitaya/bin
 
 
         b) Cambiar la librería asociada de la api.
 
-        Mirar en utilidades/nuevas_utilidades y copiar los ficheros librp.so e librp.a en
+        Mirar en utilidades/super_nuevas_utilidades y copiar los ficheros librp.so e librp.a en
 
         /opt/redpitaya/lib
 
         c) Añadir un fichero de configuración de FPGA a los existentes por defecto
 
-        Mirar en utilidades/nuevas_utilidades y copiar el fichero fpga_DSD_0.94.bit en
+        Mirar en utilidades/super_nuevas_utilidades y copiar el fichero fpga_DSD_0.94.bit en
+
+        /opt/redpitaya/fpga
+
+        d) (opcional) Sustituir el fichero de configuración de FPGA que viene por defecto en la imagen original.
+
+        Mirar en utilidades/super_nuevas_utilidades y copiar el fichero fpga_0.94.bit en
 
         /opt/redpitaya/fpga
 
@@ -34,4 +40,4 @@ systemctl start redpitaya_scpi &
 
 la aplicación i2c_shunt , necesaria para modificar la resistencia de shunt.
 
-Dicha aplicación, así como su fichero fuente (por si quisiera recompilarse) se encuentra en la carpeta de utilidades/nuevas_utilidades/src
+Dicha aplicación, así como su fichero fuente (por si quisiera recompilarse) se encuentra en la carpeta de utilidades/super_nuevas_utilidades/src
