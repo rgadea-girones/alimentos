@@ -566,14 +566,18 @@ class VISA(object):
 
                 Phase_Z_rad[iteracion-1]=-(Phase_U_dut-Phase_I_dut)
                 Phase_check=-(Phase_U_dut-Phase_I_dut)*(180/np.pi)
-                if (Phase_check<=-90):
-                    Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)+180
+                if (Phase_check<=-180):
+                    Phase_Z=-(Phase_U_dut-Phase_I_dut)*(180/np.pi)+360
                 else:
-                    if (Phase_check>=90):
-                        Phase_Z=(Phase_U_dut-Phase_I_dut)*(180/np.pi)-180
+                    if (Phase_check>=180):
+                        Phase_Z=-(Phase_U_dut-Phase_I_dut)*(180/np.pi)-360
                     else:
                         Phase_Z=Phase_check
-                PHASE[iteracion-1]=Phase_Z*(np.pi)/180
+                prefase=Phase_Z*(np.pi)/180
+
+                #while prefase>=2*np.pi:
+                #    prefase=prefase-2*np.pi
+                PHASE[iteracion-1]=prefase
                 #PHASE[iteracion-1]=Phase_Z_rad[iteracion-1]
                 t8=pc()
                 # N2=my_array2.shape[0]
@@ -992,7 +996,7 @@ class VISA(object):
             self.tx_txt('CHIRP ON')
             while 1 :
             #    rp_s.tx_txt('FIN:RAF:STAT? 1')
-                self.tx_txt('DIG:PIN? DIO'+str(7)+'_N')
+                self.tx_txt('DIG:PIN? DIO'+str(7)+'_P')
                 state = self.rx_txt()
                 if state == '1':
                     break
@@ -1025,7 +1029,7 @@ class VISA(object):
             print('t5-t1:',t5-t1)
 
 
-            smooth=1
+            smooth=0
             k=9
 
 
@@ -1033,8 +1037,8 @@ class VISA(object):
             iteracion=1
             # ZA=interp1d(frecuencias[0:muestras],my_array[0:muestras])
             # ZB=interp1d(frecuencias,my_array[256: 256+225])
-            # Z=(ZA(frecuencias))*shunt[R_shunt_k]/1000
-            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])/1024
+            # Z=(ZA(frecuencias))*shunt[R_shunt_k]/32
+            Z_sin_comprimir=(my_array[0:muestras]*shunt[R_shunt_k])/16
             # en principio el calculo en verilog es suponiendo una resistencia de 1k. Con esto lo ajusto a la resistencia de shunt exacta
 
 
