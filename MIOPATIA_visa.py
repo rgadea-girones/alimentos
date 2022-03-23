@@ -1268,6 +1268,7 @@ class VISA(object):
         self.sd.COM_SHORT_data_X = SHORT_cal[1::2]
         self.sd.COM_LOAD_data_R = LOAD_cal[0::2]
         self.sd.COM_LOAD_data_X = LOAD_cal[1::2]
+        
 
         # Frequency array creation
         if (self.sd.def_cfg['tipo_barrido']['value']==0):
