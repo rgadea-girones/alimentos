@@ -1125,7 +1125,12 @@ class VISA(object):
             print ('X_data=', self.sd.X_data[smallest_difference_index])
             print ('resistencia shunt=', shunt[R_shunt_k])
             self.dv.append_plus("He finalizado de medir")
-            self.dv.append_plus("tiempo transcurrido:" + str(total))            
+            self.dv.append_plus("tiempo transcurrido:" + str(total))  
+            self.dv.append_plus("R_data ="+ str(self.sd.R_data[smallest_difference_index]))
+            self.dv.append_plus("X_data ="+ str(self.sd.X_data[smallest_difference_index]))
+         
+          
+
 
     def config_calibration(self):
         # Configuración de los valores para la calibración en abierto, corto y carga
