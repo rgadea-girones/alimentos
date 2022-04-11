@@ -8,7 +8,7 @@
             "name": "Python: Archivo actual",
             "type": "python",
             "request": "launch",
-            "args":["158.42.34.99"],
+            "args":["169.254.49.151"],
             "program": "${file}",
             "console": "integratedTerminal"
         }
