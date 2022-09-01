@@ -981,6 +981,16 @@ class VISA(object):
             self.tx_txt('DIG:PIN:DIR OUT,DIO6_N')
             self.tx_txt('DIG:PIN:DIR OUT,DIO7_N')
 
+            #elegimos 10K
+            #activo a nivel bajo: activo
+            self.tx_txt('DIG:PIN DIO0_N,1') 
+            #activo a nivel bajo: desactivo
+            self.tx_txt('DIG:PIN DIO1_N,0')
+            #activo a nivel alto: desactivo            
+            self.tx_txt('DIG:PIN DIO2_N,0')
+            #activo a nivel alto: desactivo                
+            self.tx_txt('DIG:PIN DIO3_N,0')
+
             #elegimos 1K
             #activo a nivel bajo: activo
             self.tx_txt('DIG:PIN DIO0_N,0') 
@@ -991,6 +1001,8 @@ class VISA(object):
             #activo a nivel alto: desactivo                
             self.tx_txt('DIG:PIN DIO3_N,0')
 
+
+
             #elegimos el cable rojo , conector j2
             #activo a nivel bajo: desactivo    
             self.tx_txt('DIG:PIN DIO4_N,1')
@@ -1000,6 +1012,20 @@ class VISA(object):
             self.tx_txt('DIG:PIN DIO6_N,0')
             #activo a nivel bajo: desactivo                
             self.tx_txt('DIG:PIN DIO7_N,1')
+
+            #elegimos el cable amarillo , conector j2
+            #activo a nivel bajo: desactivo    
+            self.tx_txt('DIG:PIN DIO4_N,1')
+            #activo a nivel alto: desactivo    
+            self.tx_txt('DIG:PIN DIO5_N,0')
+            #activo a nivel alto: dactivo                
+            self.tx_txt('DIG:PIN DIO6_N,1')
+            #activo a nivel bajo: desactivo                
+            self.tx_txt('DIG:PIN DIO7_N,1')
+
+
+
+
             #ponemos la resistencia a 1k
 
             # sizeh1=str('-sizeh1={0}'.format(individual[0]))
@@ -1360,15 +1386,36 @@ class VISA(object):
             self.tx_txt('DIG:PIN:DIR OUT,DIO6_N')
             self.tx_txt('DIG:PIN:DIR OUT,DIO7_N')
 
-            #elegimos 1K
-            #activo a nivel bajo: activo
+            self.tx_txt('DIG:PIN:DIR OUT,DIO0_N')
+            self.tx_txt('DIG:PIN:DIR OUT,DIO1_N')
+            self.tx_txt('DIG:PIN:DIR OUT,DIO2_N')
+            self.tx_txt('DIG:PIN:DIR OUT,DIO3_N')
+            self.tx_txt('DIG:PIN:DIR OUT,DIO4_N')
+            self.tx_txt('DIG:PIN:DIR OUT,DIO5_N')
+            self.tx_txt('DIG:PIN:DIR OUT,DIO6_N')
+            self.tx_txt('DIG:PIN:DIR OUT,DIO7_N')
+
+            # #elegimos 10K
+            # #activo a nivel bajo: activo
+            # self.tx_txt('DIG:PIN DIO0_N,1') 
+            # #activo a nivel bajo: desactivo
+            # self.tx_txt('DIG:PIN DIO1_N,0')
+            # #activo a nivel alto: desactivo            
+            # self.tx_txt('DIG:PIN DIO2_N,0')
+            # #activo a nivel alto: desactivo                
+            # self.tx_txt('DIG:PIN DIO3_N,0')
+
+            # elegimos 1K
+            # activo a nivel bajo: activo
             self.tx_txt('DIG:PIN DIO0_N,0') 
-            #activo a nivel bajo: desactivo
+            # activo a nivel bajo: desactivo
             self.tx_txt('DIG:PIN DIO1_N,1')
-            #activo a nivel alto: desactivo            
+            # activo a nivel alto: desactivo            
             self.tx_txt('DIG:PIN DIO2_N,0')
-            #activo a nivel alto: desactivo                
+            # activo a nivel alto: desactivo                
             self.tx_txt('DIG:PIN DIO3_N,0')
+
+
 
             #elegimos el cable rojo , conector j2
             #activo a nivel bajo: desactivo    
@@ -1379,6 +1426,37 @@ class VISA(object):
             self.tx_txt('DIG:PIN DIO6_N,0')
             #activo a nivel bajo: desactivo                
             self.tx_txt('DIG:PIN DIO7_N,1')
+
+            # #elegimos el cable amarillo , conector j2
+            # #activo a nivel bajo: desactivo    
+            # self.tx_txt('DIG:PIN DIO4_N,1')
+            # #activo a nivel alto: desactivo    
+            # self.tx_txt('DIG:PIN DIO5_N,0')
+            # #activo a nivel alto: desactivo                
+            # self.tx_txt('DIG:PIN DIO6_N,0')
+            # #activo a nivel bajo: activo                
+            # self.tx_txt('DIG:PIN DIO7_N,0')
+
+
+            # #elegimos el cable verde , conector j2
+            # #activo a nivel bajo: activo    
+            # self.tx_txt('DIG:PIN DIO4_N,0')
+            # #activo a nivel alto: desactivo    
+            # self.tx_txt('DIG:PIN DIO5_N,0')
+            # #activo a nivel alto: desactivo                
+            # self.tx_txt('DIG:PIN DIO6_N,0')
+            # #activo a nivel bajo: desactivo                
+            # self.tx_txt('DIG:PIN DIO7_N,1')
+
+            # #elegimos el cable azul , conector j2
+            # #activo a nivel bajo: desactivo    
+            # self.tx_txt('DIG:PIN DIO4_N,1')
+            # #activo a nivel alto: desactivo    
+            # self.tx_txt('DIG:PIN DIO5_N,0')
+            # #activo a nivel alto: activo                
+            # self.tx_txt('DIG:PIN DIO6_N,1')
+            # #activo a nivel bajo: desactivo                
+            # self.tx_txt('DIG:PIN DIO7_N,1')
 
             # muestras=10
             frecuencias=frecuencias[0:muestras]
