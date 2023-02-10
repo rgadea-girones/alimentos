@@ -43,4 +43,5 @@ systemctl start redpitaya_scpi &
 4) Supongamos que ya tengo bien conectada la placa, cambiados los ficheros y lanzado el spi_server. Es el momento de lanzar la aplicación python remota (en nuestro PC) que se conectará con la placa.
 
      a) Necesito saber la IP porque es el único argumento que necesita la aplicación python denominada miopatia.py para ser lanzada
+     
      b) Si todo ha sido correcto se abrirá el entorno para el manejo de la placa
