@@ -238,3 +238,71 @@ class DATA_VIEW(object):
                                      'F_ALFA1','F_ALFA2','F_ALFA3',
                                      'EPS_INFe','EPS_ALFA1e','EPS_ALFA2e','EPS_ALFA3e',
                                      'F_ALFA1e','F_ALFA2e','F_ALFA3e','R2'])
+
+    def show_data_rafa(self, comboBox_trazaA,  data,data1,data2,data3):
+        self.sd.axes['ax5'].cla()
+        # self.sd.axes['ax3'].cla()
+
+        traza_A = self.switch({ 0:data['Z_mod'],
+                                1:data['Z_Fase'],
+                                2:data['Err'],
+                                3:data['Eri'],
+                                4:data['E_mod'],
+                                5:data['E_fase']},
+                                comboBox_trazaA)
+
+        traza_B = self.switch({ 0:data1['Z_mod'],
+                                 1:data1['Z_Fase'],
+                                 2:data1['Err'],
+                                 3:data1['Eri'],
+                                 4:data1['E_mod'],
+                                 5:data1['E_fase']},
+                                 comboBox_trazaA)
+        traza_C = self.switch({ 0:data2['Z_mod'],
+                                 1:data2['Z_Fase'],
+                                 2:data2['Err'],
+                                 3:data2['Eri'],
+                                 4:data2['E_mod'],
+                                 5:data2['E_fase']},
+                                 comboBox_trazaA)   
+        traza_D = self.switch({ 0:data3['Z_mod'],
+                                 1:data3['Z_Fase'],
+                                 2:data3['Err'],
+                                 3:data3['Eri'],
+                                 4:data3['E_mod'],
+                                 5:data3['E_fase']},
+                                 comboBox_trazaA)                                                                
+
+        if (self.sd.def_cfg['tipo_barrido']['value']==0):
+            string_A = self.switch({0:'plot', 1:'plot', 2:'plot',
+                                    3:'plot', 4:'semilogy', 5:'plot'},
+                                    comboBox_trazaA)
+            # string_B = self.switch({0:'plot', 1:'plot', 2:'plot',
+            #                         3:'plot', 4:'semilogy', 5:'plot'},
+            #                         comboBox_trazaB)
+
+            eval("self.sd.axes['ax5']." + string_A + "(data['Freq'], traza_A, color='red')")
+            self.sd.axes['ax5'].tick_params(axis='y', colors='red')
+            # eval("self.sd.axes['ax3']." + string_B + "(data['Freq'], traza_B, color='blue')")
+            self.sd.axes['ax5'].grid(True)
+            # self.sd.axes['ax3'].tick_params(axis='y',colors='blue')
+
+        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
+            string_A = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
+                                    3:'semilogx', 4:'loglog', 5:'semilogx'},
+                                    comboBox_trazaA)
+            # string_B = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
+            #                         3:'semilogx', 4:'loglog', 5:'semilogx'},
+            #                         comboBox_trazaB)
+            
+            eval("self.sd.axes['ax5']." + string_A + "(data['Freq'], traza_A, color='green', label='vacio')")
+            self.sd.axes['ax5'].tick_params(axis='y',colors='red')
+            eval("self.sd.axes['ax5']." + string_A + "(data1['Freq'], traza_B, color='blue', label='agua')")
+            eval("self.sd.axes['ax5']." + string_A + "(data2['Freq'], traza_C, color='orange', label='zumo')")       
+            eval("self.sd.axes['ax5']." + string_A + "(data3['Freq'], traza_D, color='purple', label='sal')")       
+
+            self.sd.axes['ax5'].legend()     
+            self.sd.axes['ax5'].grid(True)
+            # self.sd.axes['ax3'].tick_params(axis='y', colors='blue')
+
+        self.sd.fig4.tight_layout()

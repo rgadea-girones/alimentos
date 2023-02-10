@@ -36,13 +36,13 @@ class VISA(object):
         self.timeout = timeout
 
         try:
-            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+             self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-            if timeout is not None:
-                self._socket.settimeout(timeout)
+             if timeout is not None:
+                 self._socket.settimeout(timeout)
 
-            self._socket.connect((host, port))
-            print('conexion establecida con redpitaya')
+             self._socket.connect((host, port))
+             print('conexion establecida con redpitaya')
 
         except socket.error as e:
             print('SCPI >> connect({:s}:{:d}) failed: {:s}'.format(host, port, e))
@@ -1352,6 +1352,20 @@ class VISA(object):
             np.savetxt(s, [incrementos], fmt='%1.1f', delimiter=', ')
             outStr = s.getvalue().decode('UTF-8')
             # print(outStr)
+            self.tx_txt('SOUR1:VOLT ' +str(self.sd.def_cfg['vosc']['value']))
+        #    self.tx_txt('SOUR1:VOLT:OFFS 0.00') # esto lo utilizo para cambiar el offset de canal b
+        #    self.tx_txt('SOUR2:VOLT:OFFS ' + str(self.sd.def_cfg['nivel_DC']['value'])) # esto lo utilizo para cambiar el offset de canal b
+         #   self.tx_txt('SOUR1:BURS:NCYC 0')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
+         #   self.tx_txt('SOUR1:BURS:NOR ' +str(muestras_ampliadas)) # solo funciona si led3 esta activado, numero de frecuencias
+            # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
+        #    self.tx_txt('SOUR2:BURS:NOR ' +str(umbral_horizontal_detector_cero))
+        #    self.tx_txt('SOUR2:BURS:NCYC ' +str(umbral_vertical_detector_cero)) #controlo el numero de ciclos de ancho del deteccor de cero
+
+
+
+
+
+
             self.tx_txt('SOUR1:TRAC:DATA:DATA ' + outStr)
             self.tx_txt('SOUR1:FUNC ARBITRARY')
             self.tx_txt('SOUR1:TRAC:DATA:DATA_rafa ' + outStr)
@@ -1395,26 +1409,28 @@ class VISA(object):
             self.tx_txt('DIG:PIN:DIR OUT,DIO6_N')
             self.tx_txt('DIG:PIN:DIR OUT,DIO7_N')
 
-            # #elegimos 10K
-            # #activo a nivel bajo: activo
-            # self.tx_txt('DIG:PIN DIO0_N,1') 
-            # #activo a nivel bajo: desactivo
-            # self.tx_txt('DIG:PIN DIO1_N,0')
-            # #activo a nivel alto: desactivo            
-            # self.tx_txt('DIG:PIN DIO2_N,0')
-            # #activo a nivel alto: desactivo                
-            # self.tx_txt('DIG:PIN DIO3_N,0')
 
-            # elegimos 1K
-            # activo a nivel bajo: activo
-            self.tx_txt('DIG:PIN DIO0_N,0') 
-            # activo a nivel bajo: desactivo
-            self.tx_txt('DIG:PIN DIO1_N,1')
-            # activo a nivel alto: desactivo            
-            self.tx_txt('DIG:PIN DIO2_N,0')
-            # activo a nivel alto: desactivo                
-            self.tx_txt('DIG:PIN DIO3_N,0')
 
+            if (R_shunt_k==2):
+                # elegimos 1K
+                # activo a nivel bajo: activo
+                self.tx_txt('DIG:PIN DIO0_N,0') 
+                # activo a nivel bajo: desactivo
+                self.tx_txt('DIG:PIN DIO1_N,1')
+                # activo a nivel alto: desactivo            
+                self.tx_txt('DIG:PIN DIO2_N,0')
+                # activo a nivel alto: desactivo                
+                self.tx_txt('DIG:PIN DIO3_N,0')
+            else:
+                # #elegimos 10K
+                # #activo a nivel bajo: activo
+                self.tx_txt('DIG:PIN DIO0_N,1') 
+                # #activo a nivel bajo: desactivo
+                self.tx_txt('DIG:PIN DIO1_N,0')
+                # #activo a nivel alto: desactivo            
+                self.tx_txt('DIG:PIN DIO2_N,0')
+                # #activo a nivel alto: desactivo                
+                self.tx_txt('DIG:PIN DIO3_N,0')               
 
 
             #elegimos el cable rojo , conector j2

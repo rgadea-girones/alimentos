@@ -19,8 +19,9 @@ class DATA(object):
         self.fig1 = Figure()
         self.fig2 = Figure()
         self.fig3 = Figure()
+        self.fig4 = Figure()
         # Axes for plotting
-        self.axes={'ax0':0,'ax1':0,'ax2':0,'ax3':0,'ax4':0}
+        self.axes={'ax0':0,'ax1':0,'ax2':0,'ax3':0,'ax4':0, 'ax5':0}
 
         if (read==True):
             self.config_read()

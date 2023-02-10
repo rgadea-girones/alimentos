@@ -17,7 +17,7 @@ from MIOPATIA_dataview import DATA_VIEW
 
 # PYINSTALLER : pyinstaller -D --specpath .\EXE miopatia.py
 
-qtCreatorFile = "MIOPATIA.ui"
+qtCreatorFile = "MIOPATIA_NUEVO_PRUEBA.ui"
 
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
@@ -57,6 +57,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.comboBox_trazaA.addItems(self.sd.def_cfg['comboxA'])
         self.comboBox_trazaB.addItems(self.sd.def_cfg['comboxB'])
+        self.comboBox_trazaA_4.addItems(self.sd.def_cfg['comboxA'])
         self.comboBox_mag_fit.addItems(self.sd.def_cfg['comboxA'])
         self.comboBox_fit_alg.addItems(self.sd.def_cfg['combox_fit'])
         self.bg_xaxis      = Rbutton_group([self.radioButton_lineal, self.radioButton_log])
@@ -140,6 +141,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Clicked Calls
         clicked  = [{'wdg':self.toolButton_load,   'func':self.brw.load_mfile_browser},
                     {'wdg':self.toolButton_load_4,  'func':self.brw.load_h5file_browser},
+                    {'wdg':self.toolButton_load_17,  'func':self.brw.load_h5file_browser2},
                     {'wdg':self.toolButton_save,   'func':self.brw.save_mfile_browser},
                     {'wdg':self.toolButton_load_2, 'func':self.brw.load_calibration_file_browser},
                     {'wdg':self.toolButton_save_2, 'func':self.brw.save_calibration_file_browser},
@@ -156,6 +158,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.toolButton_load_3, 'func':self.brw.load_fit_data_browser},
                     {'wdg':self.AJUSTA,            'func':self.be.measure_fit},
                     {'wdg':self.LOAD_fit_data_2,   'func':self.be.load_h5_fit},
+                    {'wdg':self.VER_ANALISIS,      'func':self.be.load_h5_analisis},                    
                     {'wdg':self.SAVE_fit,          'func':self.be.save_fit},
                     {'wdg':self.SAVE_DB,          'func':self.be.save_measure_to_DB}]
 
@@ -247,6 +250,18 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sd.axes['ax4'].tick_params(axis="x", labelsize=8)
         self.sd.axes['ax4'].tick_params(axis="y", labelsize=8)
 
+    def addmpl_4(self, fig):
+        # Matplotlib constructor
+        self.canvas4 = FigureCanvas(fig)
+        self.mpl_4.addWidget(self.canvas4)
+        self.canvas4.draw()
+        self.toolbar = NavigationToolbar(self.canvas4, self.frame_14,
+                                         coordinates=True)
+        self.mpl_4.addWidget(self.toolbar)
+        self.sd.axes['ax5'] = fig.add_subplot(111)
+        self.sd.axes['ax5'].tick_params(axis="x", labelsize=8)
+        self.sd.axes['ax5'].tick_params(axis="y", labelsize=8)
+
 
 if __name__ == "__main__":
 
@@ -261,5 +276,6 @@ if __name__ == "__main__":
     window.addmpl_1(data.fig1)
     window.addmpl_2(data.fig2)
     window.addmpl_3(data.fig3)
+    window.addmpl_4(data.fig4)
     window.show()
     sys.exit(app.exec_())

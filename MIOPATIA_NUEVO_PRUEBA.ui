@@ -33,7 +33,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>pollo.jpg</normaloff>pollo.jpg</iconset>
+    <normaloff>../../.designer/backup/pollo.jpg</normaloff>../../.designer/backup/pollo.jpg</iconset>
   </property>
   <property name="iconSize">
    <size>
@@ -1809,7 +1809,7 @@ MEDIDA</string>
               <height>481</height>
              </rect>
             </property>
-            <layout class="QVBoxLayout" name="mpl_11"/>
+            <layout class="QVBoxLayout" name="mpl_4"/>
            </widget>
            <widget class="QLabel" name="label_161">
             <property name="geometry">
@@ -2173,7 +2173,7 @@ MEDIDA</string>
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap>ecuacion_gompertz.gif</pixmap>
+             <pixmap>../../.designer/backup/ecuacion_gompertz.gif</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>

@@ -131,6 +131,43 @@ class BACK_END(object):
                                       data)
                 self.pw.canvas3.draw()
 
+    def load_h5_analisis(self):
+        self.dv.append_plus("CARGA MEDIDA BASE DATOS H5")
+        file = self.sd.def_cfg['load_h5file_name']
+        try:
+            hdf_db = DB(file,self.dv)
+            #hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
+            #pollos = hdf_db.get('data/index/pollos')
+            #indice_medidas = hdf_db.get('data/index/medidas')
+            #tabla = hdf_db.get('data/tabla')
+            #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
+        except:
+            self.dv.append_plus("Fichero no encontrado\n")
+        else:
+            self.dv.append_plus(file)
+            pollo_sel = int(self.pw.spinBox_pollo_6.value())
+            medida_sel = int(self.pw.spinBox_medida_6.value())
+            #inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #data = tabla[inicio_medida:fin_medida]
+            #data = tabla[(tabla['Pollo']==pollo_sel)&(tabla['Medida']==medida_sel)]
+            data = hdf_db.lee_medida_BD(pollo_sel,medida_sel)
+            data1= hdf_db.lee_medida_BD(pollo_sel,medida_sel+2)
+            data2= hdf_db.lee_medida_BD(pollo_sel,medida_sel+4)            
+            data3= hdf_db.lee_medida_BD(pollo_sel,medida_sel+6)   
+            #
+
+            self.sd.pollo_fitado = pollo_sel
+            self.sd.medida_fitada = medida_sel
+
+            if (data.empty):
+                self.dv.append_fit("Medidas no encontradas en la Base de Datos")
+            else:
+                self.dv.show_data_rafa(self.pw.comboBox_trazaA_4.currentIndex(),
+                                      data,data1,data2,data3)
+
+                self.pw.canvas4.draw()
+
     def measure_fit(self):
         self.dv.append_plus("AJUSTE DE DATOS MEDIDOS")
         data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
@@ -478,7 +515,17 @@ class BROWSERS(object):
         self.pw.load_path_4.setText(self.sd.def_cfg['load_h5file_name'])
         self.pw.spinBox_medida.setMaximum(12)
         self.pw.spinBox_pollo.setMaximum(100)
-
+    def load_h5file_browser2(self):
+        file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
+                                        'Abrir fichero medida',
+                                        self.sd.def_cfg['def_path'],
+                                        "Ficheros de medida (*.hdf)")
+        fname_aux = ([str(x) for x in file_aux])
+        self.sd.def_cfg['load_h5file_name'] = fname_aux[0]
+        #Trick for Qstring converting to standard string
+        self.pw.load_path_17.setText(self.sd.def_cfg['load_h5file_name'])
+        self.pw.spinBox_medida.setMaximum(12)
+        self.pw.spinBox_pollo.setMaximum(100)
     def load_h5file_DB_browser(self):
         file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
                                         'Abrir fichero medida',
