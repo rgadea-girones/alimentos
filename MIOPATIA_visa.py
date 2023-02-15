@@ -1433,7 +1433,7 @@ class VISA(object):
                 self.tx_txt('DIG:PIN DIO3_N,0')               
 
 
-            #elegimos el cable rojo , conector j2
+            #elegimos el cable rojo , conector j1
             #activo a nivel bajo: desactivo    
             self.tx_txt('DIG:PIN DIO4_N,1')
             #activo a nivel alto: activo    
@@ -1443,7 +1443,7 @@ class VISA(object):
             #activo a nivel bajo: desactivo                
             self.tx_txt('DIG:PIN DIO7_N,1')
 
-            # #elegimos el cable amarillo , conector j2
+            # #elegimos el cable amarillo , conector j3
             # #activo a nivel bajo: desactivo    
             # self.tx_txt('DIG:PIN DIO4_N,1')
             # #activo a nivel alto: desactivo    
@@ -1464,7 +1464,7 @@ class VISA(object):
             # #activo a nivel bajo: desactivo                
             # self.tx_txt('DIG:PIN DIO7_N,1')
 
-            # #elegimos el cable azul , conector j2
+            # #elegimos el cable azul , conector j4
             # #activo a nivel bajo: desactivo    
             # self.tx_txt('DIG:PIN DIO4_N,1')
             # #activo a nivel alto: desactivo    
