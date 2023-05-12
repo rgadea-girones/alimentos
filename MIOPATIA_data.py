@@ -30,7 +30,7 @@ class DATA(object):
             self.def_cfg= {'f_inicial':{'value':10, 'limits':[10.0,100.0E6],'type':'float'},
                             'f_final' :{'value':1000000, 'limits':[10.0,100.0E6],'type':'float'},
                             'n_puntos':{'value':10, 'limits':[1,801],'type':'int'},
-                            'shunt':{'value':2, 'limits':[0,5],'type':'int'},
+                            'shunt':{'value':1, 'limits':[0,5],'type':'int'},
                             'vosc':{'value':1, 'limits':[0.0,2.0],'type':'float'},
                             'tipo_barrido':{'value':1, 'limits':[0,1],'type':'int'},
                             'DC_bias':{'value':0, 'limits':[0,1],'type':'int'},

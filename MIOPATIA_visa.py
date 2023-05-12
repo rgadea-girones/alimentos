@@ -1320,7 +1320,13 @@ class VISA(object):
             # configuramos la FPGA con diseño verilog propio de DSD
             self.tx_txt('RP:FPGABITREAM_DSD 0.94')
             t0=pc()
-            shunt=[10.0,100.0,1000.0,10000.0,100000.0,1300000.0]
+            if self.host=="10.42.0.45":
+                shunt=[90.9,100.0,900.9,1000.0,10000.0,100000.0]
+            else:
+                shunt=[90.9,100.0,285.71,500.0,1000.0,2000.0]
+            
+
+
             R_shunt_k = self.sd.def_cfg['shunt']['value'] #elijo 1000 
 
             frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
@@ -1400,40 +1406,77 @@ class VISA(object):
             self.tx_txt('DIG:PIN:DIR OUT,DIO6_N')
             self.tx_txt('DIG:PIN:DIR OUT,DIO7_N')
 
-            self.tx_txt('DIG:PIN:DIR OUT,DIO0_N')
-            self.tx_txt('DIG:PIN:DIR OUT,DIO1_N')
-            self.tx_txt('DIG:PIN:DIR OUT,DIO2_N')
-            self.tx_txt('DIG:PIN:DIR OUT,DIO3_N')
-            self.tx_txt('DIG:PIN:DIR OUT,DIO4_N')
-            self.tx_txt('DIG:PIN:DIR OUT,DIO5_N')
-            self.tx_txt('DIG:PIN:DIR OUT,DIO6_N')
-            self.tx_txt('DIG:PIN:DIR OUT,DIO7_N')
 
 
-
-            if (R_shunt_k==2):
-                # elegimos 1K
+            if (R_shunt_k==0):
+                # elegimos 90.9 
                 # activo a nivel bajo: activo
                 self.tx_txt('DIG:PIN DIO0_N,0') 
                 # activo a nivel bajo: desactivo
                 self.tx_txt('DIG:PIN DIO1_N,1')
                 # activo a nivel alto: desactivo            
                 self.tx_txt('DIG:PIN DIO2_N,0')
-                # activo a nivel alto: desactivo                
-                self.tx_txt('DIG:PIN DIO3_N,0')
+                # activo a nivel alto: activo                
+                self.tx_txt('DIG:PIN DIO3_N,1')
             else:
-                # #elegimos 10K
-                # #activo a nivel bajo: activo
-                self.tx_txt('DIG:PIN DIO0_N,1') 
-                # #activo a nivel bajo: desactivo
-                self.tx_txt('DIG:PIN DIO1_N,0')
-                # #activo a nivel alto: desactivo            
-                self.tx_txt('DIG:PIN DIO2_N,0')
-                # #activo a nivel alto: desactivo                
-                self.tx_txt('DIG:PIN DIO3_N,0')               
+                if (R_shunt_k==1):
+                    # elegimos 100 
+                    # activo a nivel bajo: desactivo
+                    self.tx_txt('DIG:PIN DIO0_N,1') 
+                    # activo a nivel bajo: desactivo
+                    self.tx_txt('DIG:PIN DIO1_N,1')
+                    # activo a nivel alto: desactivo            
+                    self.tx_txt('DIG:PIN DIO2_N,0')
+                    # activo a nivel alto: activo                
+                    self.tx_txt('DIG:PIN DIO3_N,1')
+                else:
+                    if (R_shunt_k==2):
+                        # elegimos 900.9 
+                        # activo a nivel bajo: activo
+                        self.tx_txt('DIG:PIN DIO0_N,0') 
+                        # activo a nivel bajo: activo
+                        self.tx_txt('DIG:PIN DIO1_N,0')
+                        # activo a nivel alto: activo            
+                        self.tx_txt('DIG:PIN DIO2_N,1')
+                        # activo a nivel alto: desactivo                
+                        self.tx_txt('DIG:PIN DIO3_N,0')
+                    else:
+                        if (R_shunt_k==3):
+                            # #elegimos 1K
+                            # #activo a nivel bajo: activo
+                            self.tx_txt('DIG:PIN DIO0_N,0') 
+                            # #activo a nivel bajo: desactivo
+                            self.tx_txt('DIG:PIN DIO1_N,1')
+                            # #activo a nivel alto: desactivo            
+                            self.tx_txt('DIG:PIN DIO2_N,0')
+                            # #activo a nivel alto: desactivo                
+                            self.tx_txt('DIG:PIN DIO3_N,0')  
+                        else:
+                            if (R_shunt_k==4):
+                                # elegimos 10K
+                                # activo a nivel bajo: desactivo
+                                self.tx_txt('DIG:PIN DIO0_N,1') 
+                                # activo a nivel bajo: activo
+                                self.tx_txt('DIG:PIN DIO1_N,0')
+                                # activo a nivel alto: desactivo            
+                                self.tx_txt('DIG:PIN DIO2_N,0')
+                                # activo a nivel alto: desactivo                
+                                self.tx_txt('DIG:PIN DIO3_N,0')
+                            else:
+                                # k==4 y K==0 y K==5
+                                # elegimos 100K
+                                # activo a nivel bajo: desactivo
+                                self.tx_txt('DIG:PIN DIO0_N,1') 
+                                # activo a nivel bajo: desactivo
+                                self.tx_txt('DIG:PIN DIO1_N,1')
+                                # activo a nivel alto: activo            
+                                self.tx_txt('DIG:PIN DIO2_N,1')
+                                # activo a nivel alto: desactivo                
+                                self.tx_txt('DIG:PIN DIO3_N,0')
+             
 
 
-            #elegimos el cable rojo , conector j2
+            #elegimos el cable rojo , conector j1
             #activo a nivel bajo: desactivo    
             self.tx_txt('DIG:PIN DIO4_N,1')
             #activo a nivel alto: activo    
@@ -1443,7 +1486,7 @@ class VISA(object):
             #activo a nivel bajo: desactivo                
             self.tx_txt('DIG:PIN DIO7_N,1')
 
-            # #elegimos el cable amarillo , conector j2
+            # #elegimos el cable amarillo , conector j3
             # #activo a nivel bajo: desactivo    
             # self.tx_txt('DIG:PIN DIO4_N,1')
             # #activo a nivel alto: desactivo    
@@ -1464,7 +1507,7 @@ class VISA(object):
             # #activo a nivel bajo: desactivo                
             # self.tx_txt('DIG:PIN DIO7_N,1')
 
-            # #elegimos el cable azul , conector j2
+            # #elegimos el cable azul , conector j4
             # #activo a nivel bajo: desactivo    
             # self.tx_txt('DIG:PIN DIO4_N,1')
             # #activo a nivel alto: desactivo    
@@ -1481,7 +1524,7 @@ class VISA(object):
             self.tx_txt('SOUR1:VOLT ' +str(self.sd.def_cfg['vosc']['value']))
             self.tx_txt('SOUR1:VOLT:OFFS 0.00') # esto lo utilizo para cambiar el offset de canal b
             self.tx_txt('SOUR2:VOLT:OFFS ' + str(self.sd.def_cfg['nivel_DC']['value'])) # esto lo utilizo para cambiar el offset de canal b
-            self.tx_txt('SOUR1:BURS:NCYC 0')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
+            self.tx_txt('SOUR1:BURS:NCYC 2')  # solo funciona si led3 esta activado, numero de ciclos por frecuencia
             self.tx_txt('SOUR1:BURS:NOR ' +str(muestras_ampliadas)) # solo funciona si led3 esta activado, numero de frecuencias
             # # rp_s.tx_txt('SOUR2:BURS:INT:PER 30') # solo funciona si led3 esta activado, ancho detector
             self.tx_txt('SOUR2:BURS:NOR ' +str(umbral_horizontal_detector_cero))
