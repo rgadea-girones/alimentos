@@ -168,6 +168,52 @@ class BACK_END(object):
 
                 self.pw.canvas4.draw()
 
+    def load_h5_analisis2(self):
+        self.dv.append_plus("CARGA MEDIDA BASE DATOS H5")
+        file = self.sd.def_cfg['load_h5file_name']
+        try:
+            hdf_db = DB(file,self.dv)
+            #hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
+            #pollos = hdf_db.get('data/index/pollos')
+            #indice_medidas = hdf_db.get('data/index/medidas')
+            #tabla = hdf_db.get('data/tabla')
+            #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
+        except:
+            self.dv.append_plus("Fichero no encontrado\n")
+        else:
+            self.dv.append_plus(file)
+            pollo_sel = int(self.pw.spinBox_pollo_6.value())
+            medida_sel = int(self.pw.spinBox_medida_6.value())
+            #inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #data = tabla[inicio_medida:fin_medida]
+            #data = tabla[(tabla['Pollo']==pollo_sel)&(tabla['Medida']==medida_sel)]
+            data = hdf_db.lee_medida_BD(pollo_sel,medida_sel)
+            data1= hdf_db.lee_medida_BD(pollo_sel,medida_sel+1)
+            data2= hdf_db.lee_medida_BD(pollo_sel,medida_sel+2)            
+            data3= hdf_db.lee_medida_BD(pollo_sel,medida_sel+3)   
+            data4= hdf_db.lee_medida_BD(pollo_sel,medida_sel+4)  
+            #
+
+            self.sd.pollo_fitado = pollo_sel
+            self.sd.medida_fitada = medida_sel
+
+            if (data.empty):
+                self.dv.append_fit("Medidas no encontradas en la Base de Datos")
+            else:
+                self.dv.show_data_rafa2(self.pw.comboBox_trazaA_4.currentIndex(),
+                                      data,data1,data2,data3,data4)
+
+                self.pw.canvas4.draw()
+
+    def  load_h5_analisis_selector(self):
+        if (self.sd.def_cfg['pto_tip']['value']==0):       
+            self.load_h5_analisis()
+            print("estoy aqui")
+        else :
+            self.load_h5_analisis2()
+            print("estoy aqui2")
+
     def measure_fit(self):
         self.dv.append_plus("AJUSTE DE DATOS MEDIDOS")
         data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
