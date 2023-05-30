@@ -17,7 +17,7 @@ from MIOPATIA_dataview import DATA_VIEW
 
 # PYINSTALLER : pyinstaller -D --specpath .\EXE miopatia.py
 
-qtCreatorFile = "MIOPATIA_NUEVO_PRUEBA.ui"
+qtCreatorFile = "MIOPATIA_NUEVO_PRUEBA_mayo_2023.ui"
 
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
@@ -66,6 +66,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_DC_2       = Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
         self.post_pro      = Rbutton_group([self.radioButton_Corre, self.radioButton_F_Corre ])   
         self.post_pro_2    = Rbutton_group([self.radioButton_Corre_2, self.radioButton_F_Corre_2 ])  
+        self.tipo_analisis = Rbutton_group([self.radioButton_tipoanalisis, self.radioButton_tipoanalisis_2, self.radioButton_tipoanalisis_3 ])  
+        self.sel_filtrado  = Rbutton_group([self.SMOOTH_ON,self.SMOOTH_OFF ])  
+        
         self.bg_config_cal = Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
         self.bg_pto_cal    = Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
 
@@ -75,6 +78,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.mirror =  {'f_inicial':   {'array':['f_inicial', 'f_inicial_2'],'qt':'QLineEdit'},
                         'f_final':     {'array':['f_final',   'f_final_2'],  'qt':'QLineEdit'},
                         'n_puntos':    {'array':['n_puntos',  'n_puntos_2'],  'qt':'QLineEdit'},
+                        'n_ciclos':    {'array':['n_ciclos',  'n_ciclos_2'],  'qt':'QLineEdit'},
                         'shunt':       {'array':['shunt', 'shunt_2'],  'qt':'QLineEdit'},
                         'vosc':        {'array':['vosc',        'vosc_2'],   'qt':'QLineEdit'},
                         'tipo_barrido':{'array':['bg_xaxis', 'bg_xaxis_2'],  'qt':'QButtonGroup'},
@@ -91,7 +95,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.others = {'conf_cal':{'array':'bg_config_cal', 'qt':'QButtonGroup'},
                        'c_load':{'array':'c_load', 'qt':'QLineEdit'},
                        'g_load':{'array':'g_load', 'qt':'QLineEdit'},
-                       'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'}
+                       'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'},
+                       'smooth':{'array':'sel_filtrado', 'qt':'QButtonGroup'},
+                       'k_factor':{'array':'k_factor',  'qt':'QLineEdit'},                       
+                       'pto_tip':{'array':'tipo_analisis', 'qt':'QButtonGroup'}
                        }
         #Fit Parameters
         self.fit_param = OrderedDict(
@@ -158,9 +165,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.toolButton_load_3, 'func':self.brw.load_fit_data_browser},
                     {'wdg':self.AJUSTA,            'func':self.be.measure_fit},
                     {'wdg':self.LOAD_fit_data_2,   'func':self.be.load_h5_fit},
-                    {'wdg':self.VER_ANALISIS,      'func':self.be.load_h5_analisis},                    
+                    {'wdg':self.VER_ANALISIS,      'func':self.be.load_h5_analisis_selector},                    
                     {'wdg':self.SAVE_fit,          'func':self.be.save_fit},
-                    {'wdg':self.SAVE_DB,          'func':self.be.save_measure_to_DB}]
+                    {'wdg':self.SAVE_DB,           'func':self.be.save_measure_to_DB}]
 
         # Fit calls
         for i in self.fit_param.keys():
@@ -268,11 +275,11 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     myappid = 'UPV.visa.4294A.1' # arbitrary string
     # ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-    app.setWindowIcon(QtGui.QIcon('pollo.jpg'))
+    app.setWindowIcon(QtGui.QIcon('reflujo-gastroesofagico.jpg'))
 
     data = DATA(read=False)
     window = MyApp(data)
-    window.setWindowIcon(QtGui.QIcon('pollo.jpg'))
+    window.setWindowIcon(QtGui.QIcon('reflujo-gastroesofagico.jpg'))
     window.addmpl_1(data.fig1)
     window.addmpl_2(data.fig2)
     window.addmpl_3(data.fig3)
