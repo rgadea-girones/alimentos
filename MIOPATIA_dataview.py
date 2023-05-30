@@ -340,12 +340,12 @@ class DATA_VIEW(object):
                                  4:data3['E_mod'],
                                  5:data3['E_fase']},
                                  comboBox_trazaA)               
-        traza_E = self.switch({ 0:data3['Z_mod'],
-                                 1:data3['Z_Fase'],
-                                 2:data3['Err'],
-                                 3:data3['Eri'],
-                                 4:data3['E_mod'],
-                                 5:data3['E_fase']},
+        traza_E = self.switch({ 0:data4['Z_mod'],
+                                 1:data4['Z_Fase'],
+                                 2:data4['Err'],
+                                 3:data4['Eri'],
+                                 4:data4['E_mod'],
+                                 5:data4['E_fase']},
                                  comboBox_trazaA)                                                                                     
 
         if (self.sd.def_cfg['tipo_barrido']['value']==0):
@@ -371,10 +371,10 @@ class DATA_VIEW(object):
             #                         comboBox_trazaB)
             
             eval("self.sd.axes['ax5']." + string_A + "(data['Freq'], traza_A, color='black', label='0.0 %')")
-            eval("self.sd.axes['ax5']." + string_A + "(data['Freq'], traza_B, color='green', label='0.2 %')")
-            eval("self.sd.axes['ax5']." + string_A + "(data1['Freq'], traza_C, color='blue', label='0.9 %')")
-            eval("self.sd.axes['ax5']." + string_A + "(data2['Freq'], traza_D, color='orange', label='1.5 %')")       
-            eval("self.sd.axes['ax5']." + string_A + "(data3['Freq'], traza_E, color='purple', label='5.0 %')")       
+            eval("self.sd.axes['ax5']." + string_A + "(data1['Freq'], traza_B, color='green', label='0.2 %')")
+            eval("self.sd.axes['ax5']." + string_A + "(data2['Freq'], traza_C, color='blue', label='0.9 %')")
+            eval("self.sd.axes['ax5']." + string_A + "(data3['Freq'], traza_D, color='orange', label='1.5 %')")       
+            eval("self.sd.axes['ax5']." + string_A + "(data4['Freq'], traza_E, color='purple', label='5.0 %')")       
             self.sd.axes['ax5'].tick_params(axis='y',colors='red')
             self.sd.axes['ax5'].legend()     
             self.sd.axes['ax5'].grid(True)

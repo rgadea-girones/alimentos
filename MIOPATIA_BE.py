@@ -483,6 +483,8 @@ class BACK_END(object):
                                                                 self.pw.spinBox_medida_db.value(),
                                                                 data_array,
                                                                 self.pw.spinBox_pollo_db_2.value())
+            idea=self.pw.spinBox_medida_db.value()+1
+            self.pw.spinBox_medida_db.setValue(idea)
             self.sd.def_cfg['ultimo_pollo'] = int(last_pollo)
             self.sd.def_cfg['ultima_medida'] = int(last_medida)
             self.pw.last_pollo.display(self.sd.def_cfg['ultimo_pollo'])
