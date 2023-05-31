@@ -1,5 +1,6 @@
 import sys
 import json
+import time
 from matplotlib.figure import Figure
 import numpy as np
 
@@ -22,7 +23,7 @@ class DATA(object):
         self.fig4 = Figure()
         # Axes for plotting
         self.axes={'ax0':0,'ax1':0,'ax2':0,'ax3':0,'ax4':0, 'ax5':0}
-
+        timestr = time.strftime("%Y%m%d")
         if (read==True):
             self.config_read()
         else:
@@ -43,12 +44,12 @@ class DATA(object):
                             'pto_tip':{'value':0, 'limits':[0,2],'type':'int'},
                             'ultimo_pollo':{'value':0, 'limits':[0,99],'type':'int'},
                             'ultima_medida':{'value':0, 'limits':[0,9],'type':'int'},
-                            'load_mfile_name':"./medida.csv",
-                            'save_mfile_name':"./medida.csv",
+                            'load_mfile_name':"./COPIA_EXCELS/medida.csv",
+                            'save_mfile_name':"./COPIA_EXCELS/medida.csv",
                             'load_cal_file_name':"./calibracion.cal",
                             'save_cal_file_name':"./calibracion_new.cal",
-                            'load_h5file_name':"./espectros.hdf",
-                            'io_h5file_name':"./test_hdf.hdf",
+                            'load_h5file_name':"./COPIA_PANDAS/espectros.hdf",
+                            'io_h5file_name':"./COPIA_PANDAS/hdf_"+timestr+".hdf",
                             'def_path':"./",
                             'conf_cal':{'value':0, 'limits':[0,1],'type':'int'},
                             'c_load':{'value':500, 'limits':[0,1E6],'type':'float'},
@@ -57,7 +58,7 @@ class DATA(object):
                             'comboxA':['|Z|','F.Z','E\'r','E\'\'r','|Er|','F.Er'],
                             'comboxB':['F.Z','|Z|','E\'r','E\'\'r','|Er|','F.Er'],                            
                             'combox_fit':['lm','trf','dogbox'],
-                            'load_mfile_fit':"./medida.csv",
+                            'load_mfile_fit':"./COPIA_EXCELS/medida.csv",
                             'origen_fit':{'value':0, 'limits':[0,1],'type':'int'},
                             # FIT PARAMETERS
                             'param_fit':{'names' :['n_func_fit','f_low_fit','f_high_fit',

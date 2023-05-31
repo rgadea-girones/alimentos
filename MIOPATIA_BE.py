@@ -152,9 +152,9 @@ class BACK_END(object):
             #data = tabla[inicio_medida:fin_medida]
             #data = tabla[(tabla['Pollo']==pollo_sel)&(tabla['Medida']==medida_sel)]
             data = hdf_db.lee_medida_BD(pollo_sel,medida_sel)
-            data1= hdf_db.lee_medida_BD(pollo_sel,medida_sel+2)
-            data2= hdf_db.lee_medida_BD(pollo_sel,medida_sel+4)            
-            data3= hdf_db.lee_medida_BD(pollo_sel,medida_sel+6)   
+            data1= hdf_db.lee_medida_BD(pollo_sel,medida_sel+1)
+            data2= hdf_db.lee_medida_BD(pollo_sel,medida_sel+2)            
+            data3= hdf_db.lee_medida_BD(pollo_sel,medida_sel+3)   
             #
 
             self.sd.pollo_fitado = pollo_sel

@@ -119,12 +119,12 @@
         ],
         "type": "int"
     },
-    "load_mfile_name": "./medida.csv",
-    "save_mfile_name": "./medida.csv",
+    "load_mfile_name": "./COPIA_EXCELS/medida.csv",
+    "save_mfile_name": "./COPIA_EXCELS/medida.csv",
     "load_cal_file_name": "./calibracion.cal",
     "save_cal_file_name": "./calibracion_new.cal",
-    "load_h5file_name": "./espectros.hdf",
-    "io_h5file_name": "./test_hdf.hdf",
+    "load_h5file_name": "./COPIA_PANDAS/espectros.hdf",
+    "io_h5file_name": "./COPIA_PANDAS/hdf_20230531.hdf",
     "def_path": "./",
     "conf_cal": {
         "value": 0,
@@ -179,7 +179,7 @@
         "trf",
         "dogbox"
     ],
-    "load_mfile_fit": "./medida.csv",
+    "load_mfile_fit": "./COPIA_EXCELS/medida.csv",
     "origen_fit": {
         "value": 0,
         "limits": [
