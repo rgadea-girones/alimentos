@@ -17,7 +17,7 @@ from MIOPATIA_dataview import DATA_VIEW
 
 # PYINSTALLER : pyinstaller -D --specpath .\EXE miopatia.py
 
-qtCreatorFile = "MIOPATIA_NUEVO_PRUEBA_mayo_2023.ui"
+qtCreatorFile = "MIOPATIA_NUEVO_PRUEBA_junio_2023.ui"
 
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
@@ -37,7 +37,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # Classes Instantiation
 
         # VISA start
-        self.dv  = DATA_VIEW(self.sd,[self.textBrowser,self.textBrowser_2],self.textBrowser_3)
+        self.dv  = DATA_VIEW(self.sd,[self.textBrowser,self.textBrowser_2,self.textBrowser_4],self.textBrowser_3)
         self.vi  = VISA(sys.argv[1], self.sd,self.dv)
         self.be  = BACK_END(self,data,self.vi,self.dv)
         self.brw = BROWSERS(self,data,self.dv)
@@ -67,7 +67,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.post_pro      = Rbutton_group([self.radioButton_Corre, self.radioButton_F_Corre ])   
         self.post_pro_2    = Rbutton_group([self.radioButton_Corre_2, self.radioButton_F_Corre_2 ])  
         self.tipo_analisis = Rbutton_group([self.radioButton_tipoanalisis, self.radioButton_tipoanalisis_2, self.radioButton_tipoanalisis_3 ])  
-        self.sel_filtrado  = Rbutton_group([self.SMOOTH_ON,self.SMOOTH_OFF ])  
+        self.sel_smooth    = Rbutton_group([self.SMOOTH_ON,self.SMOOTH_OFF ])  
+        self.sel_smooth_2  = Rbutton_group([self.SMOOTH_ON_2,self.SMOOTH_OFF_2 ])          
         
         self.bg_config_cal = Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
         self.bg_pto_cal    = Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
@@ -80,6 +81,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                         'n_puntos':    {'array':['n_puntos',  'n_puntos_2'],  'qt':'QLineEdit'},
                         'n_ciclos':    {'array':['n_ciclos',  'n_ciclos_2'],  'qt':'QLineEdit'},
                         'shunt':       {'array':['shunt', 'shunt_2'],  'qt':'QLineEdit'},
+                        'smooth':      {'array':['sel_smooth','sel_smooth_2'], 'qt':'QButtonGroup'},
+                        'k_factor':    {'array':['k_factor','k_factor_2'],  'qt':'QLineEdit'},                         
                         'vosc':        {'array':['vosc',        'vosc_2'],   'qt':'QLineEdit'},
                         'tipo_barrido':{'array':['bg_xaxis', 'bg_xaxis_2'],  'qt':'QButtonGroup'},
                         'DC_bias':     {'array':['bg_DC',    'bg_DC_2'],     'qt':'QButtonGroup'},
@@ -96,8 +99,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                        'c_load':{'array':'c_load', 'qt':'QLineEdit'},
                        'g_load':{'array':'g_load', 'qt':'QLineEdit'},
                        'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'},
-                       'smooth':{'array':'sel_filtrado', 'qt':'QButtonGroup'},
-                       'k_factor':{'array':'k_factor',  'qt':'QLineEdit'},                       
+                    #    'smooth':{'array':'sel_filtrado', 'qt':'QButtonGroup'},
+                    #    'k_factor':{'array':'k_factor',  'qt':'QLineEdit'},                       
                        'pto_tip':{'array':'tipo_analisis', 'qt':'QButtonGroup'}
                        }
         #Fit Parameters
@@ -277,7 +280,7 @@ if __name__ == "__main__":
     # ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     app.setWindowIcon(QtGui.QIcon('reflujo-gastroesofagico.jpg'))
 
-    data = DATA(read=False)
+    data = DATA(read=True)
     window = MyApp(data)
     window.setWindowIcon(QtGui.QIcon('reflujo-gastroesofagico.jpg'))
     window.addmpl_1(data.fig1)

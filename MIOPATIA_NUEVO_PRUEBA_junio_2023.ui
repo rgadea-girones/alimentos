@@ -2151,6 +2151,16 @@ MEDIDA</string>
             </widget>
            </widget>
           </widget>
+          <widget class="QTextBrowser" name="textBrowser_4">
+           <property name="geometry">
+            <rect>
+             <x>850</x>
+             <y>580</y>
+             <width>421</width>
+             <height>181</height>
+            </rect>
+           </property>
+          </widget>
          </widget>
          <widget class="QWidget" name="fit">
           <attribute name="title">

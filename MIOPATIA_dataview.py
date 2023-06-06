@@ -90,6 +90,14 @@ class DATA_VIEW(object):
                                 4:data['E_mod'],
                                 5:data['E_fase']},
                                 comboBox_trazaB)
+        smooth=self.sd.def_cfg['smooth']['value']
+        k=self.sd.def_cfg['k_factor']['value']
+        pre_traza_A=traza_A
+        pre_traza_B=traza_B           
+        if (smooth==0):
+            traza_A = pre_traza_A.rolling(window=k, center=True, min_periods=1).mean()
+            traza_B = pre_traza_B.rolling(window=k, center=True, min_periods=1).mean()
+    
 
         if (self.sd.def_cfg['tipo_barrido']['value']==0):
             string_A = self.switch({0:'plot', 1:'plot', 2:'plot',
@@ -271,7 +279,19 @@ class DATA_VIEW(object):
                                  3:data3['Eri'],
                                  4:data3['E_mod'],
                                  5:data3['E_fase']},
-                                 comboBox_trazaA)                                                                
+                                 comboBox_trazaA)        
+
+        smooth=self.sd.def_cfg['smooth']['value']
+        k=self.sd.def_cfg['k_factor']['value']
+        pre_traza_A=traza_A
+        pre_traza_B=traza_B
+        pre_traza_C=traza_C
+        pre_traza_D=traza_D                        
+        if (smooth==0):
+            traza_A = pre_traza_A.rolling(window=k, center=True, min_periods=1).mean()
+            traza_B = pre_traza_B.rolling(window=k, center=True, min_periods=1).mean()
+            traza_C = pre_traza_C.rolling(window=k, center=True, min_periods=1).mean()
+            traza_D = pre_traza_D.rolling(window=k, center=True, min_periods=1).mean()                                                              
 
         if (self.sd.def_cfg['tipo_barrido']['value']==0):
             string_A = self.switch({0:'plot', 1:'plot', 2:'plot',
@@ -294,7 +314,7 @@ class DATA_VIEW(object):
             # string_B = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
             #                         3:'semilogx', 4:'loglog', 5:'semilogx'},
             #                         comboBox_trazaB)
-            
+      
             eval("self.sd.axes['ax5']." + string_A + "(data['Freq'], traza_A, color='green', label='vacio')")
             self.sd.axes['ax5'].tick_params(axis='y',colors='red')
             eval("self.sd.axes['ax5']." + string_A + "(data1['Freq'], traza_B, color='blue', label='agua')")

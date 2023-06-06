@@ -73,6 +73,21 @@ class BACK_END(object):
         except:
             self.dv.append_plus("Fichero no encontrado\n")
         else:
+            rafa=data.to_xarray()
+            #rafa=rafa.to_numpy
+            self.sd.freq=rafa.Freq.to_numpy()
+            self.sd.Z_mod_data=rafa.Z_mod.to_numpy()
+            self.sd.Z_fase_data=rafa.Z_Fase.to_numpy()
+            self.sd.Err_data=rafa.Err.to_numpy()
+            self.sd.Eri_data=rafa.Eri.to_numpy()
+            self.sd.Er_mod_data=rafa.E_mod.to_numpy()
+            self.sd.Er_fase_data=rafa.E_fase.to_numpy()
+            self.sd.R_data=rafa.R.to_numpy()
+            self.sd.X_data=rafa.X.to_numpy()
+
+            #data_array = np.concatenate([self.sd.freq,self.sd.Z_mod_data,self.sd.Z_fase_data,self.sd.Err_data,self.sd.Eri_data,self.sd.Er_mod_data,self.sd.Er_fase_data,self.sd.R_data,self.sd.X_data],
+            #                    axis=1)
+
             self.dv.append_plus(file)
             self.dv.show_data(self.pw.comboBox_trazaA.currentIndex(),
                               self.pw.comboBox_trazaB.currentIndex(),
@@ -209,10 +224,10 @@ class BACK_END(object):
     def  load_h5_analisis_selector(self):
         if (self.sd.def_cfg['pto_tip']['value']==0):       
             self.load_h5_analisis()
-            print("estoy aqui")
+            #print("estoy aqui")
         else :
             self.load_h5_analisis2()
-            print("estoy aqui2")
+            #print("estoy aqui2")
 
     def measure_fit(self):
         self.dv.append_plus("AJUSTE DE DATOS MEDIDOS")

@@ -96,6 +96,31 @@ class DB_management(object):
                 extracto = p_e[(p_e['Pollo']==str(pollo))&(p_e['Medida']==str(medida))]
 
                 if (np.array(extracto).size==0):
+                    self.dv.append_plus("Medida no encontrada")
+                    ceros = pd.DataFrame(0, index=np.arange(200), columns=['Pollo','Medida','Freq','Z_mod',
+                                                    'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
+                    #return_value = pd.DataFrame([])
+                    return_value = ceros
+                else:
+                    Primero = extracto['Primero'].to_numpy(dtype='int')[0]
+                    Ultimo  = extracto['Ultimo'].to_numpy(dtype='int')[0]
+                    return_value = t.iloc[Primero:Ultimo+1]
+        except EnvironmentError:
+            self.dv.append_plus("Base de Datos no encontrada")
+            return_value = -1
+
+        return return_value
+    
+    def borra_medida_BD(self, pollo, medida): #no implementada aun porque no me convence manipular la base de datos de esta manera
+        # Devuelve los datos de la tabla correspondientes con el pollo y la medida en formato DataFrame
+        try:
+            with pd.HDFStore(self.filename,complib="zlib",complevel=4) as hdf_db:
+                pre_p_e  = hdf_db.get('data/pollos_estado')
+                p_e =pre_p_e.drop_duplicates(subset = ['Pollo', 'Medida'],  keep = 'last').reset_index(drop = True)
+                t    = hdf_db.get('data/tabla')
+                extracto = p_e[(p_e['Pollo']==str(pollo))&(p_e['Medida']==str(medida))]
+
+                if (np.array(extracto).size==0):
                     return_value = pd.DataFrame([])
                 else:
                     Primero = extracto['Primero'].to_numpy(dtype='int')[0]

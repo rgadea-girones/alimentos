@@ -1050,20 +1050,23 @@ class VISA(object):
             self.sd.freq=self.sd.freq.compressed()
             preZ = Z.compressed()
 
-                        # ahora aplico una forma de smooth
-            if (smooth==0):
-                PHASE = np.cumsum(prePHASE, dtype=float)
-                Z=np.cumsum(preZ, dtype=float)
-                PHASE[k:] = PHASE[k:] - PHASE[:-k]
-                Z[k:] = Z[k:] - Z[:-k]
-                PHASE=PHASE[k - 1:] / k
+                        # ahora aplico una forma de smooth; pero mejor hacerlo en la imagen , no sobre los datos
+            # if (smooth==0):
+            #     PHASE = np.cumsum(prePHASE, dtype=float)
+            #     Z=np.cumsum(preZ, dtype=float)
+            #     PHASE[k:] = PHASE[k:] - PHASE[:-k]
+            #     Z[k:] = Z[k:] - Z[:-k]
+            #     PHASE=PHASE[k - 1:] / k
 
-                Z=Z[k - 1:] / k
-                self.sd.freq=self.sd.freq[k-1:]
-            else:
-                PHASE=prePHASE
-            # self.sd.freq=frecuencias
-                Z = preZ
+            #     Z=Z[k - 1:] / k
+            #     self.sd.freq=self.sd.freq[k-1:]
+            # else:
+            #     PHASE=prePHASE
+            # # self.sd.freq=frecuencias
+            #     Z = preZ
+
+            PHASE=prePHASE
+            Z=preZ
 
             t10=pc()
             self.sd.R_data = Z*np.cos(PHASE*np.pi/180)
@@ -1100,7 +1103,7 @@ class VISA(object):
             self.dv.append_plus("tiempo transcurrido:" + str(total))  
             self.dv.append_plus("R_data ="+ str(self.sd.R_data[smallest_difference_index]))
             self.dv.append_plus("X_data ="+ str(self.sd.X_data[smallest_difference_index]))
-         
+            self.dv.append_plus("resistencia shunt ="+ str(shunt[R_shunt_k]))         
           
 
 
