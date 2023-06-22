@@ -16,7 +16,7 @@ from plumbum.machines.paramiko_machine import ParamikoMachine
 
 class VISA(object):
     delimiter = '\r\n'
-    def __init__(self, host, shared_data, dataview, timeout=None, port=5000):
+    def __init__(self, shared_data, dataview, timeout=None, port=5000):
         self.sd = shared_data
         #self.tb = txt_browser
         #self.fit_browser = fit_browser
@@ -31,6 +31,7 @@ class VISA(object):
         """Initialize object and open IP connection.
         Host IP should be a string in parentheses, like '192.168.1.100'.
         """
+        host=self.sd.def_cfg['direccion_redpitaya']
         self.host    = host
         self.port    = port
         self.timeout = timeout
@@ -41,12 +42,45 @@ class VISA(object):
              if timeout is not None:
                  self._socket.settimeout(timeout)
 
-             self._socket.connect((host, port))
+             self._socket.connect((self.host, port))
              print('conexion establecida con redpitaya')
 
         except socket.error as e:
-            print('SCPI >> connect({:s}:{:d}) failed: {:s}'.format(host, port, e))
+            self.dv.append_plus("no se puede conectar a la redpitaya ="+ str(host))     
+            # print('SCPI >> connect({:s}:{:d}) failed: {:s}'.format(host, port, e))
+    def conectar(self):
+        # self.sd = shared_data
+        # #self.tb = txt_browser
+        # #self.fit_browser = fit_browser
+        # self.dv = dataview
 
+        # Visa initializationg
+        # self.rm = visa.ResourceManager()
+        # self.lor = self.rm.list_resources()
+        # ("Lista de dispositivos encontrados:") 
+        # self.dv.append_plus(str(self.lor)) 
+
+        """Initialize object and open IP connection.
+        Host IP should be a string in parentheses, like '192.168.1.100'.
+        """
+        host=self.sd.def_cfg['direccion_redpitaya']
+        self.host    = host
+        port    = self.port
+        timeout= self.timeout
+
+        try:
+            self._socket = None
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)            
+            if timeout is not None:
+                 self._socket.settimeout(timeout)
+
+            self._socket.connect((host, port))
+            print('conexion establecida con redpitaya')
+            self.dv.append_plus("CONECTADO a redpitaya ="+ str(host))  
+
+        except socket.error as e:
+            self.dv.append_plus("no se puede conectar a la redpitaya ="+ str(host))     
+            # print('SCPI >> connect({:s}:{:d}) failed: {:s}'.format(host, port, e))
     def __del__(self):
         if self._socket is not None:
             self._socket.close()
@@ -749,7 +783,7 @@ class VISA(object):
             # configuramos la FPGA con diseño verilog propio de DSD
             self.tx_txt('RP:FPGABITREAM_DSD 0.94')
             t0=pc()
-            if self.host=="169.254.168.35":
+            if self.sd.def_cfg['modelo']['value']==0:
                 shunt=[90.9,100.0,900.9,1000.0,10000.0,100000.0]
             else:
                 shunt=[90.9,100.0,285.71,500.0,1000.0,2000.0]

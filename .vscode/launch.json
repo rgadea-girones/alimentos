@@ -8,7 +8,7 @@
             "name": "Python: Archivo actual",
             "type": "python",
             "request": "launch",
-            "args":["10.42.0.116"],               //"args":["169.254.171.54"],               //"169.254.168.35"   desde linux        "args":["10.42.0.45"], //45 esla 7010 116 es la 7020
+           // "args":["169.254.57.166"],               //"args":["169.254.171.54"],               //"169.254.168.35"   desde linux        "args":["10.42.0.45"], //45 esla 7010 116 es la 7020
             "program": "${file}",
             "console": "integratedTerminal"
         }

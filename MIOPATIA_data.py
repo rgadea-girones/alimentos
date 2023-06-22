@@ -11,7 +11,7 @@ class DATA(object):
         Writes JSON file with information if required
     """
 
-    def __init__(self,read=True):
+    def __init__(self,read=False):
 
         self.filename = "miopatia.json"
         self.def_cfg=[]
@@ -32,11 +32,12 @@ class DATA(object):
                             'f_final' :{'value':1000000, 'limits':[10.0,100.0E6],'type':'float'},
                             'n_puntos':{'value':50, 'limits':[1,801],'type':'int'},
                             'n_ciclos':{'value':0, 'limits':[0,10],'type':'int'},
-                            'shunt':{'value':1, 'limits':[0,5],'type':'int'},
+                            'shunt':{'value':3, 'limits':[0,5],'type':'int'},
                             'vosc':{'value':0.5, 'limits':[0.0,2.0],'type':'float'},
                             'tipo_barrido':{'value':1, 'limits':[0,1],'type':'int'},
                             'DC_bias':{'value':0, 'limits':[0,1],'type':'int'},
                             'smooth':{'value':1, 'limits':[0,1],'type':'int'},
+                            'modelo':{'value':0, 'limits':[0,1],'type':'int'},                            
                             'k_factor':{'value':9, 'limits':[1,9],'type':'int'},                            
                             'nivel_DC':{'value':0.016, 'limits':[-40.0,40.0],'type':'float'},
                             #'avg':{'value':0, 'limits':[0,1],'type':'int'},
@@ -44,6 +45,7 @@ class DATA(object):
                             'pto_tip':{'value':0, 'limits':[0,2],'type':'int'},
                             'ultimo_pollo':{'value':0, 'limits':[0,99],'type':'int'},
                             'ultima_medida':{'value':0, 'limits':[0,9],'type':'int'},
+                            'direccion_redpitaya':"169.154.57.167",
                             'load_mfile_name':"./COPIA_EXCELS/medida.csv",
                             'save_mfile_name':"./COPIA_EXCELS/medida.csv",
                             'load_cal_file_name':"./calibracion.cal",
@@ -82,7 +84,7 @@ class DATA(object):
                             #'f_low_fit': {'value':0, 'limits':[0,100E6],'type':'float'},
                             #'f_high_fit': {'value':100E6, 'limits':[0,100E6],'type':'float'},
                             'VI_ADDRESS': 'GPIB0::17::INSTR',
-                            'GPIB_timeout':12000
+                            'GPIB_timeout':12001
                             }
             self.config_write()
 

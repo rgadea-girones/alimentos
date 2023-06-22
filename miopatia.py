@@ -38,7 +38,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # VISA start
         self.dv  = DATA_VIEW(self.sd,[self.textBrowser,self.textBrowser_2,self.textBrowser_4],self.textBrowser_3)
-        self.vi  = VISA(sys.argv[1], self.sd,self.dv)
+        self.vi  = VISA(self.sd,self.dv)
         self.be  = BACK_END(self,data,self.vi,self.dv)
         self.brw = BROWSERS(self,data,self.dv)
 
@@ -68,7 +68,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.post_pro_2    = Rbutton_group([self.radioButton_Corre_2, self.radioButton_F_Corre_2 ])  
         self.tipo_analisis = Rbutton_group([self.radioButton_tipoanalisis, self.radioButton_tipoanalisis_2, self.radioButton_tipoanalisis_3 ])  
         self.sel_smooth    = Rbutton_group([self.SMOOTH_ON,self.SMOOTH_OFF ])  
-        self.sel_smooth_2  = Rbutton_group([self.SMOOTH_ON_2,self.SMOOTH_OFF_2 ])          
+        self.sel_smooth_2  = Rbutton_group([self.SMOOTH_ON_2,self.SMOOTH_OFF_2 ])     
+        self.sel_modelo    = Rbutton_group([self.MODELO_1,self.MODELO_2 ])               
         
         self.bg_config_cal = Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
         self.bg_pto_cal    = Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
@@ -93,12 +94,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                       'save_mfile_name':'save_path',
                       'load_cal_file_name':'load_path_2',
                       'save_cal_file_name':'save_path_2',
+                      'direccion_redpitaya':'load_path_18',
                       'io_h5file_name':'load_path_db'}
         # Other controls
         self.others = {'conf_cal':{'array':'bg_config_cal', 'qt':'QButtonGroup'},
                        'c_load':{'array':'c_load', 'qt':'QLineEdit'},
                        'g_load':{'array':'g_load', 'qt':'QLineEdit'},
                        'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'},
+                       'modelo':{'array':'sel_modelo', 'qt':'QButtonGroup'},                       
                     #    'smooth':{'array':'sel_filtrado', 'qt':'QButtonGroup'},
                     #    'k_factor':{'array':'k_factor',  'qt':'QLineEdit'},                       
                        'pto_tip':{'array':'tipo_analisis', 'qt':'QButtonGroup'}
@@ -158,6 +161,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.toolButton_load_db,'func':self.brw.load_h5file_DB_browser},
                     {'wdg':self.REDRAW_MEASURE,    'func':self.be.redraw_measure},
                     {'wdg':self.MEDIR,             'func':self.be.medir},
+                    {'wdg':self.CONEXION_1,          'func':self.vi.conectar},                    
                     {'wdg':self.LOAD_M,            'func':self.be.load_m},
                     {'wdg':self.SAVE_M,            'func':self.be.save_m},
                     {'wdg':self.GO_CAL,            'func':self.be.go_cal},
@@ -280,7 +284,7 @@ if __name__ == "__main__":
     # ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     app.setWindowIcon(QtGui.QIcon('reflujo-gastroesofagico.jpg'))
 
-    data = DATA(read=True)
+    data = DATA(read=False)
     window = MyApp(data)
     window.setWindowIcon(QtGui.QIcon('reflujo-gastroesofagico.jpg'))
     window.addmpl_1(data.fig1)

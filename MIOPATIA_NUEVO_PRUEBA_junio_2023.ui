@@ -33,7 +33,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../.designer/backup/pollo.jpg</normaloff>../../.designer/backup/pollo.jpg</iconset>
+    <normaloff>../.designer/backup/pollo.jpg</normaloff>../.designer/backup/pollo.jpg</iconset>
   </property>
   <property name="iconSize">
    <size>
@@ -2161,6 +2161,84 @@ MEDIDA</string>
             </rect>
            </property>
           </widget>
+          <widget class="QGroupBox" name="groupBox_61">
+           <property name="geometry">
+            <rect>
+             <x>120</x>
+             <y>570</y>
+             <width>421</width>
+             <height>261</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>Conexion a redpitaya</string>
+           </property>
+           <widget class="QLineEdit" name="load_path_18">
+            <property name="geometry">
+             <rect>
+              <x>90</x>
+              <y>60</y>
+              <width>211</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="CONEXION_1">
+            <property name="geometry">
+             <rect>
+              <x>70</x>
+              <y>230</y>
+              <width>141</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>CONEXIÓN</string>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="MODELO_1">
+            <property name="geometry">
+             <rect>
+              <x>40</x>
+              <y>140</y>
+              <width>95</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>7010</string>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="MODELO_2">
+            <property name="geometry">
+             <rect>
+              <x>40</x>
+              <y>160</y>
+              <width>95</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>7020</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_169">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>60</y>
+              <width>67</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>IP redpitaya</string>
+            </property>
+           </widget>
+          </widget>
          </widget>
          <widget class="QWidget" name="fit">
           <attribute name="title">
@@ -2390,7 +2468,7 @@ MEDIDA</string>
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap>../../.designer/backup/ecuacion_gompertz.gif</pixmap>
+             <pixmap>../.designer/backup/ecuacion_gompertz.gif</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
