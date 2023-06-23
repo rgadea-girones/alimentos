@@ -31,6 +31,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('./pollo.jpeg'))
+        #self.resize(800,600)
+        #self.showMaximized()
         self.show()
         # Shared data
         self.sd = data

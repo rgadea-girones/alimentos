@@ -10,18 +10,6 @@
     <height>900</height>
    </rect>
   </property>
-  <property name="minimumSize">
-   <size>
-    <width>1326</width>
-    <height>900</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>1326</width>
-    <height>900</height>
-   </size>
-  </property>
   <property name="font">
    <font>
     <family>Courier 10 Pitch</family>
@@ -2164,10 +2152,10 @@ MEDIDA</string>
           <widget class="QGroupBox" name="groupBox_61">
            <property name="geometry">
             <rect>
-             <x>120</x>
+             <x>180</x>
              <y>570</y>
              <width>421</width>
-             <height>261</height>
+             <height>201</height>
             </rect>
            </property>
            <property name="title">
@@ -2176,8 +2164,8 @@ MEDIDA</string>
            <widget class="QLineEdit" name="load_path_18">
             <property name="geometry">
              <rect>
-              <x>90</x>
-              <y>60</y>
+              <x>140</x>
+              <y>40</y>
               <width>211</width>
               <height>20</height>
              </rect>
@@ -2189,8 +2177,8 @@ MEDIDA</string>
            <widget class="QPushButton" name="CONEXION_1">
             <property name="geometry">
              <rect>
-              <x>70</x>
-              <y>230</y>
+              <x>100</x>
+              <y>150</y>
               <width>141</width>
               <height>21</height>
              </rect>
@@ -2203,7 +2191,7 @@ MEDIDA</string>
             <property name="geometry">
              <rect>
               <x>40</x>
-              <y>140</y>
+              <y>90</y>
               <width>95</width>
               <height>20</height>
              </rect>
@@ -2216,7 +2204,7 @@ MEDIDA</string>
             <property name="geometry">
              <rect>
               <x>40</x>
-              <y>160</y>
+              <y>110</y>
               <width>95</width>
               <height>20</height>
              </rect>
@@ -2228,8 +2216,8 @@ MEDIDA</string>
            <widget class="QLabel" name="label_169">
             <property name="geometry">
              <rect>
-              <x>10</x>
-              <y>60</y>
+              <x>30</x>
+              <y>40</y>
               <width>67</width>
               <height>21</height>
              </rect>
