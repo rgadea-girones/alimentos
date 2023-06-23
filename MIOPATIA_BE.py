@@ -146,6 +146,41 @@ class BACK_END(object):
                                       data)
                 self.pw.canvas3.draw()
 
+    def load_h5_to_excel(self):
+        self.dv.append_plus("CARGA MEDIDA BASE DATOS H5")
+        file = self.sd.def_cfg['load_h5file_name']
+        file_destino=self.sd.def_cfg['save_excelfile_name']
+        try:
+            hdf_db = DB(file,self.dv)
+            #hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
+            #pollos = hdf_db.get('data/index/pollos')
+            #indice_medidas = hdf_db.get('data/index/medidas')
+            #tabla = hdf_db.get('data/tabla')
+            #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
+        except:
+            self.dv.append_plus("Fichero no encontrado\n")
+        else:
+            self.dv.append_plus(file)
+            pollo_sel = int(self.pw.spinBox_pollo_6.value())
+            medida_sel = int(self.pw.spinBox_medida_6.value())
+            #inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #data = tabla[inicio_medida:fin_medida]
+            #data = tabla[(tabla['Pollo']==pollo_sel)&(tabla['Medida']==medida_sel)]
+            for x in range (medida_sel,4):
+                data = hdf_db.lee_medida_BD(pollo_sel,medida_sel+ x)            
+                if (data.empty):
+                    self.dv.append_fit("Medidas no encontradas en la Base de Datos")
+                else:
+                    if(x==0):
+                        with pd.ExcelWriter(file_destino) as writer:  
+                            data.to_excel(writer, sheet_name='Sujeto_'+ str(pollo_sel)+ 'Medida_'+str(x))
+                    else:
+                        with pd.ExcelWriter(file_destino,mode='a') as writer:  
+                            data.to_excel(writer, sheet_name='Sujeto_'+ str(pollo_sel)+ 'Medida_'+str(x))
+
+
+
     def load_h5_analisis(self):
         self.dv.append_plus("CARGA MEDIDA BASE DATOS H5")
         file = self.sd.def_cfg['load_h5file_name']
@@ -534,6 +569,17 @@ class BROWSERS(object):
         self.sd.def_cfg['save_mfile_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
         self.pw.save_path.setText(self.sd.def_cfg['save_mfile_name'])
+
+    def save_excelfile_browser(self):
+        file_aux = QtWidgets.QFileDialog.getSaveFileName(self.pw,
+                                        'Salvar fichero medida',
+                                        self.sd.def_cfg['def_path'],
+                                        "Ficheros excel (*.xlsx)")
+        fname_aux = ([str(x) for x in file_aux])
+        self.sd.def_cfg['save_excelfile_name'] = fname_aux[0]
+        #Trick for Qstring converting to standard string
+        self.pw.save_path_19.setText(self.sd.def_cfg['save_excelfile_name'])
+      
 
 
     def load_calibration_file_browser(self):
