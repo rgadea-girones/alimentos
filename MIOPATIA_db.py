@@ -90,6 +90,8 @@ class DB_management(object):
         # Devuelve los datos de la tabla correspondientes con el pollo y la medida en formato DataFrame
         try:
             with pd.HDFStore(self.filename,complib="zlib",complevel=4) as hdf_db:
+                #rafa: si hay duplicados cogera el último
+                # p_e  = hdf_db.get('data/pollos_estado')
                 pre_p_e  = hdf_db.get('data/pollos_estado')
                 p_e =pre_p_e.drop_duplicates(subset = ['Pollo', 'Medida'],  keep = 'last').reset_index(drop = True)
                 t    = hdf_db.get('data/tabla')

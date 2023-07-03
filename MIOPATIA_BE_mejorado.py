@@ -155,6 +155,8 @@ class BACK_END(object):
         file_destino=self.sd.def_cfg['save_excelfile_name']
         try:
             hdf_db = DB(file,self.dv)
+            pollos = hdf_db.get('data/pollos_estado') #.to_numpy(dtype=float)
+    
             #hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
             #pollos = hdf_db.get('data/index/pollos')
             #indice_medidas = hdf_db.get('data/index/medidas')
@@ -164,23 +166,28 @@ class BACK_END(object):
             self.dv.append_plus("Fichero no encontrado\n")
         else:
             self.dv.append_plus(file)
+            last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
+                 
             pollo_sel = int(self.pw.spinBox_pollo_6.value())
             medida_sel = int(self.pw.spinBox_medida_6.value())
             #inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
             #fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
             #data = tabla[inicio_medida:fin_medida]
             #data = tabla[(tabla['Pollo']==pollo_sel)&(tabla['Medida']==medida_sel)]
-            for x in range (medida_sel,4):
-                data = hdf_db.lee_medida_BD(pollo_sel,medida_sel+ x)            
-                if (data.empty):
-                    self.dv.append_fit("Medidas no encontradas en la Base de Datos")
-                else:
-                    if(x==0):
-                        with pd.ExcelWriter(file_destino) as writer:  
-                            data.to_excel(writer, sheet_name='Sujeto_'+ str(pollo_sel)+ 'Medida_'+str(x))
+            for x in range (0,last_pollo+1):
+                extracto = pollos[(pollos['Pollo']==str(x))]
+                last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
+                for y in range (0,last_medida+1):       
+                    data = hdf_db.lee_medida_BD(x,y)            
+                    if (data.empty):
+                        self.dv.append_fit("Medidas no encontradas en la Base de Datos")
                     else:
-                        with pd.ExcelWriter(file_destino,mode='a') as writer:  
-                            data.to_excel(writer, sheet_name='Sujeto_'+ str(pollo_sel)+ 'Medida_'+str(x))
+                        if(x==0):
+                            with pd.ExcelWriter(file_destino) as writer:  
+                                data.to_excel(writer, sheet_name='Sujeto_'+ str(pollo_sel)+ 'Medida_'+str(x))
+                        else:
+                            with pd.ExcelWriter(file_destino,mode='a') as writer:  
+                                data.to_excel(writer, sheet_name='Sujeto_'+ str(pollo_sel)+ 'Medida_'+str(x))
 
 
 

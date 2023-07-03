@@ -24,6 +24,8 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
 warnings.filterwarnings("ignore", message="Attempted to set non-positive left xlim on a log-scaled axis.\nInvalid limit will be ignored.")
 
+# WERG Filter out RuntimeWarnings. 
+warnings.filterwarnings('ignore',category=RuntimeWarning)
 
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self,data):
@@ -186,6 +188,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             eval("self." + self.fit_param[i]['array'] +".editingFinished").connect(self.be.store_fit)
         for i in clicked:
             i['wdg'].clicked.connect(i['func'])
+
+        # WERG Initialise progressBar and counters.
+        self.progressBar.setValue(0)
+        self.last_pollo.display(0)
+        self.last_medida.display(0)            
 
         # Mirrored calls
         for i in self.mirror.keys():
