@@ -191,6 +191,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # WERG Initialise progressBar and counters.
         self.progressBar.setValue(0)
+        self.progressBar_2.setValue(0)        
         self.last_pollo.display(0)
         self.last_medida.display(0)            
 

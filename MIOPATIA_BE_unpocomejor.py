@@ -167,29 +167,38 @@ class BACK_END(object):
             self.dv.append_plus(file)
             pollo_sel = int(self.pw.spinBox_pollo_6.value())
             medida_sel = int(self.pw.spinBox_medida_6.value())
-            last_pollo = hdf_db.chequea_ultimo_pollo()
+        try:
+            with pd.HDFStore(self.filename,'r',complib="zlib",complevel=4) as hdf_db:
+                try:
+                    pollos = hdf_db.get('data/pollos_estado') #.to_numpy(dtype=float)
+                except:
+                    last_pollo = 0
+                    last_medida = 0
+                else:
+                    last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
+                    extracto = pollos[(pollos['Pollo']==str(last_pollo))]
+                    last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
+        except EnvironmentError:
+            self.dv.append_plus("Base de Datos no encontrada")
+            last_pollo = 0
+            last_medida = 0
 
-            for x in range (0,last_pollo+1):
-                progreso=int(x*100/last_pollo)
-                self.pw.progressBar_2.setValue(progreso)  
-                last_medida = hdf_db.chequea_ultima_medida(x)
-                for y in range (0,last_medida+1):   
-                    QtCore.QCoreApplication.processEvents()    
-                    data = hdf_db.lee_medida_BD(x,y)            
-                    if (data.empty):
-                        self.dv.append_fit("Medidas no encontradas en la Base de Datos")
+            #inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
+            #data = tabla[inicio_medida:fin_medida]
+            #data = tabla[(tabla['Pollo']==pollo_sel)&(tabla['Medida']==medida_sel)]
+            for x in range (medida_sel,last_medida+1):
+                data = hdf_db.lee_medida_BD(pollo_sel,x)            
+                if (data.empty):
+                    self.dv.append_fit("Medidas no encontradas en la Base de Datos")
+                else:
+                    if(x==0):
+                        with pd.ExcelWriter(file_destino) as writer:  
+                            data.to_excel(writer, sheet_name='Sujeto_'+ str(pollo_sel)+ 'Medida_'+str(x))
                     else:
-                        if(x==0 and y==0):
-                            with pd.ExcelWriter(file_destino) as writer:  
-                                data.to_excel(writer, sheet_name='Sujeto_'+ str(x))
-                        else:
-                            if (y==0):
-                                with pd.ExcelWriter(file_destino,mode='a') as writer:  
-                                    data.to_excel(writer, sheet_name='Sujeto_'+ str(x))
-                            else: 
-                                with pd.ExcelWriter(file_destino,mode='a', if_sheet_exists='overlay') as writer:  
-                                    data.to_excel(writer, sheet_name='Sujeto_'+ str(x),startrow=writer.sheets['Sujeto_'+ str(x)].max_row , header=None )
- 
+                        with pd.ExcelWriter(file_destino,mode='a') as writer:  
+                            data.to_excel(writer, sheet_name='Sujeto_'+ str(pollo_sel)+ 'Medida_'+str(x))
+
 
 
     def load_h5_analisis(self):
