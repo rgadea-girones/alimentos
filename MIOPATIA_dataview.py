@@ -409,14 +409,22 @@ class DATA_VIEW(object):
         # self.sd.axes['ax3'].cla()
         traza_A=[]
         legends=[]
+        smooth=self.sd.def_cfg['smooth']['value']
+        k=self.sd.def_cfg['k_factor']['value']
+                  
         for x in data: 
-            traza_A.append ( self.switch({ 0:x['Z_mod'],
+            pre_traza1=self.switch({ 0:x['Z_mod'],
                                 1:x['Z_Fase'],
                                 2:x['Err'],
                                 3:x['Eri'],
                                 4:x['E_mod'],
                                 5:x['E_fase']},
-                                comboBox_trazaA))
+                                comboBox_trazaA)
+            if (smooth==0):
+                pre_traza2=pre_traza1.rolling(window=k, center=True, min_periods=1).mean()
+            else:
+                pre_traza2=pre_traza1
+            traza_A.append ( pre_traza2)
             legends.append(x['Pollo'][0])
 
         # traza_B = self.switch({ 0:data1['Z_mod'],
