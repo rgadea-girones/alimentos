@@ -46,6 +46,7 @@ class DATA(object):
                             'ultimo_pollo':{'value':0, 'limits':[0,99],'type':'int'},
                             'ultima_medida':{'value':0, 'limits':[0,9],'type':'int'},
                             'direccion_redpitaya':"169.254.168.35",
+                            'sujetos': "0-0",
                             'load_mfile_name':"./COPIA_EXCELS/medida.csv",
                             'save_mfile_name':"./COPIA_EXCELS/medida.csv",
                             'save_excelfile_name':"./COPIA_EXCELS/medida.xlsx",                            

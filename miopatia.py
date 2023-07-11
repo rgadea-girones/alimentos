@@ -100,6 +100,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                       'load_cal_file_name':'load_path_2',
                       'save_cal_file_name':'save_path_2',
                       'direccion_redpitaya':'load_path_18',
+                      'sujetos':'load_path_19',
                       'io_h5file_name':'load_path_db'}
         # Other controls
         self.others = {'conf_cal':{'array':'bg_config_cal', 'qt':'QButtonGroup'},

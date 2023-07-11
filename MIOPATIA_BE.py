@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 from MIOPATIA_db import DB_management as DB
 from PyQt5 import QtCore, QtWidgets, uic, QtGui
 
@@ -169,7 +170,7 @@ class BACK_END(object):
             medida_sel = int(self.pw.spinBox_medida_6.value())
             last_pollo = hdf_db.chequea_ultimo_pollo()
 
-            for x in range (0,last_pollo+1):
+            for x in range (pollo_sel,last_pollo+1):
                 progreso=int(x*100/last_pollo)
                 self.pw.progressBar_2.setValue(progreso)  
                 last_medida = hdf_db.chequea_ultima_medida(x)
@@ -179,7 +180,7 @@ class BACK_END(object):
                     if (data.empty):
                         self.dv.append_fit("Medidas no encontradas en la Base de Datos")
                     else:
-                        if(x==0 and y==0):
+                        if (os.path.isfile(file_destino)==False):
                             with pd.ExcelWriter(file_destino) as writer:  
                                 data.to_excel(writer, sheet_name='Sujeto_'+ str(x))
                         else:
@@ -267,13 +268,62 @@ class BACK_END(object):
 
                 self.pw.canvas4.draw()
 
+    def expander(inpt):
+        ret = []
+        for token in inpt.split(','):
+            if '-' in token:
+                a, b = token.strip().split('-')
+                ret.extend(range(int(a), int(b)+1))
+            else:
+                ret.append(int(token))
+        return ret
+
+    def load_h5_analisis3(self):
+        self.dv.append_plus("CARGA MEDIDA BASE DATOS H5")
+        file = self.sd.def_cfg['load_h5file_name']
+        try:
+            hdf_db = DB(file,self.dv)
+            #hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
+            #pollos = hdf_db.get('data/index/pollos')
+            #indice_medidas = hdf_db.get('data/index/medidas')
+            #tabla = hdf_db.get('data/tabla')
+            #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
+        except:
+            self.dv.append_plus("Fichero no encontrado\n")
+        else:
+            self.dv.append_plus(file)
+            pollos = self.sd.def_cfg['sujetos']
+            pollos_sel = []
+            for token in pollos.split(','):
+                if '-' in token:
+                    a, b = token.strip().split('-')
+                    pollos_sel.extend(range(int(a), int(b)+1))
+                else:
+                    pollos_sel.append(int(token))
+            medida_sel = int(self.pw.spinBox_medida_6.value())
+            data=[]
+            for x in pollos_sel: 
+                data.append(hdf_db.lee_medida_BD(x,medida_sel))
+
+
+            if (data==[]):
+                self.dv.append_fit("Sujetos no encontrados en la Base de Datos")
+            else:
+                self.dv.show_data_rafa_n(self.pw.comboBox_trazaA_4.currentIndex(),
+                                      data)
+
+                self.pw.canvas4.draw()                
+
     def  load_h5_analisis_selector(self):
         if (self.sd.def_cfg['pto_tip']['value']==0):       
             self.load_h5_analisis()
             #print("estoy aqui")
         else :
-            self.load_h5_analisis2()
-            #print("estoy aqui2")
+            if (self.sd.def_cfg['pto_tip']['value']==1):              
+                self.load_h5_analisis2()
+                #print("estoy aqui2")
+            else:
+                self.load_h5_analisis3()
 
     def measure_fit(self):
         self.dv.append_plus("AJUSTE DE DATOS MEDIDOS")

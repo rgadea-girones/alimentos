@@ -2043,7 +2043,7 @@ MEDIDA</string>
             <widget class="QComboBox" name="comboBox_trazaA_4">
              <property name="geometry">
               <rect>
-               <x>80</x>
+               <x>170</x>
                <y>90</y>
                <width>91</width>
                <height>21</height>
@@ -2089,7 +2089,7 @@ MEDIDA</string>
               </rect>
              </property>
              <property name="text">
-              <string>zumo</string>
+              <string>&quot;custom&quot;</string>
              </property>
             </widget>
             <widget class="QRadioButton" name="SMOOTH_ON_2">
@@ -2202,6 +2202,29 @@ MEDIDA</string>
               <number>24</number>
              </property>
             </widget>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox">
+             <property name="geometry">
+              <rect>
+               <x>40</x>
+               <y>440</y>
+               <width>62</width>
+               <height>22</height>
+              </rect>
+             </property>
+            </widget>
+            <widget class="QLineEdit" name="load_path_19">
+             <property name="geometry">
+              <rect>
+               <x>60</x>
+               <y>90</y>
+               <width>91</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="readOnly">
+              <bool>false</bool>
+             </property>
+            </widget>
            </widget>
           </widget>
           <widget class="QTextBrowser" name="textBrowser_4">
@@ -2291,6 +2314,19 @@ MEDIDA</string>
              <string>IP redpitaya</string>
             </property>
            </widget>
+          </widget>
+          <widget class="QLabel" name="label_170">
+           <property name="geometry">
+            <rect>
+             <x>980</x>
+             <y>150</y>
+             <width>67</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>rango</string>
+           </property>
           </widget>
          </widget>
          <widget class="QWidget" name="fit">
