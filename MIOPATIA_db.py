@@ -161,8 +161,13 @@ class DB_management(object):
                     last_medida = 0
                 else:
  #                   last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
+                    sujeto=str(pollo)
                     extracto = pollos[(pollos['Pollo']==str(pollo))]
-                    last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
+                    if (extracto.empty):
+                        self.dv.append_plus("Sujeto " + sujeto + " no encontrado en la base de Datos\n")
+                        last_medida=0
+                    else:
+                        last_medida = np.max(extracto['Medida'].to_numpy(dtype='int'))
         except EnvironmentError:
             self.dv.append_plus("Base de Datos no encontrada")
             last_medida = 0

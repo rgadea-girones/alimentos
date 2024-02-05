@@ -8,6 +8,7 @@ import pandas as pd
 
 
 class DATA_VIEW(object):
+    
     def __init__(self,shared_data,txt_browser,fit_browser):
         self.sd = shared_data
         self.tb = txt_browser

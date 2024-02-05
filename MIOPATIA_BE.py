@@ -178,7 +178,7 @@ class BACK_END(object):
                     QtCore.QCoreApplication.processEvents()    
                     data = hdf_db.lee_medida_BD(x,y)            
                     if (data.empty):
-                        self.dv.append_fit("Medidas no encontradas en la Base de Datos")
+                        self.dv.append_plus("Medidas no encontradas en la Base de Datos")
                     else:
                         if (os.path.isfile(file_destino)==False):
                             with pd.ExcelWriter(file_destino) as writer:  
