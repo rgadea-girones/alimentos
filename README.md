@@ -1,4 +1,4 @@
-MIOPATIA (transferido de usuario)
+REFLUJO (transferido de usuario)
 
 Instrucciones:
 
