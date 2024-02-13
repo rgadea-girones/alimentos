@@ -1,4 +1,4 @@
-MIOPATIA
+REFLUJO
 
 Instrucciones:
 
