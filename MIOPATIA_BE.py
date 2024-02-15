@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 from MIOPATIA_db import DB_management as DB
-from PyQt5 import QtCore, QtWidgets, uic, QtGui
+from PySide6 import QtCore, QtWidgets,  QtGui
 
 
 class BACK_END(object):

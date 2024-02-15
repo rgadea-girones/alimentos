@@ -1,11 +1,13 @@
 import sys
 import warnings
+from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtUiTools import QUiLoader
+from MainWindow import Ui_MainWindow
 
-from PyQt5 import QtCore, QtWidgets, uic, QtGui
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
-from PyQt5.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox
 from collections import OrderedDict
 import ctypes
 from MIOPATIA_visa import VISA
@@ -17,10 +19,10 @@ from MIOPATIA_dataview import DATA_VIEW
 
 # PYINSTALLER : pyinstaller -D --specpath .\EXE miopatia.py
 
-qtCreatorFile = "MIOPATIA_NUEVO_PRUEBA_junio_2023.ui"
+qtCreatorFile = "impedance_spectroscopy.ui"
 
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
+# Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
 warnings.filterwarnings("ignore", message="Attempted to set non-positive left xlim on a log-scaled axis.\nInvalid limit will be ignored.")
 
@@ -33,8 +35,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         self.setWindowIcon(QtGui.QIcon('./pollo.jpeg'))
+        # self.showFullScreen()
         #self.resize(800,600)
-        #self.showMaximized()
+        # self.showMaximized()
         self.show()
         # Shared data
         self.sd = data

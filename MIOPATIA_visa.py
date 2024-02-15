@@ -1,4 +1,4 @@
-import pyvisa as visa
+# import pyvisa as visa
 import socket
 import io
 import numpy as np
@@ -6,7 +6,7 @@ from time import perf_counter as pc
 from time import sleep
 from scipy.fft import fft, fftfreq, fftshift
 from scipy.interpolate import interp1d, make_interp_spline
-from PyQt5.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QMessageBox
 import fit_library as fit
 import pandas as pd
 from plumbum import SshMachine
