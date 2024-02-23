@@ -197,7 +197,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.progressBar.setValue(0)
         self.progressBar_2.setValue(0)        
         self.last_pollo.display(0)
-        self.last_medida.display(0)            
+        self.last_medida.display(0)   
+        self.last_medida_2.display(0)         
 
         # Mirrored calls
         for i in self.mirror.keys():
@@ -309,4 +310,4 @@ if __name__ == "__main__":
     window.addmpl_3(data.fig3)
     window.addmpl_4(data.fig4)
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

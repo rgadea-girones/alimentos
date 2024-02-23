@@ -293,23 +293,30 @@ class BACK_END(object):
         else:
             self.dv.append_plus(file)
             pollos = self.sd.def_cfg['sujetos']
-            pollos_sel = []
-            for token in pollos.split(','):
-                if '-' in token:
-                    a, b = token.strip().split('-')
-                    pollos_sel.extend(range(int(a), int(b)+1))
-                else:
-                    pollos_sel.append(int(token))
+            if pollos == '':
+                pollos_unico_sel = int(self.pw.spinBox_pollo_6.value())
+                medida_sel = int(self.pw.spinBox_medida_6.value())
+                estado_pollo = hdf_db.lee_estado_BD(pollos_unico_sel,medida_sel)
+                self.sd.def_cfg['estado_sujeto'] = int(estado_pollo)
+                self.pw.last_medida_2.display(self.sd.def_cfg['estado_sujeto'])
+            else:
+                pollos_sel = []
+                for token in pollos.split(','):
+                    if '-' in token:
+                        a, b = token.strip().split('-')
+                        pollos_sel.extend(range(int(a), int(b)+1))
+                    else:
+                        pollos_sel.append(int(token))
             medida_sel = int(self.pw.spinBox_medida_6.value())
             data=[]
             for x in pollos_sel: 
-                data.append(hdf_db.lee_medida_BD(x,medida_sel))
+                data.append(hdf_db.lee_medida_rafa_BD(x,medida_sel))
 
 
             if (data==[]):
                 self.dv.append_fit("Sujetos no encontrados en la Base de Datos")
             else:
-                self.dv.show_data_rafa_n(self.pw.comboBox_trazaA_4.currentIndex(),
+                self.dv.show_data_estado_rafa_n(self.pw.comboBox_trazaA_4.currentIndex(),
                                       data)
 
                 self.pw.canvas4.draw()                

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1326</width>
-    <height>900</height>
+    <width>1322</width>
+    <height>891</height>
    </rect>
   </property>
   <property name="font">
@@ -61,7 +61,7 @@
           <bool>false</bool>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="datos">
           <attribute name="title">
@@ -1995,14 +1995,14 @@ MEDIDA</string>
             <widget class="QPushButton" name="VER_ANALISIS">
              <property name="geometry">
               <rect>
-               <x>60</x>
-               <y>210</y>
+               <x>40</x>
+               <y>250</y>
                <width>141</width>
                <height>21</height>
               </rect>
              </property>
              <property name="text">
-              <string>VER ANALISIS</string>
+              <string>VER ANALISISS</string>
              </property>
             </widget>
             <widget class="QComboBox" name="comboBox_trazaA_4">
@@ -2054,13 +2054,13 @@ MEDIDA</string>
               </rect>
              </property>
              <property name="text">
-              <string>&quot;custom&quot;</string>
+              <string>Yake</string>
              </property>
             </widget>
             <widget class="QRadioButton" name="SMOOTH_ON_2">
              <property name="geometry">
               <rect>
-               <x>120</x>
+               <x>150</x>
                <y>140</y>
                <width>111</width>
                <height>20</height>
@@ -2073,7 +2073,7 @@ MEDIDA</string>
             <widget class="QRadioButton" name="SMOOTH_OFF_2">
              <property name="geometry">
               <rect>
-               <x>120</x>
+               <x>150</x>
                <y>180</y>
                <width>111</width>
                <height>20</height>
@@ -2086,7 +2086,7 @@ MEDIDA</string>
             <widget class="QLabel" name="label_61">
              <property name="geometry">
               <rect>
-               <x>120</x>
+               <x>150</x>
                <y>160</y>
                <width>121</width>
                <height>16</height>
@@ -2105,7 +2105,7 @@ MEDIDA</string>
             <widget class="QLineEdit" name="k_factor_2">
              <property name="geometry">
               <rect>
-               <x>210</x>
+               <x>230</x>
                <y>160</y>
                <width>41</width>
                <height>16</height>
@@ -2118,8 +2118,8 @@ MEDIDA</string>
             <widget class="QPushButton" name="GUARDAR_EXCEL">
              <property name="geometry">
               <rect>
-               <x>60</x>
-               <y>300</y>
+               <x>30</x>
+               <y>340</y>
                <width>141</width>
                <height>21</height>
               </rect>
@@ -2132,7 +2132,7 @@ MEDIDA</string>
              <property name="geometry">
               <rect>
                <x>10</x>
-               <y>270</y>
+               <y>310</y>
                <width>211</width>
                <height>20</height>
               </rect>
@@ -2145,7 +2145,7 @@ MEDIDA</string>
              <property name="geometry">
               <rect>
                <x>230</x>
-               <y>270</y>
+               <y>310</y>
                <width>31</width>
                <height>21</height>
               </rect>
@@ -2157,24 +2157,14 @@ MEDIDA</string>
             <widget class="QProgressBar" name="progressBar_2">
              <property name="geometry">
               <rect>
-               <x>90</x>
-               <y>330</y>
+               <x>70</x>
+               <y>370</y>
                <width>118</width>
                <height>23</height>
               </rect>
              </property>
              <property name="value">
               <number>24</number>
-             </property>
-            </widget>
-            <widget class="QDoubleSpinBox" name="doubleSpinBox">
-             <property name="geometry">
-              <rect>
-               <x>40</x>
-               <y>440</y>
-               <width>62</width>
-               <height>22</height>
-              </rect>
              </property>
             </widget>
             <widget class="QLineEdit" name="load_path_19">
@@ -2188,6 +2178,19 @@ MEDIDA</string>
              </property>
              <property name="readOnly">
               <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_170">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>90</y>
+               <width>67</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>rango</string>
              </property>
             </widget>
            </widget>
@@ -2280,19 +2283,6 @@ MEDIDA</string>
             </property>
            </widget>
           </widget>
-          <widget class="QLabel" name="label_170">
-           <property name="geometry">
-            <rect>
-             <x>980</x>
-             <y>150</y>
-             <width>67</width>
-             <height>21</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>rango</string>
-           </property>
-          </widget>
           <widget class="QLabel" name="label_161">
            <property name="geometry">
             <rect>
@@ -2368,7 +2358,7 @@ MEDIDA</string>
             <property name="geometry">
              <rect>
               <x>970</x>
-              <y>250</y>
+              <y>320</y>
               <width>161</width>
               <height>21</height>
              </rect>
@@ -2381,7 +2371,7 @@ MEDIDA</string>
             <property name="geometry">
              <rect>
               <x>960</x>
-              <y>280</y>
+              <y>350</y>
               <width>271</width>
               <height>151</height>
              </rect>
@@ -2551,7 +2541,7 @@ MEDIDA</string>
             <property name="geometry">
              <rect>
               <x>960</x>
-              <y>150</y>
+              <y>220</y>
               <width>271</width>
               <height>91</height>
              </rect>
@@ -2605,7 +2595,7 @@ MEDIDA</string>
               <x>960</x>
               <y>10</y>
               <width>271</width>
-              <height>131</height>
+              <height>201</height>
              </rect>
             </property>
             <property name="title">
@@ -2721,6 +2711,131 @@ MEDIDA</string>
               <string>SALVA AJUSTE</string>
              </property>
             </widget>
+            <widget class="QPushButton" name="SAVE_fit_2">
+             <property name="geometry">
+              <rect>
+               <x>90</x>
+               <y>180</y>
+               <width>111</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <family>MS Shell Dlg 2</family>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>SALVA ESTADO</string>
+             </property>
+            </widget>
+            <widget class="QSpinBox" name="spinBox_pollo_db_3">
+             <property name="geometry">
+              <rect>
+               <x>210</x>
+               <y>130</y>
+               <width>51</width>
+               <height>41</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <family>Sans</family>
+               <pointsize>18</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="minimum">
+              <number>0</number>
+             </property>
+             <property name="maximum">
+              <number>99</number>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_64">
+             <property name="geometry">
+              <rect>
+               <x>150</x>
+               <y>130</y>
+               <width>61</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <family>Sans</family>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>ESTADO veamos</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_63">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>150</y>
+               <width>61</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <family>Sans</family>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>obtenido</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_65">
+             <property name="geometry">
+              <rect>
+               <x>150</x>
+               <y>150</y>
+               <width>61</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <family>Sans</family>
+               <pointsize>11</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>deseado</string>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QLCDNumber" name="last_medida_2">
+            <property name="geometry">
+             <rect>
+              <x>1050</x>
+              <y>140</y>
+              <width>41</width>
+              <height>41</height>
+             </rect>
+            </property>
+            <property name="font">
+             <font>
+              <family>Sans</family>
+              <pointsize>10</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="lineWidth">
+             <number>1</number>
+            </property>
+            <property name="digitCount">
+             <number>2</number>
+            </property>
            </widget>
           </widget>
           <widget class="QGroupBox" name="groupBox_11">
@@ -3363,6 +3478,26 @@ MEDIDA</string>
            </property>
            <property name="readOnly">
             <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_62">
+           <property name="geometry">
+            <rect>
+             <x>980</x>
+             <y>150</y>
+             <width>61</width>
+             <height>31</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <family>Sans</family>
+             <pointsize>11</pointsize>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>ESTADO veamos</string>
            </property>
           </widget>
          </widget>
