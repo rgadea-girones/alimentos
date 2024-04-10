@@ -115,6 +115,7 @@ class DB_management(object):
     
     def lee_medida_rafa_BD(self, pollo, medida):
         # Devuelve los datos de la tabla correspondientes con el pollo y la medida en formato DataFrame
+        # rafa: modificado para que incluya tambien el estado y poder graficar conociendo el estado
         try:
             with pd.HDFStore(self.filename,complib="zlib",complevel=4) as hdf_db:
                 #rafa: si hay duplicados cogera el último

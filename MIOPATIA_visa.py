@@ -374,7 +374,33 @@ class VISA(object):
 
     def measure(self):
         if (self.sd.def_cfg['post_procesado']['value']==0):
-            self.tx_txt('RP:FPGABITREAM 0.94')
+            if self.sd.def_cfg['modelo']['value']==0:
+                shunt=[90.9,100.0,900.9,1000.0,10000.0,100000.0]
+                self.tx_txt('RP:FPGABITREAM 0.94')
+            else:
+                shunt=[90.9,100.0,285.71,500.0,1000.0,2000.0]        
+                self.tx_txt('RP:FPGABITREAM 0.94')
+                bitstream="/opt/redpitaya//fpga/z20_125/v0.94/fpga.bit.bin"
+                veamos = ParamikoMachine(self.host, user = "root", password="root")
+                veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
+                veamos.cwd.chdir("/opt/redpitaya/bin")
+                comando="./fpgautil -b " + bitstream
+                # print (comando)
+                r_back = veamos[comando]
+                r_back()
+                # sizeh1=str('-sizeh1={0}'.format(individual[0]))
+                # sizeh2=str('-sizeh2={0}'.format(individual[1]))
+                # epochs=str('-epochs={0}'.format(epochs))
+                # decay=str('-decay={0}'.format(decay_value))
+                # step=str('-step={0}'.format(learning_step))
+                # minibatch=str('-batchsize={0}'.format(batchsize))
+                # idea=str(r_back[epochs, sizeh1,sizeh2, minibatch,decay,step]())
+                # for line in idea.split("\n"):
+                #     if "error_val" in line:
+                #     #print (line.strip())
+                #        error_rate_float=[float(s) for s in re.findall('\d+\.\d+',line)]
+                #        error_rate=error_rate_float[0]
+                veamos.close()
             t0=pc()
             frecuencia_min = np.log10(self.sd.def_cfg['f_inicial']['value'])
             frecuencia_max= np.log10(self.sd.def_cfg['f_final']['value'])
@@ -397,12 +423,12 @@ class VISA(object):
             self.sd.freq=self.sd.freq[self.sd.freq>40]
             numero_valores=len(self.sd.freq)
             incrementos= (self.sd.freq*(2**32))/125e6;
-            print(str(incrementos))
+            #print(str(incrementos))
             s = io.BytesIO()
             np.savetxt(s, [incrementos], fmt='%d', delimiter=',')
-            print(str(s))
+            #print(str(s))
             outStr = s.getvalue().decode('UTF-8')
-            print(outStr)
+            #print(outStr)
             # valores no configurables desde el front-end
             wave_form = 'sine'
             Rs=1000
@@ -444,29 +470,74 @@ class VISA(object):
             self.tx_txt('DIG:PIN:DIR OUT,DIO6_N')
             self.tx_txt('DIG:PIN:DIR OUT,DIO7_N')
 
-            #elegimos 10K
-            #activo a nivel bajo: activo
-            self.tx_txt('DIG:PIN DIO0_N,1') 
-            #activo a nivel bajo: desactivo
-            self.tx_txt('DIG:PIN DIO1_N,0')
-            #activo a nivel alto: desactivo            
-            self.tx_txt('DIG:PIN DIO2_N,0')
-            #activo a nivel alto: desactivo                
-            self.tx_txt('DIG:PIN DIO3_N,0')
+            if (R_shunt_k==0):
+                # elegimos 90.9 
+                # activo a nivel bajo: activo
+                self.tx_txt('DIG:PIN DIO0_N,0') 
+                # activo a nivel bajo: desactivo
+                self.tx_txt('DIG:PIN DIO1_N,1')
+                # activo a nivel alto: desactivo            
+                self.tx_txt('DIG:PIN DIO2_N,0')
+                # activo a nivel alto: activo                
+                self.tx_txt('DIG:PIN DIO3_N,1')
+            else:
+                if (R_shunt_k==1):
+                    # elegimos 100 
+                    # activo a nivel bajo: desactivo
+                    self.tx_txt('DIG:PIN DIO0_N,1') 
+                    # activo a nivel bajo: desactivo
+                    self.tx_txt('DIG:PIN DIO1_N,1')
+                    # activo a nivel alto: desactivo            
+                    self.tx_txt('DIG:PIN DIO2_N,0')
+                    # activo a nivel alto: activo                
+                    self.tx_txt('DIG:PIN DIO3_N,1')
+                else:
+                    if (R_shunt_k==2):
+                        # elegimos 900.9 
+                        # activo a nivel bajo: activo
+                        self.tx_txt('DIG:PIN DIO0_N,0') 
+                        # activo a nivel bajo: activo
+                        self.tx_txt('DIG:PIN DIO1_N,0')
+                        # activo a nivel alto: activo            
+                        self.tx_txt('DIG:PIN DIO2_N,1')
+                        # activo a nivel alto: desactivo                
+                        self.tx_txt('DIG:PIN DIO3_N,0')
+                    else:
+                        if (R_shunt_k==3):
+                            # #elegimos 1K
+                            # #activo a nivel bajo: activo
+                            self.tx_txt('DIG:PIN DIO0_N,0') 
+                            # #activo a nivel bajo: desactivo
+                            self.tx_txt('DIG:PIN DIO1_N,1')
+                            # #activo a nivel alto: desactivo            
+                            self.tx_txt('DIG:PIN DIO2_N,0')
+                            # #activo a nivel alto: desactivo                
+                            self.tx_txt('DIG:PIN DIO3_N,0')  
+                        else:
+                            if (R_shunt_k==4):
+                                # elegimos 10K
+                                # activo a nivel bajo: desactivo
+                                self.tx_txt('DIG:PIN DIO0_N,1') 
+                                # activo a nivel bajo: activo
+                                self.tx_txt('DIG:PIN DIO1_N,0')
+                                # activo a nivel alto: desactivo            
+                                self.tx_txt('DIG:PIN DIO2_N,0')
+                                # activo a nivel alto: desactivo                
+                                self.tx_txt('DIG:PIN DIO3_N,0')
+                            else:
+                                # k==4 y K==0 y K==5
+                                # elegimos 100K
+                                # activo a nivel bajo: desactivo
+                                self.tx_txt('DIG:PIN DIO0_N,1') 
+                                # activo a nivel bajo: desactivo
+                                self.tx_txt('DIG:PIN DIO1_N,1')
+                                # activo a nivel alto: activo            
+                                self.tx_txt('DIG:PIN DIO2_N,1')
+                                # activo a nivel alto: desactivo                
+                                self.tx_txt('DIG:PIN DIO3_N,0')
+             
 
-            #elegimos 1K
-            #activo a nivel bajo: activo
-            self.tx_txt('DIG:PIN DIO0_N,0') 
-            #activo a nivel bajo: desactivo
-            self.tx_txt('DIG:PIN DIO1_N,1')
-            #activo a nivel alto: desactivo            
-            self.tx_txt('DIG:PIN DIO2_N,0')
-            #activo a nivel alto: desactivo                
-            self.tx_txt('DIG:PIN DIO3_N,0')
-
-
-
-            #elegimos el cable rojo , conector j2
+            #elegimos el cable rojo , conector j1
             #activo a nivel bajo: desactivo    
             self.tx_txt('DIG:PIN DIO4_N,1')
             #activo a nivel alto: activo    
@@ -476,15 +547,36 @@ class VISA(object):
             #activo a nivel bajo: desactivo                
             self.tx_txt('DIG:PIN DIO7_N,1')
 
-            #elegimos el cable amarillo , conector j2
-            #activo a nivel bajo: desactivo    
-            self.tx_txt('DIG:PIN DIO4_N,1')
-            #activo a nivel alto: desactivo    
-            self.tx_txt('DIG:PIN DIO5_N,0')
-            #activo a nivel alto: dactivo                
-            self.tx_txt('DIG:PIN DIO6_N,1')
-            #activo a nivel bajo: desactivo                
-            self.tx_txt('DIG:PIN DIO7_N,1')
+            # #elegimos el cable amarillo , conector j3
+            # #activo a nivel bajo: desactivo    
+            # self.tx_txt('DIG:PIN DIO4_N,1')
+            # #activo a nivel alto: desactivo    
+            # self.tx_txt('DIG:PIN DIO5_N,0')
+            # #activo a nivel alto: desactivo                
+            # self.tx_txt('DIG:PIN DIO6_N,0')
+            # #activo a nivel bajo: activo                
+            # self.tx_txt('DIG:PIN DIO7_N,0')
+
+
+            # #elegimos el cable verde , conector j2
+            # #activo a nivel bajo: activo    
+            # self.tx_txt('DIG:PIN DIO4_N,0')
+            # #activo a nivel alto: desactivo    
+            # self.tx_txt('DIG:PIN DIO5_N,0')
+            # #activo a nivel alto: desactivo                
+            # self.tx_txt('DIG:PIN DIO6_N,0')
+            # #activo a nivel bajo: desactivo                
+            # self.tx_txt('DIG:PIN DIO7_N,1')
+
+            # #elegimos el cable azul , conector j4
+            # #activo a nivel bajo: desactivo    
+            # self.tx_txt('DIG:PIN DIO4_N,1')
+            # #activo a nivel alto: desactivo    
+            # self.tx_txt('DIG:PIN DIO5_N,0')
+            # #activo a nivel alto: activo                
+            # self.tx_txt('DIG:PIN DIO6_N,1')
+            # #activo a nivel bajo: desactivo                
+            # self.tx_txt('DIG:PIN DIO7_N,1')
 
 
 
@@ -550,10 +642,16 @@ class VISA(object):
                 t2=pc()
             # ESPERAMOS EL TRIGGER
                 # sleep(1)
-                while freq<100:
-                    self.tx_txt('ACQ:TRIG:STAT?')
-                    if self.rx_txt() == 'TD':
-                        break
+                if self.sd.def_cfg['modelo']['value']==0:
+                    while freq<100:
+                        self.tx_txt('ACQ:TRIG:STAT?')
+                        if self.rx_txt() == 'TD':
+                            break
+                else:
+                    while freq<100:
+                        self.tx_txt('ACQ:TRIG:FILL?')
+                        if self.rx_txt() == 'TD':
+                            break                
                 t2t=pc()
                 # self.dv.append_plus('iteracion:'+ str(iteracion))
                 # self.dv.append_plus('frecuencia:'+ str(freq))
@@ -781,7 +879,32 @@ class VISA(object):
 
         elif (self.sd.def_cfg['post_procesado']['value']==1):
             # configuramos la FPGA con diseño verilog propio de DSD
-            self.tx_txt('RP:FPGABITREAM_DSD 0.94')
+            if self.sd.def_cfg['modelo']['value']==0:
+                shunt=[90.9,100.0,900.9,1000.0,10000.0,100000.0]
+                self.tx_txt('RP:FPGABITREAM_DSD 0.94')
+            else:
+                shunt=[90.9,100.0,285.71,500.0,1000.0,2000.0]
+                bitstream="/opt/redpitaya/fpga/red_pitaya_top_rafa.bit.bin"
+                veamos = ParamikoMachine(self.host, user = "root", password="root")
+                veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
+                veamos.cwd.chdir("/opt/redpitaya/bin")
+                comando="./fpgautil -b " + bitstream
+                # print (comando)
+                r_back = veamos[comando]
+                r_back()
+                # sizeh1=str('-sizeh1={0}'.format(individual[0]))
+                # sizeh2=str('-sizeh2={0}'.format(individual[1]))
+                # epochs=str('-epochs={0}'.format(epochs))
+                # decay=str('-decay={0}'.format(decay_value))
+                # step=str('-step={0}'.format(learning_step))
+                # minibatch=str('-batchsize={0}'.format(batchsize))
+                # idea=str(r_back[epochs, sizeh1,sizeh2, minibatch,decay,step]())
+                # for line in idea.split("\n"):
+                #     if "error_val" in line:
+                #     #print (line.strip())
+                #        error_rate_float=[float(s) for s in re.findall('\d+\.\d+',line)]
+                #        error_rate=error_rate_float[0]
+                veamos.close()
             t0=pc()
             if self.sd.def_cfg['modelo']['value']==0:
                 shunt=[90.9,100.0,900.9,1000.0,10000.0,100000.0]
@@ -837,7 +960,9 @@ class VISA(object):
 
             self.tx_txt('SOUR1:TRAC:DATA:DATA ' + outStr)
             self.tx_txt('SOUR1:FUNC ARBITRARY')
+            print("he llegado aqui")
             self.tx_txt('SOUR1:TRAC:DATA:DATA_rafa ' + outStr)
+            print("he llegado aqui")            
             self.tx_txt('OUTPUT:STATE ON') 
             #  quitar estas 5 lineas al terminar de debugear 
            # self.tx_txt('ACQ:RESULT2:DATA?')

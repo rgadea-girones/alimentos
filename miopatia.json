@@ -127,7 +127,7 @@
         ],
         "type": "int"
     },
-    "direccion_redpitaya": "169.254.168.35",
+    "direccion_redpitaya": "169.254.227.198",
     "sujetos": "0-0",
     "load_mfile_name": "./COPIA_EXCELS/medida.csv",
     "save_mfile_name": "./COPIA_EXCELS/medida.csv",
@@ -135,7 +135,7 @@
     "load_cal_file_name": "./calibracion.cal",
     "save_cal_file_name": "./calibracion_new.cal",
     "load_h5file_name": "./COPIA_PANDAS/espectros.hdf",
-    "io_h5file_name": "./COPIA_PANDAS/hdf_20240223.hdf",
+    "io_h5file_name": "./COPIA_PANDAS/hdf_20240403.hdf",
     "def_path": "./",
     "conf_cal": {
         "value": 0,

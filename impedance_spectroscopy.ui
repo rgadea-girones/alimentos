@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1322</width>
+    <width>1364</width>
     <height>891</height>
    </rect>
   </property>
@@ -1900,7 +1900,7 @@ MEDIDA</string>
            <widget class="QWidget" name="verticalLayoutWidget_11">
             <property name="geometry">
              <rect>
-              <x>10</x>
+              <x>-50</x>
               <y>10</y>
               <width>921</width>
               <height>481</height>
@@ -1949,11 +1949,14 @@ MEDIDA</string>
             <widget class="QSpinBox" name="spinBox_pollo_6">
              <property name="geometry">
               <rect>
-               <x>80</x>
+               <x>73</x>
                <y>60</y>
-               <width>44</width>
+               <width>51</width>
                <height>26</height>
               </rect>
+             </property>
+             <property name="maximum">
+              <number>9999</number>
              </property>
             </widget>
             <widget class="QLabel" name="label_167">
@@ -1985,11 +1988,14 @@ MEDIDA</string>
             <widget class="QSpinBox" name="spinBox_medida_6">
              <property name="geometry">
               <rect>
-               <x>220</x>
+               <x>203</x>
                <y>60</y>
-               <width>44</width>
+               <width>61</width>
                <height>26</height>
               </rect>
+             </property>
+             <property name="maximum">
+              <number>9999</number>
              </property>
             </widget>
             <widget class="QPushButton" name="VER_ANALISIS">

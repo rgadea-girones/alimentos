@@ -1,6 +1,6 @@
 import pandas as pd
 
-filename= "COPIA_PANDAS\BUENOS\hdf_28_06_atunes_agilent_clasificados.hdf"
+filename= "hdf_28_06_atunes_redpitaya_clasificados.hdf"
 df = pd.HDFStore(filename,'a',complib="zlib",complevel=4)
 # Crear un DataFrame de ejemplo
 pre_p_e  = df.get('data/pollos_estado')
