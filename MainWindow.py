@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'impedance_spectroscopy.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -545,7 +545,7 @@ class Ui_MainWindow(object):
         self.frame_14.setFrameShadow(QFrame.Raised)
         self.verticalLayoutWidget_11 = QWidget(self.frame_14)
         self.verticalLayoutWidget_11.setObjectName(u"verticalLayoutWidget_11")
-        self.verticalLayoutWidget_11.setGeometry(QRect(-50, 10, 921, 481))
+        self.verticalLayoutWidget_11.setGeometry(QRect(0, 10, 921, 481))
         self.mpl_4 = QVBoxLayout(self.verticalLayoutWidget_11)
         self.mpl_4.setObjectName(u"mpl_4")
         self.mpl_4.setContentsMargins(0, 0, 0, 0)
@@ -591,13 +591,13 @@ class Ui_MainWindow(object):
         self.radioButton_tipoanalisis_3.setGeometry(QRect(10, 180, 95, 20))
         self.SMOOTH_ON_2 = QRadioButton(self.groupBox_60)
         self.SMOOTH_ON_2.setObjectName(u"SMOOTH_ON_2")
-        self.SMOOTH_ON_2.setGeometry(QRect(150, 140, 111, 20))
+        self.SMOOTH_ON_2.setGeometry(QRect(140, 140, 111, 20))
         self.SMOOTH_OFF_2 = QRadioButton(self.groupBox_60)
         self.SMOOTH_OFF_2.setObjectName(u"SMOOTH_OFF_2")
-        self.SMOOTH_OFF_2.setGeometry(QRect(150, 180, 111, 20))
+        self.SMOOTH_OFF_2.setGeometry(QRect(140, 180, 111, 20))
         self.label_61 = QLabel(self.groupBox_60)
         self.label_61.setObjectName(u"label_61")
-        self.label_61.setGeometry(QRect(150, 160, 121, 16))
+        self.label_61.setGeometry(QRect(140, 160, 121, 16))
         self.label_61.setFont(font3)
         self.k_factor_2 = QLineEdit(self.groupBox_60)
         self.k_factor_2.setObjectName(u"k_factor_2")
@@ -624,6 +624,15 @@ class Ui_MainWindow(object):
         self.label_170 = QLabel(self.groupBox_60)
         self.label_170.setObjectName(u"label_170")
         self.label_170.setGeometry(QRect(10, 90, 67, 21))
+        self.RANGO_MEDIDA = QRadioButton(self.groupBox_60)
+        self.RANGO_MEDIDA.setObjectName(u"RANGO_MEDIDA")
+        self.RANGO_MEDIDA.setGeometry(QRect(140, 110, 111, 20))
+        self.RANGO_OBJETO = QRadioButton(self.groupBox_60)
+        self.RANGO_OBJETO.setObjectName(u"RANGO_OBJETO")
+        self.RANGO_OBJETO.setGeometry(QRect(10, 110, 111, 20))
+        self.radioButton_tipoanalisis_4 = QRadioButton(self.groupBox_60)
+        self.radioButton_tipoanalisis_4.setObjectName(u"radioButton_tipoanalisis_4")
+        self.radioButton_tipoanalisis_4.setGeometry(QRect(10, 210, 95, 20))
         self.textBrowser_4 = QTextBrowser(self.analisis)
         self.textBrowser_4.setObjectName(u"textBrowser_4")
         self.textBrowser_4.setGeometry(QRect(850, 520, 421, 121))
@@ -1093,6 +1102,9 @@ class Ui_MainWindow(object):
         self.GUARDAR_EXCEL.setText(QCoreApplication.translate("MainWindow", u"GUARDAR EXCEL", None))
         self.toolButton_load_18.setText(QCoreApplication.translate("MainWindow", u"...", None))
         self.label_170.setText(QCoreApplication.translate("MainWindow", u"rango", None))
+        self.RANGO_MEDIDA.setText(QCoreApplication.translate("MainWindow", u"Medida", None))
+        self.RANGO_OBJETO.setText(QCoreApplication.translate("MainWindow", u"Objeto", None))
+        self.radioButton_tipoanalisis_4.setText(QCoreApplication.translate("MainWindow", u"reflujo_2", None))
         self.groupBox_61.setTitle(QCoreApplication.translate("MainWindow", u"Conexion a redpitaya", None))
         self.CONEXION_1.setText(QCoreApplication.translate("MainWindow", u"CONEXI\u00d3N", None))
         self.MODELO_1.setText(QCoreApplication.translate("MainWindow", u"7010", None))

@@ -1900,7 +1900,7 @@ MEDIDA</string>
            <widget class="QWidget" name="verticalLayoutWidget_11">
             <property name="geometry">
              <rect>
-              <x>-50</x>
+              <x>0</x>
               <y>10</y>
               <width>921</width>
               <height>481</height>
@@ -2066,7 +2066,7 @@ MEDIDA</string>
             <widget class="QRadioButton" name="SMOOTH_ON_2">
              <property name="geometry">
               <rect>
-               <x>150</x>
+               <x>140</x>
                <y>140</y>
                <width>111</width>
                <height>20</height>
@@ -2079,7 +2079,7 @@ MEDIDA</string>
             <widget class="QRadioButton" name="SMOOTH_OFF_2">
              <property name="geometry">
               <rect>
-               <x>150</x>
+               <x>140</x>
                <y>180</y>
                <width>111</width>
                <height>20</height>
@@ -2092,7 +2092,7 @@ MEDIDA</string>
             <widget class="QLabel" name="label_61">
              <property name="geometry">
               <rect>
-               <x>150</x>
+               <x>140</x>
                <y>160</y>
                <width>121</width>
                <height>16</height>
@@ -2197,6 +2197,45 @@ MEDIDA</string>
              </property>
              <property name="text">
               <string>rango</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="RANGO_MEDIDA">
+             <property name="geometry">
+              <rect>
+               <x>140</x>
+               <y>110</y>
+               <width>111</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Medida</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="RANGO_OBJETO">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>110</y>
+               <width>111</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Objeto</string>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="radioButton_tipoanalisis_4">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>210</y>
+               <width>95</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>reflujo_2</string>
              </property>
             </widget>
            </widget>

@@ -5,11 +5,15 @@ dist/
 
 build/
 
+EXCELS/zurich/DCM/
+
+
 *.cal
 *.hdf
 
 hdf_test/
 
 __pycache__
+
 
 

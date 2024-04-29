@@ -73,10 +73,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.bg_DC_2       = Rbutton_group([self.radioButton_DC_ON_2, self.radioButton_DC_OFF_2])
         self.post_pro      = Rbutton_group([self.radioButton_Corre, self.radioButton_F_Corre ])   
         self.post_pro_2    = Rbutton_group([self.radioButton_Corre_2, self.radioButton_F_Corre_2 ])  
-        self.tipo_analisis = Rbutton_group([self.radioButton_tipoanalisis, self.radioButton_tipoanalisis_2, self.radioButton_tipoanalisis_3 ])  
+        self.tipo_analisis = Rbutton_group([self.radioButton_tipoanalisis, self.radioButton_tipoanalisis_2, self.radioButton_tipoanalisis_3,self.radioButton_tipoanalisis_4 ])  
         self.sel_smooth    = Rbutton_group([self.SMOOTH_ON,self.SMOOTH_OFF ])  
         self.sel_smooth_2  = Rbutton_group([self.SMOOTH_ON_2,self.SMOOTH_OFF_2 ])     
-        self.sel_modelo    = Rbutton_group([self.MODELO_1,self.MODELO_2 ])               
+        self.sel_modelo    = Rbutton_group([self.MODELO_1,self.MODELO_2 ])          
+        self.sel_RANGO     = Rbutton_group([self.RANGO_OBJETO,self.RANGO_MEDIDA ])                
         
         self.bg_config_cal = Rbutton_group([self.radioButton_config_cal_1, self.radioButton_config_cal_2])
         self.bg_pto_cal    = Rbutton_group([self.radioButton_pto_cal_medidor, self.radioButton_pto_cal_usuario])
@@ -110,7 +111,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                        'c_load':{'array':'c_load', 'qt':'QLineEdit'},
                        'g_load':{'array':'g_load', 'qt':'QLineEdit'},
                        'pto_cal':{'array':'bg_pto_cal', 'qt':'QButtonGroup'},
-                       'modelo':{'array':'sel_modelo', 'qt':'QButtonGroup'},                       
+                       'modelo':{'array':'sel_modelo', 'qt':'QButtonGroup'},  
+                       'RANGO':{'array':'sel_RANGO', 'qt':'QButtonGroup'},                    
                     #    'smooth':{'array':'sel_filtrado', 'qt':'QButtonGroup'},
                     #    'k_factor':{'array':'k_factor',  'qt':'QLineEdit'},                       
                        'pto_tip':{'array':'tipo_analisis', 'qt':'QButtonGroup'}

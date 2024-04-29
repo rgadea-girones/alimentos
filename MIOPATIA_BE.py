@@ -319,7 +319,81 @@ class BACK_END(object):
                 self.dv.show_data_estado_rafa_n(self.pw.comboBox_trazaA_4.currentIndex(),
                                       data)
 
-                self.pw.canvas4.draw()                
+                self.pw.canvas4.draw()     
+    def load_h5_analisis4(self):
+        self.dv.append_plus("CARGA MEDIDA BASE DATOS H5")
+        file = self.sd.def_cfg['load_h5file_name']
+        try:
+            hdf_db = DB(file,self.dv)
+            #hdf_db = pd.HDFStore(file,'r',complib="zlib",complevel=4)
+            #pollos = hdf_db.get('data/index/pollos')
+            #indice_medidas = hdf_db.get('data/index/medidas')
+            #tabla = hdf_db.get('data/tabla')
+            #columns=['Freq','Z_mod','Z_Fase','Err','Eri','E_mod','E_fase','R','X']
+        except:
+            self.dv.append_plus("Fichero no encontrado\n")
+        else:
+            self.dv.append_plus(file)
+          
+            if self.sd.def_cfg['RANGO']['value']==0: 
+                pollos = self.sd.def_cfg['sujetos']
+                if (pollos == ''):
+                    pollos_unico_sel = int(self.pw.spinBox_pollo_6.value())
+                    medida_sel = int(self.pw.spinBox_medida_6.value())
+                    estado_pollo = hdf_db.lee_estado_BD(pollos_unico_sel,medida_sel)
+                    self.sd.def_cfg['estado_sujeto'] = int(estado_pollo)
+                    self.pw.last_medida_2.display(self.sd.def_cfg['estado_sujeto'])
+                else:
+                    pollos_sel = []
+                    for token in pollos.split(','):
+                        if '-' in token:
+                            a, b = token.strip().split('-')
+                            pollos_sel.extend(range(int(a), int(b)+1))
+                        else:
+                            pollos_sel.append(int(token))
+                medida_sel = int(self.pw.spinBox_medida_6.value())
+                data=[]
+                for x in pollos_sel: 
+                    data.append(hdf_db.lee_medida_rafa_BD(x,medida_sel))
+
+
+                if (data==[]):
+                    self.dv.append_fit("Sujetos no encontrados en la Base de Datos")
+                else:
+                    self.dv.show_data_estado_rafa_n2(self.pw.comboBox_trazaA_4.currentIndex(),
+                                        data)
+
+                    self.pw.canvas4.draw()                             
+            else:
+                medidas=self.sd.def_cfg['sujetos']
+
+                if medidas == '':
+                    medidas_unico_sel = int(self.pw.spinBox_medida_6.value())
+                    pollo_sel = int(self.pw.spinBox_pollo_6.value())
+                    estado_pollo = hdf_db.lee_estado_BD(pollo_sel,medidas_unico_sel)
+                    self.sd.def_cfg['estado_sujeto'] = int(estado_pollo)
+                    self.pw.last_medida_2.display(self.sd.def_cfg['estado_sujeto'])
+                else:
+                    medidas_sel = []
+                    for token in medidas.split(','):
+                        if '-' in token:
+                            a, b = token.strip().split('-')
+                            medidas_sel.extend(range(int(a), int(b)+1))
+                        else:
+                            medidas_sel.append(int(token))
+                pollo_sel = int(self.pw.spinBox_pollo_6.value())
+                data=[]
+                for x in medidas_sel: 
+                    data.append(hdf_db.lee_medida_rafa_BD(pollo_sel,x))
+
+
+                if (data==[]):
+                    self.dv.append_fit("Medidas no encontradas en la Base de Datos")
+                else:
+                    self.dv.show_data_estado_rafa_n3(self.pw.comboBox_trazaA_4.currentIndex(),
+                                        data)
+
+                    self.pw.canvas4.draw()                      
 
     def  load_h5_analisis_selector(self):
         if (self.sd.def_cfg['pto_tip']['value']==0):       
@@ -328,9 +402,12 @@ class BACK_END(object):
         else :
             if (self.sd.def_cfg['pto_tip']['value']==1):              
                 self.load_h5_analisis2()
-                #print("estoy aqui2")
             else:
-                self.load_h5_analisis3()
+                if (self.sd.def_cfg['pto_tip']['value']==2):              
+                    self.load_h5_analisis3()                
+                #print("estoy aqui2")
+                else:
+                    self.load_h5_analisis4()
 
     def measure_fit(self):
         self.dv.append_plus("AJUSTE DE DATOS MEDIDOS")

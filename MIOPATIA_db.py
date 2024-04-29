@@ -126,7 +126,7 @@ class DB_management(object):
                 extracto = p_e[(p_e['Pollo']==str(pollo))&(p_e['Medida']==str(medida))]
 
                 if (np.array(extracto).size==0):
-                    self.dv.append_plus("Medida no encontrada")
+                    self.dv.append_plus("Medida %d no encontrada de sujeto %d"% (medida, pollo))
                     ceros = pd.DataFrame(0, index=np.arange(200), columns=['Pollo','Medida','Freq','Z_mod',
                                                     'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
                     #return_value = pd.DataFrame([])
