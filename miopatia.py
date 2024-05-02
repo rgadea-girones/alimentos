@@ -2,7 +2,7 @@ import sys
 import warnings
 from PySide6 import QtCore, QtWidgets, QtGui
 from PySide6.QtUiTools import QUiLoader
-from MainWindow import Ui_MainWindow
+from Mainwindow_YAKE import Ui_MainWindow
 
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
@@ -19,7 +19,7 @@ from MIOPATIA_dataview import DATA_VIEW
 
 # PYINSTALLER : pyinstaller -D --specpath .\EXE miopatia.py
 
-qtCreatorFile = "impedance_spectroscopy.ui"
+qtCreatorFile = "impedance_spectroscopy_YAKE.ui"
 
 
 # Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
@@ -173,7 +173,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     {'wdg':self.toolButton_load_db,'func':self.brw.load_h5file_DB_browser},
                     {'wdg':self.REDRAW_MEASURE,    'func':self.be.redraw_measure},
                     {'wdg':self.MEDIR,             'func':self.be.medir},                 
-                    {'wdg':self.LOAD_M,            'func':self.be.load_m},
+                    {'wdg':self.LOAD_M,            'func':self.be.load_m_zurich},
                     {'wdg':self.SAVE_M,            'func':self.be.save_m},
                     {'wdg':self.GO_CAL,            'func':self.be.go_cal},
                     {'wdg':self.LOAD_CAL,          'func':self.be.load_cal},

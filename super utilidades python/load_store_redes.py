@@ -7,7 +7,7 @@ from tensorflow.keras.layers import LSTM
 from tensorflow.keras.layers import Embedding
 from tensorflow.keras.preprocessing import sequence
 
-new_model = tf.keras.models.load_model('Modelo_2_rafa')
+new_model = tf.keras.models.load_model('Modelo_Paola_linux')
 new_model.summary()
 
-new_model.save('saved_model/my_model')
+new_model.save('saved_model/Modelo_Paola_windows')

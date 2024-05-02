@@ -43,7 +43,7 @@ class DATA(object):
                             'nivel_DC':{'value':0.016, 'limits':[-40.0,40.0],'type':'float'},
                             #'avg':{'value':0, 'limits':[0,1],'type':'int'},
                             'post_procesado':{'value':1, 'limits':[0,1],'type':'int'},
-                            'pto_tip':{'value':0, 'limits':[0,3],'type':'int'},
+                            'pto_tip':{'value':3, 'limits':[0,3],'type':'int'},
                             'ultimo_pollo':{'value':0, 'limits':[0,99],'type':'int'},
                             'ultima_medida':{'value':0, 'limits':[0,9],'type':'int'},
                             'direccion_redpitaya':"169.254.227.198",

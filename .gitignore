@@ -5,11 +5,12 @@ dist/
 
 build/
 
-EXCELS/zurich/DCM/
+EXCELS_zurich_DCM/
 
 
 *.cal
 *.hdf
+*.csv
 
 hdf_test/
 

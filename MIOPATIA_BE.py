@@ -14,6 +14,12 @@ class BACK_END(object):
         self.vi = visa
         self.dv = dataview
         self.flag = True
+        # Conecta la señal 'valueChanged' del spinBox_pollo_db al método 'reset_medida_db'
+        self.pw.spinBox_pollo_db.valueChanged.connect(self.reset_medida_db)
+
+    def reset_medida_db(self):
+        self.pw.spinBox_medida_db.setValue(0)
+
 
      # Controlled casting to avoid data intro errors. Read text or button_ID
     def value_control(self,objeto,limits=[0,1E12],type='int',qt_obj="QLineEdit"):
@@ -67,6 +73,7 @@ class BACK_END(object):
         self.pw.MEDIR.setEnabled(True)
 
     def load_m(self):
+        # carga csv generado por el propio equipo de medida nuestro
         self.dv.append_plus("CARGA MEDIDA")
         file = self.sd.def_cfg['load_mfile_name']
         try:
@@ -97,6 +104,155 @@ class BACK_END(object):
                               self.pw.comboBox_trazaB.currentIndex(),
                               data)
             self.pw.canvas2.draw()
+
+    def load_m_zurich(self):
+        # carga desde un csv generado por el programa zurich
+        self.dv.append_plus("CARGA MEDIDA")
+        file = self.sd.def_cfg['load_mfile_name']
+        try:
+
+            data = pd.read_csv(file,header=0,
+                            sep=';')         
+        except:
+            self.dv.append_plus("Fichero no encontrado\n")
+        else:
+            # print(data.shape)
+            index1 = (data.iloc[:,3]== 'frequency').last_valid_index()
+            frecuencia = data.iloc[10,4:].to_numpy(dtype='float64')
+            self.sd.freq=frecuencia
+            index2 = (data.iloc[:,3]=='absz').last_valid_index()
+            Z = data.iloc[0,4:].to_numpy(dtype='float64')  
+            self.sd.Z_mod_data=Z           
+            index3 = (data.iloc[:,3] == 'phasez').last_valid_index()
+            PHASE = data.iloc[23,4:].to_numpy(dtype='float64')
+            self.sd.Z_fase_data=PHASE
+
+            self.sd.R_data = Z*np.cos(PHASE*np.pi/180)
+            self.sd.X_data = Z*np.sin(PHASE*np.pi/180)
+
+            # Compute Err, Eri, Er_mod, Er_fase_data
+            # First create frequency array based on actual gui conditions
+            # The freq array will not be changed until next data acquisition even if GUI changes
+
+
+            complex_aux         = self.sd.R_data + self.sd.X_data*1j
+
+
+            admitance_aux       = 1./complex_aux
+            G_data              = np.real(admitance_aux)
+            Cp_data             = np.imag(admitance_aux)/(2*np.pi*self.sd.freq)
+            self.sd.Err_data    = (Cp_data/self.sd.Co)
+            self.sd.Eri_data    = (G_data/(self.sd.Co*(2*np.pi*self.sd.freq)))
+            E_data              = self.sd.Err_data + -1*self.sd.Eri_data*1j;
+
+            self.sd.Er_mod_data  = np.abs(E_data);
+            self.sd.Er_fase_data = np.angle(E_data);
+
+            # data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
+            #                              np.reshape(self.sd.Z_mod_data,(-1,1)),
+            #                              np.reshape(self.sd.Z_fase_data,(-1,1)),
+            #                              np.reshape(self.sd.Err_data,(-1,1)),
+            #                              np.reshape(self.sd.Eri_data,(-1,1)),
+            #                              np.reshape(self.sd.Er_mod_data,(-1,1)),
+            #                              np.reshape(self.sd.Er_fase_data,(-1,1)),
+            #                              np.reshape(self.sd.R_data,(-1,1)),
+            #                              np.reshape(self.sd.X_data,(-1,1))],
+            #                              axis=1)
+
+            self.dv.append_plus(file)
+            self.dv.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
+                              self.pw.comboBox_trazaB.currentIndex())
+            self.pw.canvas1.draw()
+
+
+            file_base = self.sd.def_cfg['io_h5file_name']
+            base_io = DB(file_base,self.dv)
+
+            data_array = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
+                                         np.reshape(self.sd.Z_mod_data,(-1,1)),
+                                         np.reshape(self.sd.Z_fase_data,(-1,1)),
+                                         np.reshape(self.sd.Err_data,(-1,1)),
+                                         np.reshape(self.sd.Eri_data,(-1,1)),
+                                         np.reshape(self.sd.Er_mod_data,(-1,1)),
+                                         np.reshape(self.sd.Er_fase_data,(-1,1)),
+                                         np.reshape(self.sd.R_data,(-1,1)),
+                                         np.reshape(self.sd.X_data,(-1,1))],
+                                         axis=1)
+            # data_frame = pd.DataFrame(data_array,
+            #                           columns=['Freq','Z_mod','Z_Fase','Err','Eri',
+            #                                    'E_mod','E_fase','R','X'])
+
+            last_pollo,last_medida = base_io.escribe_medida_BD(self.pw.spinBox_pollo_db.value(),
+                                                                self.pw.spinBox_medida_db.value(),
+                                                                data_array,
+                                                                self.pw.spinBox_pollo_db_2.value())
+            idea=self.pw.spinBox_medida_db.value()+1
+            self.pw.spinBox_medida_db.setValue(idea)
+            self.sd.def_cfg['ultimo_pollo'] = int(last_pollo)
+            self.sd.def_cfg['ultima_medida'] = int(last_medida)
+            self.pw.last_pollo.display(self.sd.def_cfg['ultimo_pollo'])
+            self.pw.last_medida.display(self.sd.def_cfg['ultima_medida'])
+            self.dv.append_plus("SALVA MEDIDA en BASE de DATOS")
+
+            # #veamos ahora la segunda medida
+            index1 = (data.iloc[:,3]== 'frequency').last_valid_index()
+            frecuencia = data.iloc[46,4:].to_numpy(dtype='float64')
+            self.sd.freq=frecuencia
+            index2 = (data.iloc[:,3]=='absz').last_valid_index()
+            Z = data.iloc[36,4:].to_numpy(dtype='float64')  
+            self.sd.Z_mod_data=Z           
+            index3 = (data.iloc[:,3] == 'phasez').last_valid_index()
+            PHASE = data.iloc[59,4:].to_numpy(dtype='float64')
+            self.sd.Z_fase_data=PHASE
+
+            self.sd.R_data = Z*np.cos(PHASE*np.pi/180)
+            self.sd.X_data = Z*np.sin(PHASE*np.pi/180)
+
+            # Compute Err, Eri, Er_mod, Er_fase_data
+            # First create frequency array based on actual gui conditions
+            # The freq array will not be changed until next data acquisition even if GUI changes
+
+
+            complex_aux         = self.sd.R_data + self.sd.X_data*1j
+
+
+            admitance_aux       = 1./complex_aux
+            G_data              = np.real(admitance_aux)
+            Cp_data             = np.imag(admitance_aux)/(2*np.pi*self.sd.freq)
+            self.sd.Err_data    = (Cp_data/self.sd.Co).astype(np.float32)
+            self.sd.Eri_data    = (G_data/(self.sd.Co*(2*np.pi*self.sd.freq))).astype(np.float32)
+            E_data              = self.sd.Err_data + -1*self.sd.Eri_data*1j;
+
+            self.sd.Er_mod_data  = np.abs(E_data);
+            self.sd.Er_fase_data = np.angle(E_data);
+
+            data_array2 = np.concatenate([np.reshape(self.sd.freq,(-1,1)),
+                                         np.reshape(self.sd.Z_mod_data,(-1,1)),
+                                         np.reshape(self.sd.Z_fase_data,(-1,1)),
+                                         np.reshape(self.sd.Err_data,(-1,1)),
+                                         np.reshape(self.sd.Eri_data,(-1,1)),
+                                         np.reshape(self.sd.Er_mod_data,(-1,1)),
+                                         np.reshape(self.sd.Er_fase_data,(-1,1)),
+                                         np.reshape(self.sd.R_data,(-1,1)),
+                                         np.reshape(self.sd.X_data,(-1,1))],
+                                         axis=1)
+
+            self.dv.append_plus(file)
+            self.dv.show_measurement2(self.pw.comboBox_trazaA.currentIndex(),
+                              self.pw.comboBox_trazaB.currentIndex())
+            self.pw.canvas2.draw()
+
+            last_pollo,last_medida = base_io.escribe_medida_BD(self.pw.spinBox_pollo_db.value(),
+                                                                self.pw.spinBox_medida_db.value(),
+                                                                data_array2,
+                                                                self.pw.spinBox_pollo_db_2.value())
+            idea=self.pw.spinBox_medida_db.value()+1
+            self.pw.spinBox_medida_db.setValue(idea)
+            self.sd.def_cfg['ultimo_pollo'] = int(last_pollo)
+            self.sd.def_cfg['ultima_medida'] = int(last_medida)
+            self.pw.last_pollo.display(self.sd.def_cfg['ultimo_pollo'])
+            self.pw.last_medida.display(self.sd.def_cfg['ultima_medida'])
+            self.dv.append_plus("SALVA MEDIDA en BASE de DATOS")            
 
     def load_m_fit(self):
         self.dv.append_plus("CARGA MEDIDA")

@@ -25,8 +25,7 @@ class DATA_VIEW(object):
 
     def append_fit(self,message):
         self.fit_browser.append(message)
-
-
+    
     def show_measurement(self,comboBox_trazaA,comboBox_trazaB):
         self.sd.axes['ax0'].clear()
         self.sd.axes['ax1'].clear()
@@ -73,6 +72,53 @@ class DATA_VIEW(object):
             self.sd.axes['ax1'].tick_params(axis='y', colors='blue')
 
         self.sd.fig1.tight_layout()
+
+    def show_measurement2(self,comboBox_trazaA,comboBox_trazaB):
+        self.sd.axes['ax2'].clear()
+        self.sd.axes['ax3'].clear()
+
+        traza_A = self.switch({ 0:self.sd.Z_mod_data,
+                                1:self.sd.Z_fase_data,
+                                2:self.sd.Err_data,
+                                3:self.sd.Eri_data,
+                                4:self.sd.Er_mod_data,
+                                5:self.sd.Er_fase_data}, comboBox_trazaA)
+
+        traza_B = self.switch({ 0:self.sd.Z_fase_data,
+                                1:self.sd.Z_mod_data,
+                                2:self.sd.Err_data,
+                                3:self.sd.Eri_data,
+                                4:self.sd.Er_mod_data,
+                                5:self.sd.Er_fase_data}, comboBox_trazaB)
+
+
+        if (self.sd.def_cfg['tipo_barrido']['value']==0):
+            string_A = self.switch({0:'plot', 1:'plot', 2:'plot',
+                                    3:'plot', 4:'semilogy', 5:'plot'},
+                                    comboBox_trazaA)
+            string_B = self.switch({0:'plot', 1:'plot', 2:'plot',
+                                    3:'plot', 4:'semilogy', 5:'plot'},
+                                    comboBox_trazaB)
+            eval("self.sd.axes['ax2']." + string_A + "(self.sd.freq, traza_A, color='red')")
+            self.sd.axes['ax2'].tick_params(axis='y', colors='red')
+            eval("self.sd.axes['ax3']." + string_B + "(self.sd.freq, traza_B, color='blue')")
+            self.sd.axes['ax3'].grid(True)
+            self.sd.axes['ax3'].tick_params(axis='y',colors='blue')
+
+        elif(self.sd.def_cfg['tipo_barrido']['value']==1):
+            string_A = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
+                                    3:'semilogx', 4:'loglog', 5:'semilogx'},
+                                    comboBox_trazaA)
+            string_B = self.switch({0:'semilogx', 1:'semilogx', 2:'semilogx',
+                                    3:'semilogx', 4:'loglog', 5:'semilogx'},
+                                    comboBox_trazaB)
+            eval("self.sd.axes['ax2']." + string_A + "(self.sd.freq, traza_A, color='red')")
+            self.sd.axes['ax2'].tick_params(axis='y',colors='red')
+            eval("self.sd.axes['ax3']." + string_B + "(self.sd.freq, traza_B, color='blue')")
+            self.sd.axes['ax3'].grid(True)
+            self.sd.axes['ax3'].tick_params(axis='y', colors='blue')
+
+        self.sd.fig2.tight_layout()
 
     def show_data(self, comboBox_trazaA, comboBox_trazaB, data):
         self.sd.axes['ax2'].cla()
@@ -676,17 +722,16 @@ class DATA_VIEW(object):
             #                         comboBox_trazaB)
             ejex=data[0][0]['Freq']
             for x, traza in enumerate(traza_A):
-                idea=sujeto[x]%5
-                if idea == 0:
+                if estado[x] == 0:
                     color = 'green'
-                elif idea ==1:
+                elif estado[x] ==1:
                     color = 'seagreen'
-                elif idea ==2:
+                elif estado[x] == 2:
                     color = 'blue'
-                elif idea ==3:
+                elif estado[x] == 3:
                     color = 'purple'
                 else:
-                    color = 'red'                
+                    color = 'red'               
                 eval("self.sd.axes['ax5']." + string_A + "(ejex, traza, color=color, label='sujeto_'+ str(int(sujeto[x]))+'_medida_'+str(medida[x])+'_estado_'+str(estado[x]))")
                 # eval("self.sd.axes['ax5']." + string_A + "(data1['Freq'], traza_B, color='green', label='0.2 %')")
                 # eval("self.sd.axes['ax5']." + string_A + "(data2['Freq'], traza_C, color='blue', label='0.9 %')")
@@ -782,13 +827,13 @@ class DATA_VIEW(object):
             #                         comboBox_trazaB)
             ejex=data[0][0]['Freq']
             for x, traza in enumerate(traza_A):
-                if medida[x] < 10:
+                if medida[x] == 0:
                     color = 'green'
-                elif medida[x] <12:
+                elif medida[x] == 4:
                     color = 'seagreen'
-                elif medida[x] < 14:
+                elif medida[x] ==1:
                     color = 'blue'
-                elif medida[x] < 16:
+                elif medida[x] == 2:
                     color = 'purple'
                 else:
                     color = 'red'          
