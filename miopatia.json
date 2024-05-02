@@ -143,7 +143,7 @@
     "load_cal_file_name": "./calibracion.cal",
     "save_cal_file_name": "./calibracion_new.cal",
     "load_h5file_name": "./COPIA_PANDAS/espectros.hdf",
-    "io_h5file_name": "./COPIA_PANDAS/hdf_20240426.hdf",
+    "io_h5file_name": "./COPIA_PANDAS/hdf_20240502.hdf",
     "def_path": "./",
     "conf_cal": {
         "value": 0,

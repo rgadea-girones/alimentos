@@ -676,17 +676,16 @@ class DATA_VIEW(object):
             #                         comboBox_trazaB)
             ejex=data[0][0]['Freq']
             for x, traza in enumerate(traza_A):
-                idea=sujeto[x]%5
-                if idea == 0:
+                if estado[x] == 0:
                     color = 'green'
-                elif idea ==1:
-                    color = 'seagreen'
-                elif idea ==2:
-                    color = 'blue'
-                elif idea ==3:
-                    color = 'purple'
+                # elif estado[x] ==1:
+                #     color = 'seagreen'
+                # elif estado[x] == 2:
+                #     color = 'blue'
+                # elif estads[x] == 3:
+                #     color = 'purple'
                 else:
-                    color = 'red'                
+                    color = 'red'                 
                 eval("self.sd.axes['ax5']." + string_A + "(ejex, traza, color=color, label='sujeto_'+ str(int(sujeto[x]))+'_medida_'+str(medida[x])+'_estado_'+str(estado[x]))")
                 # eval("self.sd.axes['ax5']." + string_A + "(data1['Freq'], traza_B, color='green', label='0.2 %')")
                 # eval("self.sd.axes['ax5']." + string_A + "(data2['Freq'], traza_C, color='blue', label='0.9 %')")
