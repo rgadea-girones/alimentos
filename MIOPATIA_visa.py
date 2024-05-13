@@ -75,6 +75,32 @@ class VISA(object):
                  self._socket.settimeout(timeout)
 
             self._socket.connect((host, port))
+            if self.sd.def_cfg['modelo']['value']==0:
+                shunt=[90.9,100.0,900.9,1000.0,10000.0,100000.0]
+                self.tx_txt('RP:FPGABITREAM_DSD 0.94')
+            else:
+                shunt=[90.9,100.0,285.71,500.0,1000.0,2000.0]
+                bitstream="/opt/redpitaya/fpga/red_pitaya_top_rafa.bit.bin"
+                veamos = ParamikoMachine(self.host, user = "root", password="root")
+                veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
+                veamos.cwd.chdir("/opt/redpitaya/bin")
+                comando="./fpgautil -b " + bitstream
+                # print (comando)
+                r_back = veamos[comando]
+                r_back()
+                # sizeh1=str('-sizeh1={0}'.format(individual[0]))
+                # sizeh2=str('-sizeh2={0}'.format(individual[1]))
+                # epochs=str('-epochs={0}'.format(epochs))
+                # decay=str('-decay={0}'.format(decay_value))
+                # step=str('-step={0}'.format(learning_step))
+                # minibatch=str('-batchsize={0}'.format(batchsize))
+                # idea=str(r_back[epochs, sizeh1,sizeh2, minibatch,decay,step]())
+                # for line in idea.split("\n"):
+                #     if "error_val" in line:
+                #     #print (line.strip())
+                #        error_rate_float=[float(s) for s in re.findall('\d+\.\d+',line)]
+                #        error_rate=error_rate_float[0]
+                veamos.close()            
             print('conexion establecida con redpitaya')
             self.dv.append_plus("CONECTADO a redpitaya ="+ str(host))  
 
@@ -879,32 +905,7 @@ class VISA(object):
 
         elif (self.sd.def_cfg['post_procesado']['value']==1):
             # configuramos la FPGA con diseño verilog propio de DSD
-            if self.sd.def_cfg['modelo']['value']==0:
-                shunt=[90.9,100.0,900.9,1000.0,10000.0,100000.0]
-                self.tx_txt('RP:FPGABITREAM_DSD 0.94')
-            else:
-                shunt=[90.9,100.0,285.71,500.0,1000.0,2000.0]
-                bitstream="/opt/redpitaya/fpga/red_pitaya_top_rafa.bit.bin"
-                veamos = ParamikoMachine(self.host, user = "root", password="root")
-                veamos.env["LD_LIBRARY_PATH"]="/opt/redpitaya/lib"
-                veamos.cwd.chdir("/opt/redpitaya/bin")
-                comando="./fpgautil -b " + bitstream
-                # print (comando)
-                r_back = veamos[comando]
-                r_back()
-                # sizeh1=str('-sizeh1={0}'.format(individual[0]))
-                # sizeh2=str('-sizeh2={0}'.format(individual[1]))
-                # epochs=str('-epochs={0}'.format(epochs))
-                # decay=str('-decay={0}'.format(decay_value))
-                # step=str('-step={0}'.format(learning_step))
-                # minibatch=str('-batchsize={0}'.format(batchsize))
-                # idea=str(r_back[epochs, sizeh1,sizeh2, minibatch,decay,step]())
-                # for line in idea.split("\n"):
-                #     if "error_val" in line:
-                #     #print (line.strip())
-                #        error_rate_float=[float(s) for s in re.findall('\d+\.\d+',line)]
-                #        error_rate=error_rate_float[0]
-                veamos.close()
+
             t0=pc()
             if self.sd.def_cfg['modelo']['value']==0:
                 shunt=[90.9,100.0,900.9,1000.0,10000.0,100000.0]

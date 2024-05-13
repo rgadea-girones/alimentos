@@ -6,8 +6,8 @@ from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 import matplotlib.pyplot as plt
 from MIOPATIA_db import DB_management as db 
 
-filename= "COPIA_PANDAS/lomosP2_20240430_clasificado_experto.hdf"
-filename2= "COPIA_PANDAS/lomosP2_20240430_clasificado_experto_ampliado_the_best7.hdf"
+filename= "COPIA_PANDAS\lomosP1_20240430_ESTADOph.hdf"
+filename2= "COPIA_PANDAS\lomosP1_20240430_ESTADOPH_ampliado_the_best6.hdf"
 df = pd.HDFStore(filename,'a',complib="zlib",complevel=4)
 df_ampliado=pd.HDFStore(filename2,'a',complib="zlib",complevel=4)
 
@@ -80,6 +80,8 @@ for index, row in pre_p_e.iterrows():
         pollo_aux = np.array([pollo,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
         pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
 
+        pollo_aux_df['Estado'] = pollo_aux_df['Estado'].astype('float32')
+
         df_ampliado.append('data/tabla', data_aux_df)
         df_ampliado.append('data/pollos_estado',pollo_aux_df)
         datos2 = df_ampliado.get('data/tabla')
@@ -119,6 +121,8 @@ for index, row in pre_p_e.iterrows():
         pollo_aux = np.array([pollo,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
         pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
 
+        pollo_aux_df['Estado'] = pollo_aux_df['Estado'].astype('float32')
+
         df_ampliado.append('data/tabla', data_aux_df)
         df_ampliado.append('data/pollos_estado', pollo_aux_df)
         datos2 = df_ampliado.get('data/tabla')
@@ -156,6 +160,8 @@ for index, row in pre_p_e.iterrows():
                                                     'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
         pollo_aux = np.array([pollo,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
         pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
+
+        pollo_aux_df['Estado'] = pollo_aux_df['Estado'].astype('float32')
 
         df_ampliado.append('data/tabla', data_aux_df)
         df_ampliado.append('data/pollos_estado',pollo_aux_df)
@@ -195,6 +201,8 @@ for index, row in pre_p_e.iterrows():
                                                     'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
         pollo_aux = np.array([pollo,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
         pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
+        
+        pollo_aux_df['Estado'] = pollo_aux_df['Estado'].astype('float32')        
 
         df_ampliado.append('data/tabla', data_aux_df)
         df_ampliado.append('data/pollos_estado', pollo_aux_df)
