@@ -6,8 +6,8 @@ from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 import matplotlib.pyplot as plt
 from MIOPATIA_db import DB_management as db 
 
-filename= "COPIA_PANDAS\hdf_lomosP1P2_trainval_def.hdf"
-filename2= "COPIA_PANDAS\hdf_lomosP1P2_trainval_def_ampliado_the_best7.hdf"
+filename= "hdf_28_06_atunes_agilent_clasificados.hdf"
+filename2= "hdf_28_06_atunes_agilent_clasificados_ampliado_the_best6.hdf"
 df = pd.HDFStore(filename,'a',complib="zlib",complevel=4)
 df_ampliado=pd.HDFStore(filename2,'a',complib="zlib",complevel=4)
 
@@ -29,11 +29,10 @@ df_ampliado.put('data/pollos_estado', pre_p_e2, format='table', data_columns=Tru
 df_ampliado.put('data/tabla', datos2 , format='table', data_columns=True)
 
 
-dato_fila=0
+
 
 #recorrer el dataframe y agregar datos
 for index, row in pre_p_e.iterrows():
-    print(dato_fila)
     Primero_ori = int(row['Primero'])
     Ultimo_ori  = int(row['Ultimo'])
     Pollo=row['Pollo']
@@ -201,7 +200,7 @@ for index, row in pre_p_e.iterrows():
         datos2 = df_ampliado.get('data/tabla')
         medida=medida+1
 
-    dato_fila=dato_fila+1
+
 # Cerrar el archivo original
 df.close
 df_ampliado.close

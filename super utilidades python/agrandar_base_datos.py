@@ -6,8 +6,8 @@ from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 import matplotlib.pyplot as plt
 from MIOPATIA_db import DB_management as db 
 
-filename= "hdf_28_06_atunes_agilent_clasificados.hdf"
-filename2= "hdf_28_06_atunes_agilent_clasificados_ampliado_the_best6.hdf"
+filename= "hdf_agilent_220_zurich_lomosP1_def_total.hdf"
+filename2= "hdf_agilent_220_zurich_lomosP1_def_total_ampliado_the_best6.hdf"
 df = pd.HDFStore(filename,'a',complib="zlib",complevel=4)
 df_ampliado=pd.HDFStore(filename2,'a',complib="zlib",complevel=4)
 
