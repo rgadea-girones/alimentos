@@ -32,7 +32,7 @@
         "type": "int"
     },
     "shunt": {
-        "value": 3,
+        "value": 4,
         "limits": [
             0,
             5
@@ -72,7 +72,7 @@
         "type": "int"
     },
     "modelo": {
-        "value": 0,
+        "value": 1,
         "limits": [
             0,
             1
@@ -135,7 +135,7 @@
         ],
         "type": "int"
     },
-    "direccion_redpitaya": "169.254.227.198",
+    "direccion_redpitaya": "10.0.1.5",
     "sujetos": "0-0",
     "load_mfile_name": "./COPIA_EXCELS/medida.csv",
     "save_mfile_name": "./COPIA_EXCELS/medida.csv",
@@ -143,7 +143,7 @@
     "load_cal_file_name": "./calibracion.cal",
     "save_cal_file_name": "./calibracion_new.cal",
     "load_h5file_name": "./COPIA_PANDAS/espectros.hdf",
-    "io_h5file_name": "./COPIA_PANDAS/hdf_20240515.hdf",
+    "io_h5file_name": "./COPIA_PANDAS/hdf_20240516.hdf",
     "def_path": "./",
     "conf_cal": {
         "value": 0,
