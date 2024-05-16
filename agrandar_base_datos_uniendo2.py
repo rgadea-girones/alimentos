@@ -19,10 +19,10 @@ interpolated_array = np.empty((220, 3))
 x_in = np.geomspace(1, 401, 401)
 x_out = np.geomspace(1, 401, 220)
 
-filename= "COPIA_PANDAS\lomosP1_20240430_clasificado_experto.hdf"
-filename1= "COPIA_PANDAS\lomosP2_20240430_clasificado_experto.hdf"
-filename2= "COPIA_PANDAS\hdf_lomosP1P2_trainval_def.hdf"
-filename3= "COPIA_PANDAS\hdf_lomosP1P2_test_def.hdf"
+filename= "COPIA_PANDAS\lomosP1_20240430_clasificado_experto_filtrado.hdf"
+filename1= "COPIA_PANDAS\lomosP2_20240430_clasificado_experto_filtrado.hdf"
+filename2= "COPIA_PANDAS\hdf_lomosP1P2_trainval_filtrado_def_good.hdf"
+filename3= "COPIA_PANDAS\hdf_lomosP1P2_test_filtrado_def_good.hdf"
 df = pd.HDFStore(filename,'a',complib="zlib",complevel=4)
 df1= pd.HDFStore(filename1,'a',complib="zlib",complevel=4)
 df_trainval=pd.HDFStore(filename2,'a',complib="zlib",complevel=4)
@@ -87,37 +87,37 @@ for index, row in pre_p_e.iterrows():
     Er_mod_data  = np.abs(E_data).reshape(-1,1)
     Er_fase_data = np.angle(E_data).reshape(-1,1)
 
- 
-    if pollo<26:
-        Primero = len(datos2)
-        Ultimo  = Primero + Ultimo_ori - Primero_ori
-        datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
-        datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
-                                                np.ones((n_freq,1),dtype=int)*(medida),
-                                                datos_auxiliares],axis=1)
-        data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
-                                                    'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
-        pollito=pollo        
-        pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
-        pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
-        df_trainval.append('data/tabla', data_aux_df)
-        df_trainval.append('data/pollos_estado',pollo_aux_df)
-        datos2 = df_trainval.get('data/tabla')
-    else:
-        Primero = len(datos3)
-        Ultimo  = Primero + Ultimo_ori - Primero_ori
-        datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
-        datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
-                                                np.ones((n_freq,1),dtype=int)*(medida),
-                                                datos_auxiliares],axis=1)
-        data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
-                                                    'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
-        pollito=pollo-25
-        pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
-        pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
-        df_test.append('data/tabla', data_aux_df)
-        df_test.append('data/pollos_estado',pollo_aux_df)
-        datos3 = df_test.get('data/tabla')
+    if int(estado)<5:
+        if pollo<26:
+            Primero = len(datos2)
+            Ultimo  = Primero + Ultimo_ori - Primero_ori
+            datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
+            datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
+                                                    np.ones((n_freq,1),dtype=int)*(medida),
+                                                    datos_auxiliares],axis=1)
+            data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
+                                                        'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
+            pollito=pollo        
+            pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
+            pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
+            df_trainval.append('data/tabla', data_aux_df)
+            df_trainval.append('data/pollos_estado',pollo_aux_df)
+            datos2 = df_trainval.get('data/tabla')
+        else:
+            Primero = len(datos3)
+            Ultimo  = Primero + Ultimo_ori - Primero_ori
+            datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
+            datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
+                                                    np.ones((n_freq,1),dtype=int)*(medida),
+                                                    datos_auxiliares],axis=1)
+            data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
+                                                        'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
+            pollito=pollo-25
+            pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
+            pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
+            df_test.append('data/tabla', data_aux_df)
+            df_test.append('data/pollos_estado',pollo_aux_df)
+            datos3 = df_test.get('data/tabla')
 for index, row in pre_p_e1.iterrows():
 
     Primero_ori = int(row['Primero'])
@@ -146,52 +146,52 @@ for index, row in pre_p_e1.iterrows():
     Er_mod_data  = np.abs(E_data).reshape(-1,1)
     Er_fase_data = np.angle(E_data).reshape(-1,1)
 
- 
-    if pollo<76 and pollo!=0:
-        Primero = len(datos2)
-        Ultimo  = Primero + Ultimo_ori - Primero_ori
-        datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
-        datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
-                                                np.ones((n_freq,1),dtype=int)*(medida),
-                                                datos_auxiliares],axis=1)
-        data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
-                                                    'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
-        pollito=pollo-25
-        pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
-        pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
-        df_trainval.append('data/tabla', data_aux_df)
-        df_trainval.append('data/pollos_estado',pollo_aux_df)
-        datos2 = df_trainval.get('data/tabla')
-    elif pollo!=0:
-        Primero = len(datos3)
-        Ultimo  = Primero + Ultimo_ori - Primero_ori
-        datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
-        datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
-                                                np.ones((n_freq,1),dtype=int)*(medida),
-                                                datos_auxiliares],axis=1)
-        data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
-                                                    'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
-        pollito=pollo-50
-        pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
-        pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
-        df_test.append('data/tabla', data_aux_df)
-        df_test.append('data/pollos_estado',pollo_aux_df)
-        datos3 = df_test.get('data/tabla')
-    else:
-        Primero = len(datos3)
-        Ultimo  = Primero + Ultimo_ori - Primero_ori
-        datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
-        datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
-                                                np.ones((n_freq,1),dtype=int)*(medida),
-                                                datos_auxiliares],axis=1)
-        data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
-                                                    'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
-        pollito=50
-        pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
-        pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
-        df_test.append('data/tabla', data_aux_df)
-        df_test.append('data/pollos_estado',pollo_aux_df)
-        datos3 = df_test.get('data/tabla')
+    if int(estado)<5:
+        if pollo<76 and pollo!=0:
+            Primero = len(datos2)
+            Ultimo  = Primero + Ultimo_ori - Primero_ori
+            datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
+            datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
+                                                    np.ones((n_freq,1),dtype=int)*(medida),
+                                                    datos_auxiliares],axis=1)
+            data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
+                                                        'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
+            pollito=pollo-25
+            pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
+            pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
+            df_trainval.append('data/tabla', data_aux_df)
+            df_trainval.append('data/pollos_estado',pollo_aux_df)
+            datos2 = df_trainval.get('data/tabla')
+        elif pollo!=0:
+            Primero = len(datos3)
+            Ultimo  = Primero + Ultimo_ori - Primero_ori
+            datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
+            datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
+                                                    np.ones((n_freq,1),dtype=int)*(medida),
+                                                    datos_auxiliares],axis=1)
+            data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
+                                                        'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
+            pollito=pollo-50
+            pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
+            pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
+            df_test.append('data/tabla', data_aux_df)
+            df_test.append('data/pollos_estado',pollo_aux_df)
+            datos3 = df_test.get('data/tabla')
+        else:
+            Primero = len(datos3)
+            Ultimo  = Primero + Ultimo_ori - Primero_ori
+            datos_auxiliares= np.concatenate([freq,Z,fase,Err_data,Eri_data,Er_mod_data,Er_fase_data,R_data,X_data],axis=1 )
+            datos_aux = np.concatenate([np.ones((n_freq,1),dtype=int)*(pollo),
+                                                    np.ones((n_freq,1),dtype=int)*(medida),
+                                                    datos_auxiliares],axis=1)
+            data_aux_df = pd.DataFrame(datos_aux,columns=['Pollo','Medida','Freq','Z_mod',
+                                                        'Z_Fase','Err','Eri','E_mod','E_fase','R','X'])
+            pollito=50
+            pollo_aux = np.array([pollito,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
+            pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])        
+            df_test.append('data/tabla', data_aux_df)
+            df_test.append('data/pollos_estado',pollo_aux_df)
+            datos3 = df_test.get('data/tabla')
 
 # Convertir la columna 'Pollo' a números
 pre_p_e2  = df_trainval.get('data/pollos_estado')
