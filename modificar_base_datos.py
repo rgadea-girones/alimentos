@@ -1,6 +1,6 @@
 import pandas as pd
 
-filename= "COPIA_PANDAS\lomosP2_20240430_clasificado_experto.hdf"
+filename= "COPIA_PANDAS\reflujo_rafa_20240517.hdf"
 df = pd.HDFStore(filename,'a',complib="zlib",complevel=4)
 # Crear un DataFrame de ejemplo
 pre_p_e  = df.get('data/pollos_estado')
