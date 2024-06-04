@@ -58,13 +58,16 @@ class BACK_END(object):
         #app.processEvents()
         #self.dv.append_plus("MEDIR")
         # self.vi.config_measurement()
-        self.vi.measure()
-        self.pw.progressBar.setValue(50)            
-        self.dv.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
-                                 self.pw.comboBox_trazaB.currentIndex())
-        self.pw.canvas1.draw()
-        self.pw.progressBar.setValue(100)           
-        self.pw.MEDIR.setEnabled(True)
+        error=self.vi.measure()
+        if error==0:
+            self.pw.progressBar.setValue(50)            
+            self.dv.show_measurement(self.pw.comboBox_trazaA.currentIndex(),
+                                    self.pw.comboBox_trazaB.currentIndex())
+            self.pw.canvas1.draw()
+            self.pw.progressBar.setValue(100)  
+            self.pw.MEDIR.setEnabled(True)   
+        else:      
+            self.pw.MEDIR.setEnabled(True)
 
     def load_m(self):
         self.dv.append_plus("CARGA MEDIDA")

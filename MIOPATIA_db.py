@@ -265,17 +265,22 @@ class DB_management(object):
                 try:
                     t    = hdf_db.get('data/tabla')
                 except:
-                    Primero = 0
+                    Primeri = 0
                     #Empty DataBase
                 else:
-                    Primero = len(t)
+                    Primeri= len(t)
+                Primero=str(Primeri)
+                Ultimo  = str(Primeri + n_freq - 1)
 
-                Ultimo  = Primero + n_freq - 1
                 pollo_aux = np.array([pollo,medida,fecha_hora,estado,Primero,Ultimo]).reshape(1,-1)
-                pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
 
+                pollo_aux_df = pd.DataFrame(pollo_aux, columns=['Pollo','Medida','Fecha','Estado','Primero','Ultimo'])
+            
+                max_str_len = 50
+                #para cambiar el limite de strings en la base de datos
+                #pollo_aux_df['Primero'] = pollo_aux_df['Primero'].astype(str)
                 hdf_db.append('data/tabla', data_aux_df)
-                hdf_db.append('data/pollos_estado', pollo_aux_df)
+                hdf_db.append('data/pollos_estado', pollo_aux_df,format='table', data_columns=True, min_itemsize={'Primero': max_str_len, 'Ultimo': max_str_len, 'Pollo': max_str_len, 'Medida': max_str_len, 'Fecha': max_str_len, 'Estado': max_str_len})
 
                 pollos = hdf_db.get('data/pollos_estado')
                 last_pollo = np.max(pollos['Pollo'].to_numpy(dtype='int'))
