@@ -3,11 +3,13 @@ import numpy as np
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
 
+import utils.augmentation as aug
+
 import matplotlib.pyplot as plt
 from MIOPATIA_db import DB_management as db 
 
-filename= "COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto_filtrado_total_trainval.hdf"
-filename2= "COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto_filtrado_total_trainval_prueba1.hdf"
+filename= "COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto_filtrado_automatico_meditado_trainval.hdf"
+filename2= "COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto_filtrado_automatico_meditado_trainval_ampliado_mas_meditado.hdf"
 df = pd.HDFStore(filename,'a',complib="zlib",complevel=4)
 df_ampliado=pd.HDFStore(filename2,'a',complib="zlib",complevel=4)
 
@@ -34,7 +36,7 @@ dato_fila=0
 #recorrer el dataframe y agregar datos
 for index, row in pre_p_e.iterrows():
     print(dato_fila)
-    if dato_fila<5:
+    if dato_fila>=0:
         Primero_ori = int(row['Primero'])
         Ultimo_ori  = int(row['Ultimo'])
         Pollo=row['Pollo']
@@ -49,7 +51,8 @@ for index, row in pre_p_e.iterrows():
         num_iteraciones = 10
         medida = 1000*(medida+1)
         for k in range(2, num_iteraciones):
-
+            if(int(estado)<4 and int(estado)>0):
+                break
             Primero = len(datos2)
             Ultimo  = Primero + Ultimo_ori - Primero_ori
             pre_traza2=t.rolling(window=k, center=True, min_periods=1).mean()
@@ -171,8 +174,9 @@ for index, row in pre_p_e.iterrows():
             Ultimo  = Primero + Ultimo_ori - Primero_ori
             data_aux=np.array(datos.iloc[Primero_ori:Ultimo_ori+1])
             Z=data_aux[:,3].reshape(-1,1)
+            Z=aug.scaling_rafa(Z)
             freq=data_aux[:,2].reshape(-1,1) 
-            fase=data_aux_ewm[:,4].reshape(-1,1)
+            fase=data_aux[:,4].reshape(-1,1)
             #vuelvo a calcular el resto de 6 parametros con los datos fitados
             Co              = 1E-12   # Valor capacidad en abierto sensor de puntas
             R_data = Z*np.cos(fase*np.pi/180).reshape(-1,1)

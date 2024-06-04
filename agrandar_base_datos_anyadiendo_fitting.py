@@ -126,19 +126,21 @@ def show_data_fit_fija_rafa( x_data, funcion, comboBox_fit_alg='trf',pollo_pw=0,
     #                                 'F_ALFA1e','F_ALFA2e','F_ALFA3e','R2'])
 
 
-filename= "COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto.hdf"
+
 filename1="COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto.hdf"
-filename2= "COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto_filtrado_automatico_meditado_trainval.hdf"
-filename3= "COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto_filtrado_automatico_meditado_test.hdf"
-df = pd.HDFStore(filename,'a',complib="zlib",complevel=4)
+filename2= "COPIA_PANDAS\lomosP1P2_20240430_clasificado_experto_filtrado_automatico.hdf"
+
+
 df1= pd.HDFStore(filename1,'a',complib="zlib",complevel=4)
-df_trainval=pd.HDFStore(filename2,'a',complib="zlib",complevel=4)
-df_test=pd.HDFStore(filename3,'a',complib="zlib",complevel=4)
+df2=pd.HDFStore(filename2,'a',complib="zlib",complevel=4)
+
 
 # Crear un DataFrame de ejemplo
-pre_p_e  = df.get('data/pollos_estado')
+
 pre_p_e1 = df1.get('data/pollos_estado')    
-pre_p_e2 = pd.DataFrame(columns=pre_p_e.columns)
+pre_p_e2 = pre_p_e1.copy()
+pre_p_e2['filtrado']=1
+pre_p_e2['filtrado']=pre_p_e3['filtrado'].astype('int32')
 pre_p_e3 = pd.DataFrame(columns=pre_p_e.columns)
 
 
@@ -227,7 +229,6 @@ n_freq=220
 #             datos3 = df_test.get('data/tabla')
 pollito_trainval=1
 pollito_test=1
-medida=0
 for index, row in pre_p_e1.iterrows():
 
     Primero_ori = int(row['Primero'])
@@ -235,7 +236,7 @@ for index, row in pre_p_e1.iterrows():
     Pollo=row['Pollo']
     pollo=int(Pollo)
     Medida=row['Medida']
-    # medida=int(Medida)
+    medida=int(Medida)
     fecha_hora=row['Fecha'] 
     estado  = row['Estado']
     data_aux=np.array(datos1.iloc[Primero_ori:Ultimo_ori+1])

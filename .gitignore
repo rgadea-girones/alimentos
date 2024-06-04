@@ -3,9 +3,19 @@ EXE/
 
 dist/
 
+logs/
+
+modelos/
+
 build/
 
 EXCELS_zurich_DCM/
+
+excels_borrar/
+
+RESULTADOS_EXCEL/
+
+Pollo_Ricardo/
 
 
 *.cal

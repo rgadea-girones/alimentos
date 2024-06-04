@@ -250,6 +250,7 @@ class DATA_VIEW(object):
                                      'EPS_INFe','EPS_ALFA1e','EPS_ALFA2e','EPS_ALFA3e',
                                      'F_ALFA1e','F_ALFA2e','F_ALFA3e','R2'])
 
+
     def show_data_rafa(self, comboBox_trazaA,  data,data1,data2,data3):
         self.sd.axes['ax5'].cla()
         # self.sd.axes['ax3'].cla()
