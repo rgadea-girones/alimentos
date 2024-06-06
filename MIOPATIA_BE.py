@@ -285,8 +285,8 @@ class BACK_END(object):
             self.dv.append_plus("Fichero no encontrado\n")
         else:
             self.dv.append_plus(file)
-            pollo_sel = int(self.pw.spinBox_pollo.value())
-            medida_sel = int(self.pw.spinBox_medida.value())
+            pollo_sel = int(self.pw.spinBox_pollo_7.value())
+            medida_sel = int(self.pw.spinBox_medida_7.value())
             #inicio_medida = indice_medidas['primero'][int(pollo_sel[self.pw.spinBox_medida.value()])]
             #fin_medida    = indice_medidas['ultimo'][int(pollo_sel[self.pw.spinBox_medida.value()])]
             #data = tabla[inicio_medida:fin_medida]
@@ -923,8 +923,8 @@ class BROWSERS(object):
         self.sd.def_cfg['load_h5file_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
         self.pw.load_path_4.setText(self.sd.def_cfg['load_h5file_name'])
-        self.pw.spinBox_medida.setMaximum(12)
-        self.pw.spinBox_pollo.setMaximum(100)
+        self.pw.spinBox_medida_7.setMaximum(12)
+        self.pw.spinBox_pollo_7.setMaximum(1000)
     def load_h5file_browser2(self):
         file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
                                         'Abrir fichero medida',
@@ -934,8 +934,8 @@ class BROWSERS(object):
         self.sd.def_cfg['load_h5file_name'] = fname_aux[0]
         #Trick for Qstring converting to standard string
         self.pw.load_path_17.setText(self.sd.def_cfg['load_h5file_name'])
-        self.pw.spinBox_medida.setMaximum(12)
-        self.pw.spinBox_pollo.setMaximum(100)
+        self.pw.spinBox_medida_7.setMaximum(12)
+        self.pw.spinBox_pollo_7.setMaximum(100)
     def load_h5file_DB_browser(self):
         file_aux = QtWidgets.QFileDialog.getOpenFileName(self.pw,
                                         'Abrir fichero medida',

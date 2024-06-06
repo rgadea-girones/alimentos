@@ -2,7 +2,7 @@ import sys
 import warnings
 from PySide6 import QtCore, QtWidgets, QtGui
 from PySide6.QtUiTools import QUiLoader
-from Mainwindow_YAKE import Ui_MainWindow
+from Mainwindow_YAKE_def2 import Ui_MainWindow
 
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
@@ -19,7 +19,7 @@ from MIOPATIA_dataview import DATA_VIEW
 
 # PYINSTALLER : pyinstaller -D --specpath .\EXE miopatia.py
 
-qtCreatorFile = "impedance_spectroscopy_YAKE.ui"
+qtCreatorFile = "impedance_spectroscopy_YAKE2.ui"
 
 
 # Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
